@@ -8,22 +8,10 @@ config = {
 
     'message_sources': [
         {
-            'via': 'mojo_webqq',
-            'login_id': '12345678',
-            'superuser_id': '23456789',
-            'api_url': 'http://127.0.0.1:5000/openqq',
-        },
-        {
-            'via': 'mojo_weixin',
-            'login_id': 'your_login_id',
-            'superuser_id': 'your_superuser_id',
-            'api_url': 'http://127.0.0.1:5001/openwx',
-        },
-        {
             'via': 'coolq_http_api',
             'login_id': '3010897940',
             'superuser_id': '3010897940',
-            'api_url': 'http://35.185.128.132:5700',
+            'api_url': 'http://qqbot.wvps.pw:5700',
             'token': ''
         }
     ]
