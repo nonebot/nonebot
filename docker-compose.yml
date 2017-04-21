@@ -1,7 +1,7 @@
 version: '2'
 services:
   xiaokai-bot:
-    image: richardchien/xiaokai-bot
+    image: cloudvalley/xiaokai-bot
     container_name: xiaokai-bot
     networks:
       - my-net
@@ -11,7 +11,7 @@ services:
       - ./data/xiaokai-bot:/data
       - /tmp:/tmp
     environment:
-      - TURING123_API_KEY=YOUR_API_KEY
+      - TURING123_API_KEY=c268de590aed467dba359955708c38c8
       - HOST=0.0.0.0
       - PORT=8888
       - BAIDU_FANYI_APP_ID=YOUR_APP_ID
