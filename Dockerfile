@@ -1,5 +1,5 @@
 FROM python:3.5.1
-MAINTAINER Richard Chien <richardchienthebest@gmail.com>
+MAINTAINER Waylon Wang <waylon.act@gmail.com>
 
 COPY *.py ./
 COPY msg_src_adapters msg_src_adapters
