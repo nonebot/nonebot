@@ -3,10 +3,7 @@ services:
   xiaokai-bot:
     image: cloudvalley/xiaokai-bot
     container_name: xiaokai-bot
-    networks:
-      - my-net
-    expose:
-      - '8888'
+    network_mode: 'container:coolq-http'
     volumes:
       - ./data/xiaokai-bot:/data
       - /tmp:/tmp
@@ -14,14 +11,4 @@ services:
       - TURING123_API_KEY=c268de590aed467dba359955708c38c8
       - HOST=0.0.0.0
       - PORT=8888
-      - BAIDU_FANYI_APP_ID=YOUR_APP_ID
-      - BAIDU_FANYI_API_KEY=YOUR_API_KEY
-      - SPEECH_RECOGNITION_SERVICE=baidu|bing
-      - BAIDU_SPEECH_API_KEY=YOUR_API_KEY
-      - BAIDU_SPEECH_SECRET_KEY=YOUR_SECRET_KEY
-      - BING_SPEECH_API_KEY=YOUR_API_KEY
-      - HEWEATHER_API_KEY=YOUR_API_KEY
     restart: always
-networks:
-  my-net:
-    driver: bridge

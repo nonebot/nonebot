@@ -11,8 +11,8 @@ config = {
             'via': 'coolq_http_api',
             'login_id': '3010897940',
             'superuser_id': '3010897940',
-            'api_url': 'http://qqbot.wvps.pw:5700',
-            'token': ''
+            'api_url': 'http://127.0.0.1:5700',
+            'token': 'LRqxVa7G3a9c'
         }
     ]
 }
