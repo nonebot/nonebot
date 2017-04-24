@@ -1,11 +1,11 @@
 version: '2'
 services:
-  im-bot:
-    image: cloudvalley/im-bot
-    container_name: im-bot
-    network_mode: 'container:coolq-server'
+  cmd-server:
+    image: cloudvalley/cmd-server
+    container_name: cmd-server
+    network_mode: 'container:msg-server'
     volumes:
-      - ./data/im-bot:/data
+      - ./data/cmd-server:/data
       - /tmp:/tmp
     environment:
       - TURING123_API_KEY=YOUR_API_KEY
