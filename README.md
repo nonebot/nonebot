@@ -23,6 +23,12 @@
 
 ### 预备
 首先你需要准备一个可以长期运行docker的操作系统环境，建议安装好docker-compose以便运行YAML文件，另外，如果你不太适应docker的命令交互方式，可以安装docker-ui使用图形化界面进行操作。
+
+由于cloudvalley/cmd-server镜像文件有将近1GB的容量，在国内拉取会非常慢，建议先配置国内的mirror服务来加速下载：
+```
+curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://51418756.m.daocloud.io
+```
+有关daocloud mirror服务的详细说明请参见[配置 Docker 加速器](https://www.daocloud.io/mirror#accelerator-doc)
 ### 拉取镜像
 「Command Server」的docker镜像可通过以下命令获得：
 ```
