@@ -17,7 +17,7 @@ from nonebot.typing import (
     Context_T, CommandName_T, CommandArgs_T, Message_T, State_T,
     Filter_T
 )
-
+from typing import Pattern
 # key: one segment of command name
 # value: subtree or a leaf Command object
 _registry = {}  # type: Dict[str, Union[Dict, Command]]
@@ -29,6 +29,10 @@ _aliases = {}  # type: Dict[str, CommandName_T]
 # key: context id
 # value: CommandSession object
 _sessions = {}  # type: Dict[str, CommandSession]
+
+# key: alias
+# value: priority value
+_priorities = {}  # type: Dict[str, int]
 
 CommandHandler_T = Callable[['CommandSession'], Any]
 
@@ -152,6 +156,7 @@ class CommandFunc:
 
 def on_command(name: Union[str, CommandName_T], *,
                aliases: Iterable[str] = (),
+               priority = 10,
                permission: int = perm.EVERYBODY,
                only_to_me: bool = True,
                privileged: bool = False,
@@ -191,6 +196,7 @@ def on_command(name: Union[str, CommandName_T], *,
 
         for alias in aliases:
             _aliases[alias] = cmd_name
+            _priorities[alias] = priority
 
         return CommandFunc(cmd, func)
 
@@ -474,8 +480,17 @@ def parse_command(bot: NoneBot,
         return None, None
 
     cmd_name_text, *cmd_remained = full_command.split(maxsplit=1)
-    cmd_name = _aliases.get(cmd_name_text)
-
+    cmd_name = None
+    cmd_priority = None
+    for alias, name in _aliases.items():
+        if isinstance(alias, Pattern) and alias.match(cmd_name_text):
+            if not cmd_priority or _priorities[alias] > cmd_priority:
+                cmd_name = name
+                cmd_priority = _priorities[alias]
+        elif isinstance(alias, str) and alias == cmd_name_text:
+            if not cmd_priority or _priorities[alias] > cmd_priority:
+                cmd_name = name
+                cmd_priority = _priorities[alias]
     if not cmd_name:
         for sep in bot.config.COMMAND_SEP:
             # loop through COMMAND_SEP to find the most optimized split
