@@ -80,7 +80,7 @@ from nonebot import on_command, CommandSession
 
 # on_command 装饰器将函数声明为一个命令处理器
 # 这里 weather 为命令的名字，同时允许使用别名「天气」「天气预报」「查天气」
-@on_command('weather', aliases=('天气', '天气预报', '查天气'))
+@on_command('weather', aliases=['天气', '天气预报', '查天气'])
 async def weather(session: CommandSession):
     # 从会话状态（session.state）中获取城市名称（city），如果当前不存在，则询问用户
     city = session.get('city', prompt='你想查询哪个城市的天气呢？')
@@ -133,7 +133,7 @@ async def get_weather_of_city(city: str) -> str:
 ```python
 # on_command 装饰器将函数声明为一个命令处理器
 # 这里 weather 为命令的名字，同时允许使用别名「天气」「天气预报」「查天气」
-@on_command('weather', aliases=('天气', '天气预报', '查天气'))
+@on_command('weather', aliases=['天气', '天气预报', '查天气'])
 async def weather(session: CommandSession):
     # 从会话状态（session.state）中获取城市名称（city），如果当前不存在，则询问用户
     city = session.get('city', prompt='你想查询哪个城市的天气呢？')
