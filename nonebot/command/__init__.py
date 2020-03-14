@@ -157,6 +157,12 @@ class CommandFunc:
         self.cmd.args_parser_func = parser_func
         return parser_func
 
+    @property
+    def help(self):
+        """
+        Explicit property interface for decorated command handler function.
+        """
+        return self.func.__doc__
 
 def on_command(name: Union[str, CommandName_T], *,
                aliases: Union[Iterable[str], str] = (),
