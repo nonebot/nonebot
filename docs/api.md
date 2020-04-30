@@ -60,6 +60,14 @@ sidebar: auto
 
   命令处理函数
 
+### `Patterns_T` <Badge text="1.7.0+"/>
+
+- **类型:** `Union[Iterable[str], str, Iterable[Pattern], Pattern]`
+
+- **说明:**
+
+  正则参数类型，可以是正则表达式或正则表达式组。
+
 ### `State_T` <Badge text="1.2.0+"/>
 
 - **类型:** `Dict[str, Any]`
@@ -1186,6 +1194,7 @@ sidebar: auto
 
   - `name: Union[str, CommandName_T]`: 命令名，如果传入的是字符串则会自动转为元组
   - `aliases: Union[Iterable[str], str]`: 命令别名
+  - `patterns: Patterns_T`: 正则匹配。可以传入正则表达式或正则表达式组，来对整条命令进行匹配。请注意滥用正则表达式可能会引发性能问题，请优先使用普通命令。另外一点需要注意的是，由正则表达式匹配到的匹配到的命令，`session`中的`current_arg`会是整个命令，而不会删除匹配到的内容，以满足一些特殊需求
   - `permission: int`: 命令所需要的权限，不满足权限的用户将无法触发该命令
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话

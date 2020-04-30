@@ -12,7 +12,7 @@ from nonebot import permission as perm
 from .command import Command, CommandManager
 from .notice_request import _bus, EventHandler
 from .natural_language import NLProcessor, NLPManager
-from .typing import CommandName_T, CommandHandler_T
+from .typing import CommandName_T, CommandHandler_T, Patterns_T
 
 _tmp_command: Set[Command] = set()
 _tmp_nl_processor: Set[NLProcessor] = set()
@@ -346,6 +346,7 @@ def get_loaded_plugins() -> Set[Plugin]:
 def on_command(name: Union[str, CommandName_T],
                *,
                aliases: Union[Iterable[str], str] = (),
+               patterns: Patterns_T = (),
                permission: int = perm.EVERYBODY,
                only_to_me: bool = True,
                privileged: bool = False,
@@ -355,6 +356,10 @@ def on_command(name: Union[str, CommandName_T],
 
     :param name: command name (e.g. 'echo' or ('random', 'number'))
     :param aliases: aliases of command name, for convenient access
+    :param patterns: custom regex pattern for the command.
+           Please use this carefully. Abuse may cause performance problem.
+           Also, Plz notice that if a message is matched by this method,
+           it will use the full command as session current_arg.
     :param permission: permission required by the command
     :param only_to_me: only handle messages to me
     :param privileged: can be run even when there is already a session
@@ -373,7 +378,7 @@ def on_command(name: Union[str, CommandName_T],
                       func=func,
                       permission=permission,
                       only_to_me=only_to_me,
-                      privileged=privileged)
+                      privileged=privileged,)
 
         if shell_like:
 
@@ -384,6 +389,7 @@ def on_command(name: Union[str, CommandName_T],
 
         CommandManager.add_command(cmd_name, cmd)
         CommandManager.add_aliases(aliases, cmd)
+        CommandManager.add_patterns(patterns, cmd)
 
         _tmp_command.add(cmd)
         func.args_parser = cmd.args_parser
