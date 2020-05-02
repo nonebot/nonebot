@@ -5,7 +5,7 @@ import warnings
 from datetime import datetime
 from functools import partial, update_wrapper
 from typing import (Tuple, Union, Callable, Iterable, Any, Optional, List, Dict,
-                    Awaitable)
+                    Awaitable, Pattern)
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.message import Message
@@ -16,7 +16,7 @@ from nonebot.helpers import context_id, send, render_expression
 from nonebot.log import logger
 from nonebot.session import BaseSession
 from nonebot.typing import (CommandName_T, CommandArgs_T, CommandHandler_T,
-                            Message_T, State_T, Filter_T)
+                            Message_T, State_T, Filter_T, Patterns_T)
 
 # key: context id
 # value: CommandSession object
@@ -133,11 +133,13 @@ class CommandManager:
     _commands = {}  # type: Dict[CommandName_T, Command]
     _aliases = {}  # type: Dict[str, Command]
     _switches = {}  # type: Dict[CommandName_T, bool]
+    _patterns = {}  # type: Dict[Pattern, Command]
 
     def __init__(self):
         self.commands = CommandManager._commands.copy()
         self.aliases = CommandManager._aliases.copy()
         self.switches = CommandManager._switches.copy()
+        self.patterns = CommandManager._patterns.copy()
 
     @classmethod
     def add_command(cls, cmd_name: CommandName_T, cmd: Command) -> None:
@@ -225,6 +227,27 @@ class CommandManager:
                 warnings.warn(f"Alias {alias} already exists")
                 return
             cls._aliases[alias] = cmd
+
+    @classmethod
+    def add_patterns(cls, patterns: Patterns_T, cmd: Command):
+        """Register command alias(es)
+
+        Args:
+            patterns (Union[Iterable[Pattern], Pattern, Iterable[str], str]): Command patterns
+            cmd (Command): Matched command
+        """
+        if isinstance(patterns, (str, Pattern)):
+            patterns = (patterns,)
+        for pattern in patterns:
+            if isinstance(pattern, str):
+                pattern = re.compile(pattern)
+            if not isinstance(pattern, Pattern):
+                warnings.warn(f"Pattern {pattern} is not a regex or string! Ignored")
+                continue
+            elif pattern in cls._patterns:
+                warnings.warn(f"Pattern {pattern} already exists")
+                continue
+            cls._patterns[pattern] = cmd
 
     def _add_command_to_tree(self, cmd_name: CommandName_T, cmd: Command,
                              tree: Dict[str, Union[Dict, Command]]) -> None:
@@ -343,6 +366,15 @@ class CommandManager:
         if not cmd:
             logger.debug(f'Command {cmd_name} not found. Try to match aliases')
             cmd = self.aliases.get(cmd_name_text)
+
+        if not cmd:
+            logger.debug(f'Alias {cmd_name} not found. Try to match patterns')
+            for pattern in self.patterns:
+                if pattern.match(full_command):
+                    cmd = self.patterns[pattern]
+                    logger.debug(f'Pattern {pattern} of command {cmd.name} matched, function: {cmd.func}')
+                    # if command matched by regex, it will use the full_command as the current_arg of the session
+                    return cmd, full_command
 
         if not cmd:
             return None, None

@@ -190,6 +190,8 @@ async def _(session: CommandSession):
 上面用了 `session.current_arg_text` 来获取用户当前输入的参数，这表示从用户输入中提取纯文本部分，也就是说不包含图片、表情、语音、卡片分享等。
 
 如果需要用户输入的原始内容，请使用 `session.current_arg`，里面可能包含 CQ 码。除此之外，还可以通过 `session.current_arg_images` 获取消息中的图片 URL 列表。
+
+另外一点值得注意的是，`@on_command` 也可以同样把正则表达式作为参数传入pattern进行匹配。在这种情况下，整条完整的指令会被作为current_arg使用（而不会删除开头匹配到的命令），这点请注意区别。
 :::
 
 
