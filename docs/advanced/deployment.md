@@ -69,12 +69,21 @@ services:
     command: python3 /root/qbot/bot.py
 ```
 
-部分说明见注释。NoneBot 运行环境由文件 `./nonebot/Dockerfile` 控制构建。如果项目中使用了第三方库，可以在这一步骤进行安装。`Dockerfile` 内容例如：
+部分说明见注释。NoneBot 运行环境由文件 `./nonebot/Dockerfile` 控制构建。`Dockerfile` 内容例如：
 
 ```Dockerfile
-FROM alpine
-RUN apk add --no-cache tzdata python3 py3-multidict py3-yarl && \
-    pip3 install --no-cache-dir "nonebot[scheduler]"
+FROM alpine:latest
+
+RUN apk add --no-cache tzdata python3 &&\
+    pip3 install --no-cache-dir --upgrade pip wheel &&\
+    pip3 install --no-cache-dir nonebot[scheduler]
+
+ADD requirements.txt /root/
+
+#使用apk安装某些缺少编译环境的包
+RUN apk add --no-cache py3-lxml py3-pillow py3-yarl py3-multidict &&\ 
+    pip3 install --no-cache-dir -r /root/requirements.txt &&\
+    rm /root/requirements.txt
 ```
 
-上述文件编辑完成后，输入命令 `docker-compose up` 即可一次性启动酷Q和 NoneBot（可通过 `docker-compose up -d` 在后台启动。更多 Docker Compose 用法见 [官方文档](https://docs.docker.com/compose/reference/overview/)。
+上述文件编辑完成后，输入命令 `docker-compose up` 即可一次性启动酷Q和 NoneBot（可通过 `docker-compose up -d` 在后台启动）。更多 Docker Compose 用法见 [官方文档](https://docs.docker.com/compose/reference/overview/)。
