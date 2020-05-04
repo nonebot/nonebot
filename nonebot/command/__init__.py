@@ -132,7 +132,7 @@ class CommandManager:
     """Global Command Manager"""
     _commands = {}  # type: Dict[CommandName_T, Command]
     _aliases = {}  # type: Dict[str, Command]
-    _switches = {}  # type: Dict[CommandName_T, bool]
+    _switches = {}  # type: Dict[Command, bool]
     _patterns = {}  # type: Dict[Pattern, Command]
 
     def __init__(self):
@@ -152,7 +152,7 @@ class CommandManager:
         if cmd_name in cls._commands:
             warnings.warn(f"Command {cmd_name} already exists")
             return
-        cls._switches[cmd_name] = True
+        cls._switches[cmd] = True
         cls._commands[cmd_name] = cmd
 
     @classmethod
@@ -170,6 +170,12 @@ class CommandManager:
                 f"Command {cmd_name} does not exist. Please use add_command instead"
             )
             return
+
+        cmd_ = cls._commands[cmd_name]
+        if cmd_ in cls._switches:
+            del cls._switches[cmd_]
+
+        cls._switches[cmd] = True
         cls._commands[cmd_name] = cmd
 
     @classmethod
@@ -191,8 +197,8 @@ class CommandManager:
                            cls._aliases.keys())):
                 del cls._aliases[alias]
             del cls._commands[cmd_name]
-            if cmd_name in cls._switches:
-                del cls._switches[cmd_name]
+            if cmd in cls._switches:
+                del cls._switches[cmd]
             return True
         return False
 
@@ -206,8 +212,9 @@ class CommandManager:
             cmd_name (CommandName_T): Command name
             state (Optional[bool]): State to change to. Defaults to None.
         """
-        cls._switches[cmd_name] = not cls._switches[
-            cmd_name] if state is None else bool(state)
+        cmd = cls._commands[cmd_name]
+        cls._switches[cmd] = not cls._switches[cmd] if state is None else bool(
+            state)
 
     @classmethod
     def add_aliases(cls, aliases: Union[Iterable[str], str], cmd: Command):
@@ -242,7 +249,8 @@ class CommandManager:
             if isinstance(pattern, str):
                 pattern = re.compile(pattern)
             if not isinstance(pattern, Pattern):
-                warnings.warn(f"Pattern {pattern} is not a regex or string! Ignored")
+                warnings.warn(
+                    f"Pattern {pattern} is not a regex or string! Ignored")
                 continue
             elif pattern in cls._patterns:
                 warnings.warn(f"Pattern {pattern} already exists")
@@ -262,7 +270,7 @@ class CommandManager:
         for parent_key in cmd_name[:-1]:
             current_parent[parent_key] = current_parent.get(parent_key) or {}
             current_parent = current_parent[parent_key]
-            # TODO: 支持test test.sub子命令
+
             if not isinstance(current_parent, dict):
                 warnings.warn(f"{current_parent} is not a registry dict")
                 return
@@ -292,20 +300,26 @@ class CommandManager:
         if not cmd_name:
             return None
 
-        cmd_tree = self._generate_command_tree({
+        # cmd_tree = self._generate_command_tree({
+        #     name: cmd
+        #     for name, cmd in self.commands.items()
+        #     if self.switches.get(cmd, True)
+        # })
+        # for part in cmd_name[:-1]:
+        #     if part not in cmd_tree or not isinstance(
+        #             cmd_tree[part],  #type: ignore
+        #             dict):
+        #         return None
+        #     cmd_tree = cmd_tree[part]  # type: ignore
+
+        # cmd = cmd_tree.get(cmd_name[-1])  # type: ignore
+        # return cmd if isinstance(cmd, Command) else None
+        cmd = {
             name: cmd
             for name, cmd in self.commands.items()
-            if self.switches.get(name, True)
-        })
-        for part in cmd_name[:-1]:
-            if part not in cmd_tree or not isinstance(
-                    cmd_tree[part],  #type: ignore
-                    dict):
-                return None
-            cmd_tree = cmd_tree[part]  # type: ignore
-
-        cmd = cmd_tree.get(cmd_name[-1])  # type: ignore
-        return cmd if isinstance(cmd, Command) else None
+            if self.switches.get(cmd, True)
+        }.get(cmd_name)
+        return cmd
 
     def parse_command(self, bot: NoneBot, cmd_string: str
                      ) -> Tuple[Optional[Command], Optional[str]]:
@@ -365,14 +379,25 @@ class CommandManager:
         cmd = self._find_command(cmd_name)  # type: ignore
         if not cmd:
             logger.debug(f'Command {cmd_name} not found. Try to match aliases')
-            cmd = self.aliases.get(cmd_name_text)
+            cmd = {
+                name: cmd
+                for name, cmd in self.aliases.items()
+                if self.switches.get(cmd, True)
+            }.get(cmd_name_text)
 
         if not cmd:
             logger.debug(f'Alias {cmd_name} not found. Try to match patterns')
-            for pattern in self.patterns:
-                if pattern.match(full_command):
-                    cmd = self.patterns[pattern]
-                    logger.debug(f'Pattern {pattern} of command {cmd.name} matched, function: {cmd.func}')
+            patterns = {
+                pattern: cmd
+                for pattern, cmd in self.patterns.items()
+                if self.switches.get(cmd, True)
+            }
+            for pattern in patterns:
+                if pattern.search(full_command):
+                    cmd = patterns[pattern]
+                    logger.debug(
+                        f'Pattern {pattern} of command {cmd.name} matched, function: {cmd.func}'
+                    )
                     # if command matched by regex, it will use the full_command as the current_arg of the session
                     return cmd, full_command
 
@@ -391,8 +416,9 @@ class CommandManager:
             cmd_name (CommandName_T): Command name
             state (Optional[bool]): State to change to. Defaults to None.
         """
-        self.switches[cmd_name] = not self.switches[
-            cmd_name] if state is None else bool(state)
+        cmd = self.commands[cmd_name]
+        self.switches[cmd] = not self.switches[cmd] if state is None else bool(
+            state)
 
 
 class _PauseException(Exception):
