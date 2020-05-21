@@ -64,7 +64,8 @@ class NoneBot(CQHttp):
 _bot: Optional[NoneBot] = None
 
 
-def init(config_object: Optional[Any] = None) -> None:
+def init(config_object: Optional[Any] = None,
+         start_scheduler: bool = True) -> None:
     """
     Initialize NoneBot instance.
 
@@ -82,7 +83,8 @@ def init(config_object: Optional[Any] = None) -> None:
     else:
         logger.setLevel(logging.INFO)
 
-    _bot.server_app.before_serving(_start_scheduler)
+    if start_scheduler:
+        _bot.server_app.before_serving(_start_scheduler)
 
 
 async def _start_scheduler():
