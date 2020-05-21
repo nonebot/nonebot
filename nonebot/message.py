@@ -3,7 +3,7 @@ import asyncio
 from typing import Callable, Iterable
 
 from aiocqhttp import Event as CQEvent
-from aiocqhttp.message import escape, unescape, Message, MessageSegment
+from aiocqhttp.message import  Message, MessageSegment
 
 from . import NoneBot
 from .log import logger
