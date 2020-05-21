@@ -624,7 +624,7 @@ sidebar: auto
 
   注册心跳元事件处理函数。
 
-### `init(config_object=None)`
+### `init(config_object=None, start_scheduler=True)`
 
 - **说明:**
 
@@ -633,6 +633,7 @@ sidebar: auto
 - **参数:**
 
   - `config_object: Optional[Any]`: 配置对象，类型不限，只要能够通过 `__getattr__` 和 `__dict__` 分别访问到单个和所有配置项即可，若没有传入，则使用默认配置
+  - `start_scheduler: bool`: 是否要启动 `scheduler`
 
 - **返回:**
 
