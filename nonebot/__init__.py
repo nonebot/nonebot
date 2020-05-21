@@ -54,8 +54,8 @@ class NoneBot(CQHttp):
             **kwargs) -> None:
         host = host or self.config.HOST
         port = port or self.config.PORT
-        if 'debug' not in kwargs:
-            kwargs['debug'] = self.config.DEBUG
+
+        kwargs.setdefault('debug', self.config.DEBUG)
 
         logger.info(f'Running on {host}:{port}')
         super().run(host=host, port=port, *args, **kwargs)
@@ -106,7 +106,9 @@ def get_bot() -> NoneBot:
     return _bot
 
 
-def run(host: Optional[str] = None, port: Optional[int] = None, *args,
+def run(host: Optional[str] = None,
+        port: Optional[int] = None,
+        *args,
         **kwargs) -> None:
     """Run the NoneBot instance."""
     get_bot().run(host=host, port=port, *args, **kwargs)
@@ -130,7 +132,7 @@ def on_websocket_connect(func: Callable[[aiocqhttp.Event], Awaitable[None]]) \
     return get_bot().on_meta_event('lifecycle.connect')(func)
 
 
-from .exceptions import *
+from .exceptions import CQHttpError
 from .command import CommandSession, CommandGroup
 from .plugin import (on_command, on_natural_language, on_notice, on_request,
                      load_plugin, load_plugins, load_builtin_plugins,
