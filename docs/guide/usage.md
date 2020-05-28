@@ -52,7 +52,7 @@ from nonebot import on_command, CommandSession
 @on_command('usage', aliases=['使用帮助', '帮助', '使用方法'])
 async def _(session: CommandSession):
     # 获取设置了名称的插件列表
-    plugins = list(filter(lambda p: p.name, nonebot.get_loaded_plugins()))
+    plugins = list(nonebot.get_loaded_plugins())
 
     arg = session.current_arg_text.strip().lower()
     if not arg:
