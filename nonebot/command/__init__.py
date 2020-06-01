@@ -4,7 +4,7 @@ import asyncio
 import warnings
 from datetime import datetime
 from functools import partial, update_wrapper
-from typing import (Tuple, Union, Callable, Iterable, Any, Optional, List, Dict,
+from typing import (Tuple, Union, Set, Iterable, Any, Optional, List, Dict,
                     Awaitable, Pattern)
 
 from aiocqhttp import Event as CQEvent
@@ -134,6 +134,8 @@ class CommandManager:
     _aliases = {}  # type: Dict[str, Command]
     _switches = {}  # type: Dict[Command, bool]
     _patterns = {}  # type: Dict[Pattern, Command]
+    _preffix_lengths = set()  # type: Set[int]
+    _preffixed_commands = {}  # type: Dict[str, Command]
 
     def __init__(self):
         self.commands = CommandManager._commands.copy()
@@ -257,6 +259,22 @@ class CommandManager:
                 continue
             cls._patterns[pattern] = cmd
 
+    @classmethod
+    def add_preffixes(cls, preffixes: Iterable[str], cmd: Command):
+        """Register preffixed command
+        
+        Args:
+            preffixes (Iterable[str]): Command preffixes
+            cmd (Command): Matched command
+        """
+        for preffix in preffixes:
+            if preffix in cls._preffixed_commands:
+                warnings.warn(f"Preffix {preffix} already exists")
+                continue
+            preffix_length = len(preffix)
+            cls._preffix_lengths.add(preffix_length)
+            cls._preffixed_commands[preffix] = cmd
+
     def _add_command_to_tree(self, cmd_name: CommandName_T, cmd: Command,
                              tree: Dict[str, Union[Dict, Command]]) -> None:
         """Add command to the target command tree.
@@ -329,7 +347,7 @@ class CommandManager:
         for start in bot.config.COMMAND_START:
             # loop through COMMAND_START to find the longest matched start
             curr_matched_start = None
-            if isinstance(start, type(re.compile(''))):
+            if isinstance(start, re.Pattern):
                 m = start.search(cmd_string)
                 if m and m.start(0) == 0:
                     curr_matched_start = m.group(0)
@@ -384,6 +402,19 @@ class CommandManager:
                 for name, cmd in self.aliases.items()
                 if self.switches.get(cmd, True)
             }.get(cmd_name_text)
+
+        if (not cmd) and self._preffix_lengths:
+            logger.debug(f'Alias {cmd_name} not found. Try to match preffixes')
+            full_length = len(full_command)
+            for length in self._preffix_lengths:
+                if length > full_length:
+                    continue
+                preffix = full_command[:length]
+                cmd = self._preffixed_commands.get(preffix)
+                if cmd:
+                    # matched
+                    cmd_remained = (full_command[length:],)
+                    break
 
         if not cmd:
             logger.debug(f'Alias {cmd_name} not found. Try to match patterns')
