@@ -368,6 +368,8 @@ def on_command(name: Union[str, CommandName_T],
     :param shell_like: use shell-like syntax to split arguments
     """
 
+    aliases = (aliases,) if isinstance(aliases, str) else aliases
+
     def deco(func: CommandHandler_T) -> CommandHandler_T:
         if not isinstance(name, (str, tuple)):
             raise TypeError('the name of a command must be a str or tuple')
@@ -388,8 +390,6 @@ def on_command(name: Union[str, CommandName_T],
                 session.args['argv'] = shlex.split(session.current_arg)
 
             cmd.args_parser_func = shell_like_args_parser
-
-        aliases = (aliases,) if isinstance(aliases, str) else aliases
 
         CommandManager.add_command(cmd_name, cmd)
         CommandManager.add_aliases(aliases, cmd)
