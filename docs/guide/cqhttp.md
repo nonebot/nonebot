@@ -4,13 +4,13 @@
 
 ## 事件数据
 
-在 [发生了什么？](./whats-happened.md) 中我们提到，收到 酷Q 事件后，CQHTTP 通过反向 WebSocket 给 NoneBot 发送事件数据。这些数据被 aiocqhttp 包装为 [`aiocqhttp.Event`](https://python-aiocqhttp.cqp.moe/module/aiocqhttp/#aiocqhttp.Event) 对象，随后被 NoneBot 放在了 `session.event` 属性。该对象本质上是一个字典（但也提供了属性来获取其中的字段），你可以通过断点调试或打印等方式查看它的内容，其中的字段名和含义见 CQHTTP 的 [事件列表](https://cqhttp.cc/docs/#/Post?id=事件列表) 中的「上报数据」。
+在 [发生了什么？](./whats-happened.md) 中我们提到，收到 酷Q 事件后，CQHTTP 通过反向 WebSocket 给 NoneBot 发送事件数据。这些数据被 aiocqhttp 包装为 [`aiocqhttp.Event`](https://aiocqhttp.cqp.moe/module/aiocqhttp/#aiocqhttp.Event) 对象，随后被 NoneBot 放在了 `session.event` 属性。该对象本质上是一个字典（但也提供了属性来获取其中的字段），你可以通过断点调试或打印等方式查看它的内容，其中的字段名和含义见 CQHTTP 的 [事件列表](https://cqhttp.cc/docs/#/Post?id=事件列表) 中的「上报数据」。
 
 ## API 调用
 
 前面我们已经多次调用 `CommandSession` 类的 `send()` 方法，而这个方法只能回复给消息的发送方，不能手动指定发送者，因此当我们需要实现将收到的消息经过处理后转发给另一个接收方这样的功能时，这个方法就用不了了。
 
-幸运的是，`NoneBot` 类是继承自 aiocqhttp 的 [`CQHttp` 类](https://python-aiocqhttp.cqp.moe/module/aiocqhttp/#aiocqhttp.CQHttp) 的，而这个类实现了 `__getattr__()` 魔术方法，由此提供了直接通过 bot 对象调用 CQHTTP 的 API 的能力。
+幸运的是，`NoneBot` 类是继承自 aiocqhttp 的 [`CQHttp` 类](https://aiocqhttp.cqp.moe/module/aiocqhttp/#aiocqhttp.CQHttp) 的，而这个类实现了 `__getattr__()` 魔术方法，由此提供了直接通过 bot 对象调用 CQHTTP 的 API 的能力。
 
 :::tip 提示
 如果你在使用 HTTP 通信，要调用 CQHTTP API 要在 `config.py` 中添加：

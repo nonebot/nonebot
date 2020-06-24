@@ -16,7 +16,7 @@ sidebar: auto
 
 ## aiocqhttp
 
-[aiocqhttp](https://github.com/richardchien/python-aiocqhttp)（或称 python-aiocqhttp）是 CQHTTP 插件的一个 Python 异步 SDK，基于 asyncio，在 Quart 的基础上封装了与 CQHTTP 插件的网络交互。
+[aiocqhttp](https://github.com/nonebot/aiocqhttp) 是 CQHTTP 插件的一个 Python 异步 SDK，基于 asyncio，在 Quart 的基础上封装了与 CQHTTP 插件的网络交互。
 
 ## asyncio
 
