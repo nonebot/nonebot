@@ -9,7 +9,7 @@
 ```
 
 :::tip 提示
-本章的完整代码可以在 [awesome-bot-3](https://github.com/richardchien/nonebot/tree/master/docs/guide/code/awesome-bot-3) 查看。
+本章的完整代码可以在 [awesome-bot-3](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-3) 查看。
 :::
 
 ## 调整项目结构

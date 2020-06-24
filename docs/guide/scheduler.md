@@ -3,7 +3,7 @@
 实际应用中还经常会有定时执行任务的需求，为了方便这类需求的开发，NoneBot 可选地包含了计划任务功能。
 
 :::tip 提示
-本章的完整代码可以在 [awesome-bot-6](https://github.com/richardchien/nonebot/tree/master/docs/guide/code/awesome-bot-6) 查看。
+本章的完整代码可以在 [awesome-bot-6](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-6) 查看。
 :::
 
 ## 安装 `scheduler` 可选功能

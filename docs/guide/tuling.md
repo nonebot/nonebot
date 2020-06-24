@@ -11,7 +11,7 @@
 不过还是有解决方案的，市面上有一些提供智能聊天机器人接口的厂商，本章我们以 [图灵机器人](http://www.tuling123.com/) 为例，因为它的使用比较广泛，接入也比较简单，不过缺点是免费调用次数比较少。
 
 :::tip 提示
-本章的完整代码可以在 [awesome-bot-4](https://github.com/richardchien/nonebot/tree/master/docs/guide/code/awesome-bot-4) 查看。
+本章的完整代码可以在 [awesome-bot-4](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-4) 查看。
 :::
 
 ## 注册图灵机器人账号

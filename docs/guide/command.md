@@ -3,7 +3,7 @@
 本章将以一个天气查询插件为例，教你如何编写自己的命令。
 
 :::tip 提示
-本章的完整代码可以在 [awesome-bot-2](https://github.com/richardchien/nonebot/tree/master/docs/guide/code/awesome-bot-2) 查看。
+本章的完整代码可以在 [awesome-bot-2](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-2) 查看。
 :::
 
 ## 创建插件目录

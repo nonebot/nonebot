@@ -5,7 +5,7 @@
 本章将介绍如何在插件中处理通知和请求。
 
 :::tip 提示
-本章的完整代码可以在 [awesome-bot-5](https://github.com/richardchien/nonebot/tree/master/docs/guide/code/awesome-bot-5) 查看。
+本章的完整代码可以在 [awesome-bot-5](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-5) 查看。
 :::
 
 ## 自动同意加群请求

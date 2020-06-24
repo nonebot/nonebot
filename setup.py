@@ -8,10 +8,9 @@ packages = find_packages(include=('nonebot', 'nonebot.*'))
 setup(
     name='nonebot',
     version='1.6.0',
-    url='https://github.com/richardchien/nonebot',
+    url='https://github.com/nonebot/nonebot',
     license='MIT License',
-    author='Richard Chien',
-    author_email='richardchienthebest@gmail.com',
+    author='NoneBot Team',
     description='An asynchronous QQ bot framework based on CoolQ.',
     long_description=long_description,
     long_description_content_type='text/markdown',

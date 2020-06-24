@@ -1,6 +1,6 @@
 # NoneBot
 
-[![License](https://img.shields.io/github/license/richardchien/nonebot.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/nonebot/nonebot.svg)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/nonebot.svg)](https://pypi.python.org/pypi/nonebot)
 ![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)
 ![CQHTTP Version](https://img.shields.io/badge/cqhttp-4.8+-black.svg)
@@ -31,6 +31,6 @@ NoneBot 在其底层与 酷Q 交互的部分使用 [aiocqhttp](https://github.co
 
 ## 贡献
 
-如果你在使用过程中发现任何问题，可以 [提交 issue](https://github.com/richardchien/nonebot/issues/new) 或自行 fork 修改后提交 pull request。
+如果你在使用过程中发现任何问题，可以 [提交 issue](https://github.com/nonebot/nonebot/issues/new) 或自行 fork 修改后提交 pull request。
 
 如果你要提交 pull request，请确保你的代码风格和项目已有的代码保持一致，遵循 [PEP 8](https://www.python.org/dev/peps/pep-0008/)，变量命名清晰，有适当的注释。
