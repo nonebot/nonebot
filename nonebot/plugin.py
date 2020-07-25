@@ -5,11 +5,11 @@ import shlex
 import warnings
 import importlib
 from types import ModuleType
-from typing import Any, Set, Dict, Union, Optional, Iterable, Callable
+from typing import Any, Set, Dict, Union, Optional, Iterable, Callable, Type
 
 from .log import logger
 from nonebot import permission as perm
-from .command import Command, CommandManager
+from .command import Command, CommandManager, CommandSession
 from .notice_request import _bus, EventHandler
 from .natural_language import NLProcessor, NLPManager
 from .typing import CommandName_T, CommandHandler_T, Patterns_T
@@ -179,7 +179,8 @@ class PluginManager:
                         event] and state != False:
                     _bus.subscribe(event, event_handler.func)
 
-    def switch_plugin(self, module_path: str,
+    def switch_plugin(self,
+                      module_path: str,
                       state: Optional[bool] = None) -> None:
         """Change plugin state or simply switch it if `state` is None
         
@@ -201,7 +202,8 @@ class PluginManager:
         for nl_processor in plugin.nl_processors:
             self.nlp_manager.switch_nlprocessor(nl_processor, state)
 
-    def switch_command(self, module_path: str,
+    def switch_command(self,
+                       module_path: str,
                        state: Optional[bool] = None) -> None:
         """Change plugin command state or simply switch it if `state` is None
         
@@ -216,7 +218,8 @@ class PluginManager:
         for command in plugin.commands:
             self.cmd_manager.switch_command(command.name, state)
 
-    def switch_nlprocessor(self, module_path: str,
+    def switch_nlprocessor(self,
+                           module_path: str,
                            state: Optional[bool] = None) -> None:
         """Change plugin nlprocessor state or simply switch it if `state` is None
         
@@ -343,14 +346,17 @@ def get_loaded_plugins() -> Set[Plugin]:
     return set(PluginManager._plugins.values())
 
 
-def on_command(name: Union[str, CommandName_T],
-               *,
-               aliases: Union[Iterable[str], str] = (),
-               patterns: Patterns_T = (),
-               permission: int = perm.EVERYBODY,
-               only_to_me: bool = True,
-               privileged: bool = False,
-               shell_like: bool = False) -> Callable:
+def on_command(
+    name: Union[str, CommandName_T],
+    *,
+    aliases: Union[Iterable[str], str] = (),
+    patterns: Patterns_T = (),
+    permission: int = perm.EVERYBODY,
+    only_to_me: bool = True,
+    privileged: bool = False,
+    shell_like: bool = False,
+    session_implement: Optional[Type[CommandSession]] = None
+) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
     Decorator to register a function as a command.
 
@@ -371,6 +377,9 @@ def on_command(name: Union[str, CommandName_T],
             raise TypeError('the name of a command must be a str or tuple')
         if not name:
             raise ValueError('the name of a command must not be empty')
+        if not issubclass(session_implement, CommandSession):
+            raise TypeError(
+                'session_implement must be a subclass of CommandSession')
 
         cmd_name = (name,) if isinstance(name, str) else name
 
@@ -378,7 +387,8 @@ def on_command(name: Union[str, CommandName_T],
                       func=func,
                       permission=permission,
                       only_to_me=only_to_me,
-                      privileged=privileged,)
+                      privileged=privileged,
+                      session_implement=session_implement)
 
         if shell_like:
 
@@ -399,13 +409,13 @@ def on_command(name: Union[str, CommandName_T],
     return deco
 
 
-def on_natural_language(
-        keywords: Union[Optional[Iterable], str, Callable] = None,
-        *,
-        permission: int = perm.EVERYBODY,
-        only_to_me: bool = True,
-        only_short_message: bool = True,
-        allow_empty_message: bool = False) -> Callable:
+def on_natural_language(keywords: Union[Optional[Iterable], str,
+                                        Callable] = None,
+                        *,
+                        permission: int = perm.EVERYBODY,
+                        only_to_me: bool = True,
+                        only_short_message: bool = True,
+                        allow_empty_message: bool = False) -> Callable:
     """
     Decorator to register a function as a natural language processor.
 
