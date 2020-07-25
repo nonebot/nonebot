@@ -774,11 +774,12 @@ async def call_command(bot: NoneBot,
     cmd = CommandManager()._find_command(name)
     if not cmd:
         return False
-    session = CommandSession(bot,
-                             event,
-                             cmd,
-                             current_arg=current_arg,
-                             args=args)
+    SessionImplement = cmd.session_impl or CommandSession
+    session = SessionImplement(bot,
+                               event,
+                               cmd,
+                               current_arg=current_arg,
+                               args=args)
     return await _real_run_command(session,
                                    context_id(session.event),
                                    check_perm=check_perm,
