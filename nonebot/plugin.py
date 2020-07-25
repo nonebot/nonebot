@@ -377,6 +377,9 @@ def on_command(
             raise TypeError('the name of a command must be a str or tuple')
         if not name:
             raise ValueError('the name of a command must not be empty')
+        if not issubclass(session_implement, CommandSession):
+            raise TypeError(
+                'session_implement must be a subclass of CommandSession')
 
         cmd_name = (name,) if isinstance(name, str) else name
 
