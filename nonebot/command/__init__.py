@@ -5,7 +5,7 @@ import warnings
 from datetime import datetime
 from functools import partial, update_wrapper
 from typing import (Tuple, Union, Callable, Iterable, Any, Optional, List, Dict,
-                    Awaitable, Pattern)
+                    Awaitable, Pattern, Type)
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.message import Message
@@ -25,18 +25,23 @@ _sessions = {}  # type: Dict[str, "CommandSession"]
 
 class Command:
     __slots__ = ('name', 'func', 'permission', 'only_to_me', 'privileged',
-                 'args_parser_func')
+                 'args_parser_func', 'session_impl')
 
     def __init__(self, *, name: CommandName_T, func: CommandHandler_T,
-                 permission: int, only_to_me: bool, privileged: bool):
+                 permission: int, only_to_me: bool, privileged: bool,
+                 session_implement: Optional[Type['CommandSession']]):
         self.name = name
         self.func = func
         self.permission = permission
         self.only_to_me = only_to_me
         self.privileged = privileged
         self.args_parser_func: Optional[CommandHandler_T] = None
+        self.session_impl = session_implement
 
-    async def run(self, session, *, check_perm: bool = True,
+    async def run(self,
+                  session: 'CommandSession',
+                  *,
+                  check_perm: bool = True,
                   dry: bool = False) -> bool:
         """
         Run the command in a given session.
@@ -279,8 +284,9 @@ class CommandManager:
             return
         current_parent[cmd_name[-1]] = cmd
 
-    def _generate_command_tree(self, commands: Dict[CommandName_T, Command]
-                              ) -> Dict[str, Union[Dict, Command]]:
+    def _generate_command_tree(
+        self, commands: Dict[CommandName_T,
+                             Command]) -> Dict[str, Union[Dict, Command]]:
         """Generate command tree from commands dictionary.
         
         Args:
@@ -294,8 +300,8 @@ class CommandManager:
             self._add_command_to_tree(cmd_name, cmd, cmd_tree)
         return cmd_tree
 
-    def _find_command(self,
-                      name: Union[str, CommandName_T]) -> Optional[Command]:
+    def _find_command(self, name: Union[str,
+                                        CommandName_T]) -> Optional[Command]:
         cmd_name = (name,) if isinstance(name, str) else name
         if not cmd_name:
             return None
@@ -321,8 +327,9 @@ class CommandManager:
         }.get(cmd_name)
         return cmd
 
-    def parse_command(self, bot: NoneBot, cmd_string: str
-                     ) -> Tuple[Optional[Command], Optional[str]]:
+    def parse_command(
+            self, bot: NoneBot,
+            cmd_string: str) -> Tuple[Optional[Command], Optional[str]]:
         logger.debug(f'Parsing command: {repr(cmd_string)}')
 
         matched_start = None
@@ -421,7 +428,11 @@ class CommandManager:
             state)
 
 
-class _PauseException(Exception):
+class CommandInterrupt(Exception):
+    pass
+
+
+class _PauseException(CommandInterrupt):
     """
     Raised by session.pause() indicating that the command session
     should be paused to ask the user for some arguments.
@@ -429,7 +440,7 @@ class _PauseException(Exception):
     pass
 
 
-class _FinishException(Exception):
+class _FinishException(CommandInterrupt):
     """
     Raised by session.finish() indicating that the command session
     should be stopped and removed.
@@ -442,7 +453,7 @@ class _FinishException(Exception):
         self.result = result
 
 
-class SwitchException(Exception):
+class SwitchException(CommandInterrupt):
     """
     Raised by session.switch() indicating that the command session
     should be stopped and replaced with a new one (going through
@@ -571,7 +582,9 @@ class CommandSession(BaseSession):
         """
         return self.state.get('argv', [])
 
-    def refresh(self, event: CQEvent, *,
+    def refresh(self,
+                event: CQEvent,
+                *,
                 current_arg: Optional[str] = '') -> None:
         """
         Refill the session with a new message event.
@@ -611,7 +624,8 @@ class CommandSession(BaseSession):
         self._current_send_kwargs = kwargs
         self.pause(prompt, **kwargs)
 
-    def get_optional(self, key: str,
+    def get_optional(self,
+                     key: str,
                      default: Optional[Any] = None) -> Optional[Any]:
         """
         Simply get a argument with given key.
@@ -684,8 +698,10 @@ async def handle_command(bot: NoneBot, event: CQEvent,
             await asyncio.sleep(0.3)
 
     check_perm = True
-    session = _sessions.get(ctx_id) if not is_privileged_cmd else None
-    if session:
+    session: Optional[CommandSession] = _sessions.get(
+        ctx_id) if not is_privileged_cmd else None
+
+    if session is not None:
         if session.running:
             logger.warning(f'There is a session of command '
                            f'{session.cmd.name} running, notify the user')
@@ -709,16 +725,18 @@ async def handle_command(bot: NoneBot, event: CQEvent,
                 del _sessions[ctx_id]
             session = None
 
-    if not session:
+    if session is None:
         if not cmd:
             logger.debug('Not a known command, ignored')
             return False
         if cmd.only_to_me and not event['to_me']:
             logger.debug('Not to me, ignored')
             return False
-        session = CommandSession(bot, event, cmd, current_arg=current_arg)
+        SessionImpl = cmd.session_impl or CommandSession
+        session = SessionImpl(bot, event, cmd, current_arg=current_arg)
         logger.debug(f'New session of command {session.cmd.name} created')
 
+    assert isinstance(session, CommandSession)
     return await _real_run_command(session,
                                    ctx_id,
                                    check_perm=check_perm,
