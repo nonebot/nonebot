@@ -3,7 +3,7 @@ import shlex
 import asyncio
 import warnings
 from datetime import datetime
-from functools import partial, update_wrapper
+from functools import partial, wraps
 from typing import (Tuple, Union, Callable, Iterable, Any, Optional, List, Dict,
                     Awaitable, Pattern, Type)
 
@@ -664,6 +664,27 @@ class CommandSession(BaseSession):
         if not isinstance(new_message, Message):
             new_message = Message(new_message)
         raise SwitchException(new_message)
+
+
+class SyncCommandSession(CommandSession):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._run_future = lambda x: x
+
+    def __getattribute__(self, key: str) -> Any:
+        obj = super().__getattribute__(key)
+        if not asyncio.iscoroutinefunction(obj):
+            return obj
+
+        @wraps(obj)
+        def task(*args, **kwargs):
+            loop: asyncio.AbstractEventLoop = self.bot.loop
+            coro = obj(*args, **kwargs)
+            task = asyncio.run_coroutine_threadsafe(coro, loop)
+            return task.result()
+
+        return task
 
 
 async def handle_command(bot: NoneBot, event: CQEvent,

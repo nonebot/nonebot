@@ -4,12 +4,15 @@ import sys
 import shlex
 import warnings
 import importlib
+from concurrent.futures.thread import ThreadPoolExecutor
+from functools import wraps, partial
+from inspect import iscoroutinefunction
 from types import ModuleType
 from typing import Any, Set, Dict, Union, Optional, Iterable, Callable, Type
 
 from .log import logger
 from nonebot import permission as perm
-from .command import Command, CommandManager, CommandSession
+from .command import Command, CommandManager, CommandSession, SyncCommandSession
 from .notice_request import _bus, EventHandler
 from .natural_language import NLProcessor, NLPManager
 from .typing import CommandName_T, CommandHandler_T, Patterns_T
@@ -17,6 +20,7 @@ from .typing import CommandName_T, CommandHandler_T, Patterns_T
 _tmp_command: Set[Command] = set()
 _tmp_nl_processor: Set[NLProcessor] = set()
 _tmp_event_handler: Set[EventHandler] = set()
+_executor = ThreadPoolExecutor()
 
 
 class Plugin:
@@ -373,6 +377,17 @@ def on_command(
     """
 
     def deco(func: CommandHandler_T) -> CommandHandler_T:
+        nonlocal session_implement
+
+        @wraps(func)
+        def syncwrapper(func, *args, **kwargs):
+            from nonebot import get_bot
+            logger.debug(f'Command {name!r} is synchronize: {func}, '
+                         'convert to asynchronous')
+            loop = get_bot().loop
+            runner = lambda: func(*args, **kwargs)
+            return loop.run_in_executor(_executor, runner)
+
         if not isinstance(name, (str, tuple)):
             raise TypeError('the name of a command must be a str or tuple')
         if not name:
@@ -381,6 +396,11 @@ def on_command(
                 session_implement, CommandSession):
             raise TypeError(
                 'session_implement must be a subclass of CommandSession')
+        if not callable(func):
+            raise TypeError('decorator must decorate a callable object')
+        if not iscoroutinefunction(func):
+            func = partial(syncwrapper, func)
+            session_implement = session_implement or SyncCommandSession
 
         cmd_name = (name,) if isinstance(name, str) else name
 
