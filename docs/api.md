@@ -60,7 +60,7 @@ sidebar: auto
 
   命令处理函数
 
-### `Patterns_T` <Badge text="1.7.0+"/>
+### `Patterns_T` <Badge text="master"/>
 
 - **类型:** `Union[Iterable[str], str, Iterable[Pattern], Pattern]`
 
