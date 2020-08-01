@@ -189,7 +189,7 @@ sidebar: auto
 
 ### `SUPERUSERS`
 
-- **类型:** `Container[int]` <Badge text="1.6.0-" type="error" />, `Collection[int]` <Badge text="master"/>
+- **类型:** `Collection[int]` <Badge text="master"/>
 
 - **默认值:** `set()`
 
