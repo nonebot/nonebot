@@ -3121,6 +3121,32 @@ async def _(session):
   await send(bot, event, 'hello')
   ```
 
+### _coroutine_ `send_to_superusers(bot, message, **kwargs)` <Badge text="master"/>
+
+- **说明:**
+
+  发送私聊消息到全体超级用户（即配置下的 `SUPERUSERS`）。
+
+- **参数:**
+
+  - `bot: NoneBot`: NoneBot 对象
+  - `message: Message_T`: 要发送的消息内容
+  - `**kwargs: Any`: 其它传入 `bot.send_private_msg()` 的命名参数
+
+- **返回:**
+
+  - `None`
+
+- **异常:**
+
+  - `CQHttpError`: 发送失败时抛出，实际由 [aiocqhttp] 抛出，等价于 `aiocqhttp.Error`
+
+- **用法:**
+
+  ```python
+  await send_to_superusers(bot, f'被群 {event.group_id} 踢出了')
+  ```
+
 ### `render_expression(expr, *args, escape_args=True, **kwargs)`
 
 - **说明:**
