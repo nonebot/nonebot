@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import random
 from typing import Sequence, Callable, Any
@@ -65,6 +66,23 @@ async def send(bot: NoneBot,
         if not ignore_failure:
             raise
         return None
+
+
+async def send_to_superusers(bot: NoneBot,
+                             message: Message_T,
+                             **kwargs) -> None:
+    """
+    Send a private message to all superusers that are defined in config.
+
+    :param bot: nonebot object
+    :param message: message to send to each superuser
+    :param kwargs: keyword arguments used in bot.send_private_msg()
+    """
+    tasks = [
+        bot.send_private_msg(user_id=user_id, message=message, **kwargs)
+        for user_id in bot.config.SUPERUSERS
+    ]
+    await asyncio.gather(*tasks)
 
 
 def render_expression(expr: Expression_T,
