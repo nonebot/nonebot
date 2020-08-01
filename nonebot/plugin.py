@@ -4,14 +4,14 @@ import sys
 import shlex
 import warnings
 import importlib
-from concurrent.futures.thread import ThreadPoolExecutor
+from types import ModuleType
 from functools import wraps, partial
 from inspect import iscoroutinefunction
-from types import ModuleType
+from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Set, Dict, Union, Optional, Iterable, Callable, Type
 
 from .log import logger
-from nonebot import permission as perm
+from nonebot import get_bot, permission as perm
 from .command import Command, CommandManager, CommandSession, SyncCommandSession
 from .notice_request import _bus, EventHandler
 from .natural_language import NLProcessor, NLPManager
@@ -381,7 +381,6 @@ def on_command(
 
         @wraps(func)
         def syncwrapper(func, *args, **kwargs):
-            from nonebot import get_bot
             logger.debug(f'Command {name!r} is synchronize: {func}, '
                          'convert to asynchronous')
             loop = get_bot().loop
