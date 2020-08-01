@@ -15,7 +15,7 @@ For example:
 """
 
 from datetime import timedelta
-from typing import Container, Union, Iterable, Pattern, Optional, Dict, Any
+from typing import Collection, Union, Iterable, Pattern, Optional, Dict, Any
 
 from .typing import Expression_T
 
@@ -26,7 +26,7 @@ HOST: str = '127.0.0.1'
 PORT: int = 8080
 DEBUG: bool = True
 
-SUPERUSERS: Container[int] = set()
+SUPERUSERS: Collection[int] = set()
 NICKNAME: Union[str, Iterable[str]] = ''
 
 COMMAND_START: Iterable[Union[str, Pattern]] = {'/', '!', '／', '！'}
