@@ -52,8 +52,8 @@ async def handle_message(bot: NoneBot, event: CQEvent) -> None:
     if coros:
         try:
             await asyncio.gather(*coros)
-        except CanceledException:
-            logger.info(f'Message {event["message_id"]} is ignored')
+        except CanceledException as e:
+            logger.info(f'Message {event["message_id"]} is ignored: {e.reason}')
             return
 
     while True:
