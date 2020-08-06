@@ -1,0 +1,30 @@
+name: Code Lint
+on: 
+  - push
+  - pull_request
+
+jobs:
+  lint:
+    name: Lint the Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python Environment
+        uses: actions/setup-python@v2
+        with:
+            python-version: 3.8
+
+      - name: Install Dependencies
+        run: |
+            python -m pip install --upgrade pip
+            pip install flake8 
+
+      - name: Run Linters
+        uses: samuelmeuli/lint-action@v1
+        with:
+            github_token: ${{ secrets.github_token }}
+            auto_fix: false
+            flake8: true
+            flake8_args: "--config .flake8"
