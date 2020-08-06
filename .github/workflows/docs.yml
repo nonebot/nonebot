@@ -1,12 +1,19 @@
 name: Generate Document
 
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Document version required'
+        required: false
+        default: ""
   push:
     branches: 
       - master
     paths: 
       - '**.py'
       - '**.pyi'
+        
     
 
 jobs:
@@ -24,5 +31,15 @@ jobs:
     - name: Prepare sphinx environment
       run: |
         pip install pip -U
-        pip install sphinx sphinx-markdown-builder
+        pip install -e .
+        pip install git+https://github.com/nonebot/sphinx-markdown-builder
+        pip install sphinx
+    
+    - name: Generate document struct
+      working-directory: docs/script
+      env:
+        RELEASE_VER: ${{ github.event.inputs.version }}
+      run: |
+        if [ -z "RELEASE_VER" ]; then export RELEASE_VER=$GITHUB_SHA ; fi
+        echo ":warning: Not implemented yet ($RELEASE_VER) "
 
