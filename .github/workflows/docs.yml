@@ -1,0 +1,28 @@
+name: Generate Document
+
+on:
+  push:
+    branches: 
+      - master
+    paths: 
+      - '**.py'
+      - '**.pyi'
+    
+
+jobs:
+  docs:
+    name: Generate API References
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+
+    - name: Prepare sphinx environment
+      run: |
+        pip install pip -U
+        pip install sphinx sphinx-markdown-builder
+
