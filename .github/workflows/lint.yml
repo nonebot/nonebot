@@ -1,0 +1,9 @@
+name: Code Lint
+on: 
+  - push
+  - pull_request
+
+jobs:
+  lint:
+    name: Lint the Code
+    runs-on: ubuntu-latest
