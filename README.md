@@ -20,13 +20,9 @@ NoneBot 在其底层与 酷Q 交互的部分使用 [aiocqhttp](https://github.co
 
 需要注意的是，NoneBot 仅支持 Python 3.7+ 及 CQHTTP 插件 v4.8+。
 
-## 示意图
-
-![](docs/assets/diagram.png)
-
 ## 文档
 
-文档目前「指南」和「API」部分已经完成，「进阶」部分尚未完成，你可以在 [这里](https://nonebot.cqp.moe/) 查看。
+文档目前「指南」和「API」部分已经完成，「进阶」部分尚未完成，你可以在 [这里](https://docs.nonebot.dev/) 查看。
 
 ## 贡献
 
