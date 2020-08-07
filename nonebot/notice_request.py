@@ -1,5 +1,4 @@
-from functools import update_wrapper
-from typing import List, Optional, Callable, Union
+from typing import List, Callable
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.bus import EventBus

@@ -1,6 +1,5 @@
 import asyncio
 import warnings
-from functools import update_wrapper
 from typing import Set, Iterable, Optional, Callable, Union, NamedTuple
 
 from aiocqhttp import Event as CQEvent
@@ -65,7 +64,7 @@ class NLPManager:
     def switch_nlprocessor_global(cls,
                                   processor: NLProcessor,
                                   state: Optional[bool] = None
-                                 ) -> Optional[bool]:
+                                  ) -> Optional[bool]:
         """Remove or add a natural language processor globally
         
         Args:
@@ -77,7 +76,7 @@ class NLPManager:
         if processor in cls._nl_processors and not state:
             cls._nl_processors.remove(processor)
             return True
-        elif processor not in cls._nl_processors and state != False:
+        elif processor not in cls._nl_processors and state is not False:
             cls._nl_processors.add(processor)
             return False
 
@@ -95,7 +94,7 @@ class NLPManager:
         if processor in self.nl_processors and not state:
             self.nl_processors.remove(processor)
             return True
-        elif processor not in self.nl_processors and state != False:
+        elif processor not in self.nl_processors and state is not False:
             self.nl_processors.add(processor)
             return False
 

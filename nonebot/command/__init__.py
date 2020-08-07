@@ -1,10 +1,9 @@
 import re
-import shlex
 import asyncio
 import warnings
 from datetime import datetime
-from functools import partial, update_wrapper
-from typing import (Tuple, Union, Callable, Iterable, Any, Optional, List, Dict,
+from functools import partial
+from typing import (Tuple, Union, Iterable, Any, Optional, List, Dict,
                     Awaitable, Pattern, Type)
 
 from aiocqhttp import Event as CQEvent
@@ -295,7 +294,7 @@ class CommandManager:
         Returns:
             Dict[str, Union[Dict, "Command"]]: Command tree
         """
-        cmd_tree = {}  #type: Dict[str, Union[Dict, "Command"]]
+        cmd_tree = {}  # type: Dict[str, Union[Dict, "Command"]]
         for cmd_name, cmd in commands.items():
             self._add_command_to_tree(cmd_name, cmd, cmd_tree)
         return cmd_tree
@@ -858,4 +857,4 @@ def kill_current_session(event: CQEvent) -> None:
         del _sessions[ctx_id]
 
 
-from nonebot.command.group import CommandGroup
+from nonebot.command.group import CommandGroup  # noqa: F401

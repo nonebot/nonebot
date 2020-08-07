@@ -1,4 +1,4 @@
-from argparse import *
+from argparse import ArgumentParser
 
 from .command import CommandSession
 

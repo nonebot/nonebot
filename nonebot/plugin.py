@@ -120,7 +120,7 @@ class PluginManager:
                 if event_handler.func in _bus._subscribers[event] and not state:
                     _bus.unsubscribe(event, event_handler.func)
                 elif event_handler.func not in _bus._subscribers[
-                        event] and state != False:
+                        event] and state is not False:
                     _bus.subscribe(event, event_handler.func)
 
     @classmethod
@@ -176,7 +176,7 @@ class PluginManager:
                 if event_handler.func in _bus._subscribers[event] and not state:
                     _bus.unsubscribe(event, event_handler.func)
                 elif event_handler.func not in _bus._subscribers[
-                        event] and state != False:
+                        event] and state is not False:
                     _bus.subscribe(event, event_handler.func)
 
     def switch_plugin(self,
