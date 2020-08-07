@@ -1,4 +1,7 @@
-from typing import Union, List, Dict, Any, Sequence, Callable, Tuple, Awaitable, Pattern, Iterable
+from typing import TYPE_CHECKING, Union, List, Dict, Any, Sequence, Callable, Tuple, Awaitable, Pattern, Iterable
+
+if TYPE_CHECKING:
+    from nonebot.command import CommandSession
 
 Context_T = Dict[str, Any]
 Message_T = Union[str, Dict[str, Any], List[Dict[str, Any]]]
