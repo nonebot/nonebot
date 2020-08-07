@@ -439,7 +439,7 @@ def on_natural_language(keywords: Union[Optional[Iterable], str,
         _tmp_nl_processor.add(nl_processor)
         return func
 
-    if isinstance(keywords, Callable):
+    if callable(keywords):
         # here "keywords" is the function to be decorated
         return on_natural_language()(keywords)
     else:
@@ -466,7 +466,7 @@ def _make_event_deco(post_type: str) -> Callable:
             _tmp_event_handler.add(handler)
             return func
 
-        if isinstance(arg, Callable):
+        if callable(arg):
             return deco(arg)  # type: ignore
         return deco
 

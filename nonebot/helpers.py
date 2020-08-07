@@ -1,7 +1,7 @@
 import asyncio
 import hashlib
 import random
-from typing import Sequence, Callable, Any
+from typing import Sequence, Any
 
 from aiocqhttp.message import escape
 from aiocqhttp import Event as CQEvent
@@ -98,7 +98,7 @@ def render_expression(expr: Expression_T,
     :param kwargs: keyword arguments used in str.format()
     :return: the rendered message
     """
-    if isinstance(expr, Callable):
+    if callable(expr):
         expr = expr(*args, **kwargs)
     elif isinstance(expr, Sequence) and not isinstance(expr, str):
         expr = random.choice(expr)
