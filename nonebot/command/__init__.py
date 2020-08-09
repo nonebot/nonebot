@@ -3,7 +3,7 @@ import asyncio
 import warnings
 from datetime import datetime
 from functools import partial
-from typing import (Tuple, Union, Iterable, Any, Optional, List, Dict,
+from typing import (NoReturn, Tuple, Union, Iterable, Any, Optional, List, Dict,
                     Awaitable, Pattern, Type)
 
 from aiocqhttp import Event as CQEvent
@@ -633,19 +633,19 @@ class CommandSession(BaseSession):
         """
         return self.state.get(key, default)
 
-    def pause(self, message: Optional[Message_T] = None, **kwargs) -> None:
+    def pause(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
         """Pause the session for further interaction."""
         if message:
             self._run_future(self.send(message, **kwargs))
         raise _PauseException
 
-    def finish(self, message: Optional[Message_T] = None, **kwargs) -> None:
+    def finish(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
         """Finish the session."""
         if message:
             self._run_future(self.send(message, **kwargs))
         raise _FinishException
 
-    def switch(self, new_message: Message_T) -> None:
+    def switch(self, new_message: Message_T) -> NoReturn:
         """
         Finish the session and switch to a new (fake) message event.
 
