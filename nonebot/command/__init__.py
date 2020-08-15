@@ -335,13 +335,13 @@ class CommandManager:
         for start in bot.config.COMMAND_START:
             # loop through COMMAND_START to find the longest matched start
             curr_matched_start = None
-            if isinstance(start, type(re.compile(''))):
+            if isinstance(start, str):
+                if cmd_string.startswith(start):
+                    curr_matched_start = start
+            elif isinstance(start, Pattern):
                 m = start.search(cmd_string)
                 if m and m.start(0) == 0:
                     curr_matched_start = m.group(0)
-            elif isinstance(start, str):
-                if cmd_string.startswith(start):
-                    curr_matched_start = start
 
             if curr_matched_start is not None and \
                     (matched_start is None or
@@ -368,10 +368,10 @@ class CommandManager:
         for sep in bot.config.COMMAND_SEP:
             # loop through COMMAND_SEP to find the most optimized split
             curr_cmd_name = None
-            if isinstance(sep, type(re.compile(''))):
-                curr_cmd_name = tuple(sep.split(cmd_name_text))
-            elif isinstance(sep, str):
+            if isinstance(sep, str):
                 curr_cmd_name = tuple(cmd_name_text.split(sep))
+            elif isinstance(sep, Pattern):
+                curr_cmd_name = tuple(sep.split(cmd_name_text))
 
             if curr_cmd_name is not None and \
                     (not cmd_name or len(curr_cmd_name) > len(cmd_name)):
