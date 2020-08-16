@@ -10,3 +10,4 @@ ignore =
     W503,W504,
     W291,W293,
     F403,
+extend-exclude = venv,.venv,docs
