@@ -633,7 +633,7 @@ sidebar: auto
 - **参数:**
 
   - `config_object: Optional[Any]`: 配置对象，类型不限，只要能够通过 `__getattr__` 和 `__dict__` 分别访问到单个和所有配置项即可，若没有传入，则使用默认配置
-  - `start_scheduler: bool`: 是否要启动 `scheduler`
+  - `start_scheduler: bool` <Badge text="master"/>: 是否要启动 `nonebot.scheduler`
 
 - **返回:**
 
@@ -1183,7 +1183,7 @@ sidebar: auto
                      '\n'.join(map(lambda p: p.name, filter(lambda p: p.name, plugins))))
   ```
 
-### _decorator_ `on_command(name, *, aliases=(), permission=perm.EVERYBODY, only_to_me=True, privileged=False, shell_like=False)` <Badge text="1.6.0+" />
+### _decorator_ `on_command(name, *, aliases=(), permission=perm.EVERYBODY, only_to_me=True, privileged=False, shell_like=False, session_class=None)` <Badge text="1.6.0+" />
 
 - **说明:**
 
@@ -1195,11 +1195,15 @@ sidebar: auto
 
   - `name: Union[str, CommandName_T]`: 命令名，如果传入的是字符串则会自动转为元组
   - `aliases: Union[Iterable[str], str]`: 命令别名
-  - `patterns: Patterns_T`: 正则匹配。可以传入正则表达式或正则表达式组，来对整条命令进行匹配。请注意滥用正则表达式可能会引发性能问题，请优先使用普通命令。另外一点需要注意的是，由正则表达式匹配到的匹配到的命令，`session`中的`current_arg`会是整个命令，而不会删除匹配到的内容，以满足一些特殊需求
+  - `patterns: Patterns_T` <Badge text="master"/>: 正则匹配，可以传入正则表达式或正则表达式组，来对整条命令进行匹配
+    :::warning 注意
+    滥用正则表达式可能会引发性能问题，请优先使用普通命令。另外一点需要注意的是，由正则表达式匹配到的匹配到的命令，`session` 中的 `current_arg` 会是整个命令，而不会删除匹配到的内容，以满足一些特殊需求。
+    :::
   - `permission: int`: 命令所需要的权限，不满足权限的用户将无法触发该命令
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
   - `shell_like: bool`: 是否使用类 shell 语法，若是，则会自动使用 `shlex` 模块进行分割（无需手动编写参数解析器），分割后的参数列表放入 `session.args['argv']`
+  - `session_class: Optional[Type[CommandSession]]` <Badge text="master"/>: 自定义 `CommandSession` 子类，若传入此参数，则命令处理函数的参数 `session` 类型为 `session_class`
 
 - **要求:**
 
