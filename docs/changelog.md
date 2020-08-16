@@ -6,7 +6,12 @@ sidebar: auto
 
 ## master
 
-
+- `on_command` 装饰器新增 `patterns` 参数，用于正则匹配命令
+- `on_command` 装饰器新增 `session_class` 参数，用于指定自定义的 `CommandSession` 子类
+- ` init` 函数新增 `start_scheduler` 参数，用于控制是否在启动 NoneBot 时启动 `nonebot.scheduler`
+- `nonebot.helpers` 模块新增辅助函数 `send_to_superusers`，用于向所有超级用户发送私聊消息
+- 优化对命令运行时特殊异常的处理
+- 修复一些 bug
 
 ## v1.6.0
 
