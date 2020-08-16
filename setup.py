@@ -7,7 +7,7 @@ packages = find_packages(include=('nonebot', 'nonebot.*'))
 
 setup(
     name='nonebot',
-    version='1.6.0',
+    version='1.7.0',
     url='https://github.com/nonebot/nonebot',
     license='MIT License',
     author='NoneBot Team',
@@ -18,7 +18,7 @@ setup(
     package_data={
         '': ['*.pyi'],
     },
-    install_requires=['aiocqhttp>=1.2,<1.3', 'aiocache>=0.10,<1.0'],
+    install_requires=['aiocqhttp>=1.3', 'aiocache>=0.10,<1.0'],
     extras_require={
         'scheduler': ['apscheduler'],
     },

@@ -4,7 +4,7 @@ sidebar: auto
 
 # 更新日志
 
-## master
+## v1.7.0
 
 - `on_command` 装饰器新增 `patterns` 参数，用于正则匹配命令
 - `on_command` 装饰器新增 `session_class` 参数，用于指定自定义的 `CommandSession` 子类
