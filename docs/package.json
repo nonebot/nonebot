@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "dev": "vuepress dev --host 127.0.0.1 -p 8888 --debug .",
+    "build": "vuepress build ."
+  },
+  "devDependencies": {
+    "vuepress": "^0.14.8"
+  }
+}
