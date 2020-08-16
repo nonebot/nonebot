@@ -24,18 +24,18 @@ _sessions = {}  # type: Dict[str, "CommandSession"]
 
 class Command:
     __slots__ = ('name', 'func', 'permission', 'only_to_me', 'privileged',
-                 'args_parser_func', 'session_impl')
+                 'args_parser_func', 'session_class')
 
     def __init__(self, *, name: CommandName_T, func: CommandHandler_T,
                  permission: int, only_to_me: bool, privileged: bool,
-                 session_implement: Optional[Type['CommandSession']]):
+                 session_class: Optional[Type['CommandSession']]):
         self.name = name
         self.func = func
         self.permission = permission
         self.only_to_me = only_to_me
         self.privileged = privileged
         self.args_parser_func: Optional[CommandHandler_T] = None
-        self.session_impl = session_implement
+        self.session_class = session_class
 
     async def run(self,
                   session: 'CommandSession',
@@ -731,8 +731,8 @@ async def handle_command(bot: NoneBot, event: CQEvent,
         if cmd.only_to_me and not event['to_me']:
             logger.debug('Not to me, ignored')
             return False
-        SessionImpl = cmd.session_impl or CommandSession
-        session = SessionImpl(bot, event, cmd, current_arg=current_arg)
+        SessionClass = cmd.session_class or CommandSession
+        session = SessionClass(bot, event, cmd, current_arg=current_arg)
         logger.debug(f'New session of command {session.cmd.name} created')
 
     assert isinstance(session, CommandSession)
@@ -773,12 +773,8 @@ async def call_command(bot: NoneBot,
     cmd = CommandManager()._find_command(name)
     if not cmd:
         return False
-    SessionImplement = cmd.session_impl or CommandSession
-    session = SessionImplement(bot,
-                               event,
-                               cmd,
-                               current_arg=current_arg,
-                               args=args)
+    SessionClass = cmd.session_class or CommandSession
+    session = SessionClass(bot, event, cmd, current_arg=current_arg, args=args)
     return await _real_run_command(session,
                                    context_id(session.event),
                                    check_perm=check_perm,

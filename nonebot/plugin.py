@@ -355,7 +355,7 @@ def on_command(
     only_to_me: bool = True,
     privileged: bool = False,
     shell_like: bool = False,
-    session_implement: Optional[Type[CommandSession]] = None
+    session_class: Optional[Type[CommandSession]] = None
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
     Decorator to register a function as a command.
@@ -370,6 +370,7 @@ def on_command(
     :param only_to_me: only handle messages to me
     :param privileged: can be run even when there is already a session
     :param shell_like: use shell-like syntax to split arguments
+    :param session_class: session class
     """
 
     def deco(func: CommandHandler_T) -> CommandHandler_T:
@@ -377,10 +378,10 @@ def on_command(
             raise TypeError('the name of a command must be a str or tuple')
         if not name:
             raise ValueError('the name of a command must not be empty')
-        if session_implement is not None and not issubclass(
-                session_implement, CommandSession):
+        if session_class is not None and not issubclass(session_class,
+                                                        CommandSession):
             raise TypeError(
-                'session_implement must be a subclass of CommandSession')
+                'session_class must be a subclass of CommandSession')
 
         cmd_name = (name,) if isinstance(name, str) else name
 
@@ -389,7 +390,7 @@ def on_command(
                       permission=permission,
                       only_to_me=only_to_me,
                       privileged=privileged,
-                      session_implement=session_implement)
+                      session_class=session_class)
 
         if shell_like:
 
