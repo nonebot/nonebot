@@ -641,10 +641,11 @@ class CommandSession(BaseSession):
         self.pause(prompt, **kwargs)
 
     async def aget(self,
-                   key: str,
+                   key: str = ...,
                    *,
                    prompt: Optional[Message_T] = None,
                    arg_filters: Optional[List[Filter_T]] = None,
+                   force_update: bool = ...,
                    **kwargs) -> Any:
         """
         Get an argument with a given key.
@@ -659,8 +660,13 @@ class CommandSession(BaseSession):
         :param arg_filters: argument filters for the next user input
         :return: the argument value
         """
+        if key is ... and force_update is ...:
+            force_update = True
         if key in self.state:
-            return self.state[key]
+            if force_update:
+                del self.state[key]
+            else:
+                return self.state[key]
 
         self.current_key = key
         self.current_arg_filters = arg_filters
