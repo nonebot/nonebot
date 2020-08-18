@@ -26,7 +26,7 @@ class CommandInterrupt(Exception):
     pass
 
 
-class _YieldException(Exception):
+class _YieldException(CommandInterrupt):
     """
     Raised by command.run(), session indicating that the waiting session
     will resume and current execution path should return immediately.
