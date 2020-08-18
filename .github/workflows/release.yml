@@ -1,2 +1,61 @@
-# Just create a new file now.. :)
-# Feel free to update content >_<
+name: Publish Releases
+
+env:
+  CHANGELOG_PATH: docs/changelog.md
+  CHANGELOG_REGEX: '##\sv(\d+\.\d+\.\d+)'
+
+on: 
+  push:
+    tags: 
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Prepare Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      
+      - name: Install requirements
+        run: |
+          pip install twine requests
+      
+      - name: Build dists
+        run: |
+          python setup.py sdist
+      
+      - name: Get version information
+        shell: python
+        run: |
+          import re
+          import os
+          
+          changelog_path = os.environ['CHANGELOG_PATH']
+          changelog_regex = os.environ['CHANGELOG_REGEX']
+          
+          with open(changelog_path,'rt',encoding='utf-8') as f:
+            textlog = '\n'.join(f.readlines())
+          
+          ver,log = re.split(changelog_regex,textlog)[1:3]
+          
+          os.system('export CHANGELOG="%s"' % log)
+          os.system('export VERSION="%s"' % ver)
+      
+      - name: Publish package
+        env:
+          TWINE_REPOSITORY: nonebot
+          TWINE_NON_INTERACTIVE: true
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          twine upload dist/* 
+      
+      - name: Push Messages
+        run: |
+          echo "::warning:: Not implemented yet! Current CHANGELOG for $VERSION is $CHANGELOG"
