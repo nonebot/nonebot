@@ -98,14 +98,17 @@ def render_expression(expr: Expression_T,
     :param kwargs: keyword arguments used in str.format()
     :return: the rendered message
     """
+    result: str
     if callable(expr):
-        expr = expr(*args, **kwargs)
+        result = expr(*args, **kwargs)
     elif isinstance(expr, Sequence) and not isinstance(expr, str):
-        expr = random.choice(expr)
+        result = random.choice(expr)
+    else:
+        result = expr
     if escape_args:
-        return expr.format(
+        return result.format(
             *[escape(s) if isinstance(s, str) else s for s in args], **{
                 k: escape(v) if isinstance(v, str) else v
                 for k, v in kwargs.items()
             })
-    return expr.format(*args, **kwargs)
+    return result.format(*args, **kwargs)

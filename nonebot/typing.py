@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 Context_T = Dict[str, Any]
 Message_T = Union[str, Dict[str, Any], List[Dict[str, Any]]]
-Expression_T = Union[str, Sequence[str], Callable]
+Expression_T = Union[str, Sequence[str], Callable[..., str]]
 CommandName_T = Tuple[str, ...]
 CommandArgs_T = Dict[str, Any]
 CommandHandler_T = Callable[["CommandSession"], Any]

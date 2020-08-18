@@ -30,7 +30,7 @@ sidebar: auto
 
 ### `Expression_T`
 
-- **类型:** `Union[str, Sequence[str], Callable]`
+- **类型:** `Union[str, Sequence[str], Callable[..., str]]` <Badge text="master"/>
 
 - **说明:**
 
@@ -3159,10 +3159,10 @@ async def _(session):
 
 - **参数:**
 
-  - `expr: Expression_T`: 要渲染的 Expression，对于 Expression 的三种类型：`str`、`Sequence[str]`、`Callable`，行为分别是：
+  - `expr: Expression_T`: 要渲染的 Expression，对于 Expression 的三种类型：`str`、`Sequence[str]`、`Callable[..., str]`，行为分别是：
     - `str`：以 `*args`、`**kwargs` 为参数，使用 `str.format()` 进行格式化
     - `Sequence[str]`：随机选择其中之一，进行上面 `str` 的操作
-    - `Callable`：以 `*args`、`**kwargs` 为参数，调用该可调用对象/函数，对返回的字符串进行上面 `str` 的操作
+    - `Callable[..., str]`：以 `*args`、`**kwargs` 为参数，调用该可调用对象/函数，对返回的字符串进行上面 `str` 的操作
   - `escape_args: bool`: 是否对渲染参数进行转义
   - `*args: Any`: 渲染参数
   - `**kwargs: Any`: 渲染参数
