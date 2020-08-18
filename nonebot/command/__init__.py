@@ -3,8 +3,8 @@ import asyncio
 import warnings
 from datetime import datetime
 from functools import partial
-from typing import (Tuple, Union, Iterable, Any, Optional, List, Dict,
-                    Awaitable, Pattern, NoReturn, Type)
+from typing import (NoReturn, Tuple, Union, Iterable, Any, Optional, List, Dict,
+                    Awaitable, Pattern, Type)
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.message import Message
@@ -164,7 +164,7 @@ class CommandManager:
     @classmethod
     def add_command(cls, cmd_name: CommandName_T, cmd: Command) -> None:
         """Register a command
-
+        
         Args:
             cmd_name (CommandName_T): Command name
             cmd (Command): Command object
@@ -178,9 +178,9 @@ class CommandManager:
     @classmethod
     def reload_command(cls, cmd_name: CommandName_T, cmd: Command) -> None:
         """Reload a command
-
+        
         **Warning! Dangerous function**
-
+        
         Args:
             cmd_name (CommandName_T): Command name
             cmd (Command): Command object
@@ -201,12 +201,12 @@ class CommandManager:
     @classmethod
     def remove_command(cls, cmd_name: CommandName_T) -> bool:
         """Remove a command
-
+        
         **Warning! Dangerous function**
-
+        
         Args:
             cmd_name (CommandName_T): Command name to remove
-
+        
         Returns:
             bool: Success or not
         """
@@ -227,7 +227,7 @@ class CommandManager:
                               cmd_name: CommandName_T,
                               state: Optional[bool] = None):
         """Change command state globally or simply switch it if `state` is None
-
+        
         Args:
             cmd_name (CommandName_T): Command name
             state (Optional[bool]): State to change to. Defaults to None.
@@ -239,7 +239,7 @@ class CommandManager:
     @classmethod
     def add_aliases(cls, aliases: Union[Iterable[str], str], cmd: Command):
         """Register command alias(es)
-
+        
         Args:
             aliases (Union[Iterable[str], str]): Command aliases
             cmd (Command): Command
@@ -280,7 +280,7 @@ class CommandManager:
     def _add_command_to_tree(self, cmd_name: CommandName_T, cmd: Command,
                              tree: Dict[str, Union[Dict, Command]]) -> None:
         """Add command to the target command tree.
-
+        
         Args:
             cmd_name (CommandName_T): Name of the command
             cmd (Command): Command object
@@ -303,10 +303,10 @@ class CommandManager:
         self, commands: Dict[CommandName_T,
                              Command]) -> Dict[str, Union[Dict, Command]]:
         """Generate command tree from commands dictionary.
-
+        
         Args:
             commands (Dict[CommandName_T, Command]): Dictionary of commands
-
+        
         Returns:
             Dict[str, Union[Dict, "Command"]]: Command tree
         """
@@ -433,7 +433,7 @@ class CommandManager:
                        cmd_name: CommandName_T,
                        state: Optional[bool] = None):
         """Change command state or simply switch it if `state` is None
-
+        
         Args:
             cmd_name (CommandName_T): Command name
             state (Optional[bool]): State to change to. Defaults to None.
@@ -696,7 +696,7 @@ class CommandSession(BaseSession):
         if message:
             self._run_future(self.send(message, **kwargs))
         if not self.waiting:
-            self._future = asyncio.Future()
+            self._future = asyncio.get_event_loop().create_future()
             self.running = False
             res = await self._future
             self.running = True
