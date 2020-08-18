@@ -62,7 +62,7 @@ sidebar: auto
 
 ### `Patterns_T` <Badge text="1.7.0+"/>
 
-- **类型:** `Union[Iterable[str], str, Iterable[Pattern], Pattern]`
+- **类型:** `Union[Iterable[str], str, Iterable[Pattern[str]], Pattern[str]]` <Badge text="master"/>
 
 - **说明:**
 
