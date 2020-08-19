@@ -34,6 +34,45 @@ class _YieldException(CommandInterrupt):
     pass
 
 
+class _PauseException(CommandInterrupt):
+    """
+    Raised by session.pause() indicating that the command session
+    should be paused to ask the user for some arguments.
+    """
+    pass
+
+
+class _FinishException(CommandInterrupt):
+    """
+    Raised by session.finish() indicating that the command session
+    should be stopped and removed.
+    """
+
+    def __init__(self, result: bool = True):
+        """
+        :param result: succeeded to call the command
+        """
+        self.result = result
+
+
+class SwitchException(CommandInterrupt):
+    """
+    Raised by session.switch() indicating that the command session
+    should be stopped and replaced with a new one (going through
+    handle_message() again).
+
+    Since the new message will go through handle_message() again,
+    the later function should be notified. So this exception is
+    intended to be propagated to handle_message().
+    """
+
+    def __init__(self, new_message: Message):
+        """
+        :param new_message: new message which should be placed in event
+        """
+        self.new_message = new_message
+
+
 class Command:
     __slots__ = ('name', 'func', 'permission', 'only_to_me', 'privileged',
                  'args_parser_func', 'session_class')
@@ -121,7 +160,7 @@ class Command:
             return True
         return False
 
-    async def _check_perm(self, session) -> bool:
+    async def _check_perm(self, session: 'CommandSession') -> bool:
         """
         Check if the session has sufficient permission to
         call the command.
@@ -152,7 +191,7 @@ class CommandManager:
     _commands = {}  # type: Dict[CommandName_T, Command]
     _aliases = {}  # type: Dict[str, Command]
     _switches = {}  # type: Dict[Command, bool]
-    _patterns = {}  # type: Dict[Pattern, Command]
+    _patterns = {}  # type: Dict[Pattern[str], Command]
 
     def __init__(self):
         self.commands = CommandManager._commands.copy()
@@ -442,45 +481,6 @@ class CommandManager:
             state)
 
 
-class _PauseException(CommandInterrupt):
-    """
-    Raised by session.pause() indicating that the command session
-    should be paused to ask the user for some arguments.
-    """
-    pass
-
-
-class _FinishException(CommandInterrupt):
-    """
-    Raised by session.finish() indicating that the command session
-    should be stopped and removed.
-    """
-
-    def __init__(self, result: bool = True):
-        """
-        :param result: succeeded to call the command
-        """
-        self.result = result
-
-
-class SwitchException(CommandInterrupt):
-    """
-    Raised by session.switch() indicating that the command session
-    should be stopped and replaced with a new one (going through
-    handle_message() again).
-
-    Since the new message will go through handle_message() again,
-    the later function should be notified. So this exception is
-    intended to be propagated to handle_message().
-    """
-
-    def __init__(self, new_message: Message):
-        """
-        :param new_message: new message which should be placed in event
-        """
-        self.new_message = new_message
-
-
 class CommandSession(BaseSession):
     __slots__ = ('cmd', 'current_key', 'current_arg_filters',
                  '_current_send_kwargs', 'current_arg', '_current_arg_text',
@@ -550,7 +550,7 @@ class CommandSession(BaseSession):
 
     @property
     def waiting(self) -> bool:
-        return self._future and not self._future.done()
+        return self._future is not None and not self._future.done()
 
     @property
     def is_valid(self) -> bool:
@@ -650,7 +650,7 @@ class CommandSession(BaseSession):
         Get an argument with a given key.
 
         If the argument does not exist in the current session,
-        a pause exception will be raised, and the caller of
+        the current coroutine yields, and the caller of
         the command will know it should keep the session for
         further interaction with the user.
 
@@ -693,20 +693,24 @@ class CommandSession(BaseSession):
         self._raise(_PauseException())
 
     async def apause(self, message: Optional[Message_T] = None, **kwargs) -> None:
-        """Pause the session for further interaction."""
+        """
+        Pause the session for further interaction. The control flow will pick
+        up where it is left over when this command session is recalled.
+        """
         if message:
             self._run_future(self.send(message, **kwargs))
-        if not self.waiting:
-            while True:
-                try:
-                    self._future = asyncio.get_event_loop().create_future()
-                    self.running = False
-                    await self._future
-                    break
-                except _PauseException:
-                    continue
-                except _FinishException:
-                    raise
+        if self.waiting:
+            return
+        while True:
+            try:
+                self._future = asyncio.get_event_loop().create_future()
+                self.running = False
+                await self._future
+                break
+            except _PauseException:
+                continue
+            except _FinishException:
+                raise
 
     def finish(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
         """Finish the session."""
@@ -738,8 +742,7 @@ class CommandSession(BaseSession):
         if self.waiting:
             self._future.set_exception(e)
             raise _YieldException
-        else:
-            raise e
+        raise e
 
 
 async def handle_command(bot: NoneBot, event: CQEvent,
@@ -878,8 +881,8 @@ async def _real_run_command(session: CommandSession,
             handled = future.result()
         except asyncio.TimeoutError:
             handled = True
-        except (_PauseException, _YieldException, _FinishException, SwitchException) as e:
-            raise e
+        except CommandInterrupt:
+            raise
         except Exception as e:
             logger.error(f'An exception occurred while '
                          f'running command {session.cmd.name}:')
