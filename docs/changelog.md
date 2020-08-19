@@ -4,6 +4,10 @@ sidebar: auto
 
 # 更新日志
 
+## master
+
+- `CommandSession` 新增 `aget` `apause` 方法， 用于 Session 的异步获取参数
+
 ## v1.7.0
 
 - `on_command` 装饰器新增 `patterns` 参数，用于正则匹配命令

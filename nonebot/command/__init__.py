@@ -22,6 +22,18 @@ from nonebot.typing import (CommandName_T, CommandArgs_T, CommandHandler_T,
 _sessions = {}  # type: Dict[str, "CommandSession"]
 
 
+class CommandInterrupt(Exception):
+    pass
+
+
+class _YieldException(CommandInterrupt):
+    """
+    Raised by command.run(), session indicating that the waiting session
+    will resume and current execution path should return immediately.
+    """
+    pass
+
+
 class Command:
     __slots__ = ('name', 'func', 'permission', 'only_to_me', 'privileged',
                  'args_parser_func', 'session_class')
@@ -101,8 +113,11 @@ class Command:
                         session.current_key not in session.state:
                     # args_parser_func didn't set state, here we set it
                     session.state[session.current_key] = session.current_arg
-
-            await self.func(session)
+            if session.waiting:
+                session._future.set_result(True)
+                raise _YieldException()
+            else:
+                await self.func(session)
             return True
         return False
 
@@ -226,7 +241,7 @@ class CommandManager:
         
         Args:
             aliases (Union[Iterable[str], str]): Command aliases
-            cmd_name (Command): Command
+            cmd (Command): Command
         """
         if isinstance(aliases, str):
             aliases = (aliases,)
@@ -427,10 +442,6 @@ class CommandManager:
             state)
 
 
-class CommandInterrupt(Exception):
-    pass
-
-
 class _PauseException(CommandInterrupt):
     """
     Raised by session.pause() indicating that the command session
@@ -474,7 +485,7 @@ class CommandSession(BaseSession):
     __slots__ = ('cmd', 'current_key', 'current_arg_filters',
                  '_current_send_kwargs', 'current_arg', '_current_arg_text',
                  '_current_arg_images', '_state', '_last_interaction',
-                 '_running', '_run_future')
+                 '_running', '_run_future', '_future')
 
     def __init__(self,
                  bot: NoneBot,
@@ -509,6 +520,7 @@ class CommandSession(BaseSession):
 
         self._last_interaction = None  # last interaction time of this session
         self._running = False
+        self._future: Optional[asyncio.Future] = None
 
     @property
     def state(self) -> State_T:
@@ -535,6 +547,10 @@ class CommandSession(BaseSession):
             # change status from running to not running, record the time
             self._last_interaction = datetime.now()
         self._running = value
+
+    @property
+    def waiting(self) -> bool:
+        return self._future and not self._future.done()
 
     @property
     def is_valid(self) -> bool:
@@ -623,6 +639,43 @@ class CommandSession(BaseSession):
         self._current_send_kwargs = kwargs
         self.pause(prompt, **kwargs)
 
+    async def aget(self,
+                   key: str = ...,
+                   *,
+                   prompt: Optional[Message_T] = None,
+                   arg_filters: Optional[List[Filter_T]] = None,
+                   force_update: bool = ...,
+                   **kwargs) -> Any:
+        """
+        Get an argument with a given key.
+
+        If the argument does not exist in the current session,
+        a pause exception will be raised, and the caller of
+        the command will know it should keep the session for
+        further interaction with the user.
+
+        :param key: argument key
+        :param prompt: prompt to ask the user
+        :param arg_filters: argument filters for the next user input
+        :param force_update: true to ignore the current argument
+        :return: the argument value
+        """
+        if key is ...:
+            key = '__default_argument'
+            force_update = True
+        if key in self.state:
+            if force_update is True:
+                del self.state[key]
+            else:
+                return self.state[key]
+
+        self.current_key = key
+        self.current_arg_filters = arg_filters
+        self._current_send_kwargs = kwargs
+        await self.apause(prompt, **kwargs)
+
+        return self.state.get(key, self.current_arg)
+
     def get_optional(self,
                      key: str,
                      default: Optional[Any] = None) -> Optional[Any]:
@@ -637,13 +690,29 @@ class CommandSession(BaseSession):
         """Pause the session for further interaction."""
         if message:
             self._run_future(self.send(message, **kwargs))
-        raise _PauseException
+        self._raise(_PauseException())
+
+    async def apause(self, message: Optional[Message_T] = None, **kwargs) -> None:
+        """Pause the session for further interaction."""
+        if message:
+            self._run_future(self.send(message, **kwargs))
+        if not self.waiting:
+            while True:
+                try:
+                    self._future = asyncio.get_event_loop().create_future()
+                    self.running = False
+                    await self._future
+                    break
+                except _PauseException:
+                    continue
+                except _FinishException:
+                    raise
 
     def finish(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
         """Finish the session."""
         if message:
             self._run_future(self.send(message, **kwargs))
-        raise _FinishException
+        self._raise(_FinishException())
 
     def switch(self, new_message: Message_T) -> NoReturn:
         """
@@ -662,7 +731,15 @@ class CommandSession(BaseSession):
 
         if not isinstance(new_message, Message):
             new_message = Message(new_message)
-        raise SwitchException(new_message)
+        self._raise(SwitchException(new_message))
+
+    def _raise(self, e: Exception) -> NoReturn:
+        """Raise an exception from the main execution path"""
+        if self.waiting:
+            self._future.set_exception(e)
+            raise _YieldException
+        else:
+            raise e
 
 
 async def handle_command(bot: NoneBot, event: CQEvent,
@@ -801,7 +878,7 @@ async def _real_run_command(session: CommandSession,
             handled = future.result()
         except asyncio.TimeoutError:
             handled = True
-        except (_PauseException, _FinishException, SwitchException) as e:
+        except (_PauseException, _YieldException, _FinishException, SwitchException) as e:
             raise e
         except Exception as e:
             logger.error(f'An exception occurred while '
@@ -818,6 +895,9 @@ async def _real_run_command(session: CommandSession,
                      f'command {session.cmd.name}')
         # return True because this step of the session is successful
         return True
+    except _YieldException:
+        return True
+        # return True because this step of the session is successful
     except (_FinishException, SwitchException) as e:
         session.running = False
         logger.debug(f'Session of command {session.cmd.name} finished')
@@ -850,6 +930,8 @@ def kill_current_session(event: CQEvent) -> None:
     """
     ctx_id = context_id(event)
     if ctx_id in _sessions:
+        if _sessions[ctx_id].waiting:
+            _sessions[ctx_id]._future.set_exception(_FinishException())
         del _sessions[ctx_id]
 
 

@@ -2317,6 +2317,56 @@ sidebar: auto
 
   获取可选的时间参数。
 
+#### _coroutine_ `aget(key=..., *, prompt=None, arg_filters=None, force_update=..., **kwargs)` <Badge text="master"/>
+
+- **说明:**
+
+  从 `state` 属性获取参数，如果参数不存在，则异步地暂停当前会话，向用户发送提示，并等待用户的新一轮交互。
+
+  当用户再次输入时，不会重新运行命令处理器，而是回到此函数调用之处继续执行。
+
+  注意，一旦传入 `arg_filters` 参数（参数过滤器），则等用户再次输入时，_command_func._`args_parser` 所注册的参数解析函数将不会被运行，而会在对 `current_arg` 依次运行过滤器之后直接将其放入 `state` 属性中。
+
+- **参数:**
+
+  - `key: Any`: 参数的键，若不传入则使用默认键值
+  - `prompt: Optional[Message_T]`: 提示的消息内容
+  - `arg_filters: Optional[List[Filter_T]]`: 用于处理和验证用户输入的参数的过滤器
+  - `force_update: bool`: 是否强制获取用户新的输入，若是，则会忽略已有的当前参数，若 `key` 不传入则为真，否则默认为假
+  - `**kwargs: Any`: 其它传入 `BaseSession.send()` 的命名参数
+
+- **返回:**
+
+  - `Any`: 参数的值
+
+- **用法:**
+
+  ```python
+  from nonebot.command.argfilter import extractors, validators
+
+  note = await session.aget(
+      'note', prompt='你需要我提醒你什么呢',
+      arg_filters=[
+          extractors.extract_text,  # 取纯文本部分
+          controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+          str.strip  # 去掉两边空白字符
+      ]
+  )
+
+  time = await session.aget(
+      'time', prompt='你需要我在什么时间提醒你呢？',
+      arg_filters=[
+          extractors.extract_text,  # 取纯文本部分
+          controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+          str.strip,  # 去掉两边空白字符
+          # 正则匹配输入格式
+          validators.match_regex(r'^\d{4}-\d{2}-\d{2}$', '格式不对啦，请重新输入')
+      ]
+  )
+  ```
+
+  连续获取多个参数，如果当前还不知道，则询问用户，等待用户输入之后，会依次运行 `arg_filters` 参数中的过滤器，以确保参数内容和格式符合要求。
+
 #### `pause(message=None, **kwargs)`
 
 - **说明:**
@@ -2332,6 +2382,31 @@ sidebar: auto
 
   ```python
   session.pause('请继续发送要处理的图片，发送 done 结束')
+  ```
+
+  需要连续接收用户输入，并且过程中不需要改变 `current_key` 时，使用此函数暂停会话。
+
+#### _coroutine_ `apause(message=None, **kwargs)` <Badge text="master"/>
+
+- **说明:**
+
+  异步地暂停当前命令会话，并发送消息。
+
+  当用户再次输入时，不会重新运行命令处理器，而是回到此函数调用之处继续执行。
+
+- **参数:**
+
+  - `message: Optional[Message_T]`: 要发送的消息，若不传入则不发送
+  - `**kwargs: Any`: 其它传入 `BaseSession.send()` 的命名参数
+
+- **用法:**
+
+  ```python
+  while True:
+      await session.apause('请继续发送要处理的图片，发送 done 结束')
+      if session.current_arg_text.strip() == 'done':
+          session.finish('处理完成')
+      process_images(session.current_arg_images)
   ```
 
   需要连续接收用户输入，并且过程中不需要改变 `current_key` 时，使用此函数暂停会话。
