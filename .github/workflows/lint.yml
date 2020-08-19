@@ -3,6 +3,9 @@ on:
   - push
   - pull_request
 
+env:
+  FLAKE8_FORMAT: '::error file=%(path)s,line=%(row)d,col=%(col)d:: %(code)s %(text)s'
+
 jobs:
   lint:
     name: Lint the Code
@@ -22,9 +25,5 @@ jobs:
             pip install flake8
 
       - name: Run Linters
-        uses: samuelmeuli/lint-action@v1
-        with:
-            github_token: ${{ secrets.github_token }}
-            auto_fix: false
-            flake8: true
-            flake8_args: "--config .flake8"
+        run: |
+          flake8 --config .flake8 --format "$FLAKE8_FORMAT"
