@@ -114,7 +114,6 @@ class Command:
                     # args_parser_func didn't set state, here we set it
                     session.state[session.current_key] = session.current_arg
             if session.waiting:
-                # session.running = True
                 session._future.set_result(True)
                 raise _YieldException()
             else:
@@ -658,12 +657,14 @@ class CommandSession(BaseSession):
         :param key: argument key
         :param prompt: prompt to ask the user
         :param arg_filters: argument filters for the next user input
+        :param force_update: true to ignore the current argument
         :return: the argument value
         """
-        if key is ... and force_update is ...:
+        if key is ...:
+            key = '__default_argument'
             force_update = True
         if key in self.state:
-            if force_update:
+            if force_update is True:
                 del self.state[key]
             else:
                 return self.state[key]
@@ -696,12 +697,16 @@ class CommandSession(BaseSession):
         if message:
             self._run_future(self.send(message, **kwargs))
         if not self.waiting:
-            self._future = asyncio.get_event_loop().create_future()
-            self.running = False
-            res = await self._future
-            self.running = True
-            if isinstance(res, Exception):
-                raise res
+            while True:
+                try:
+                    self._future = asyncio.get_event_loop().create_future()
+                    self.running = False
+                    await self._future
+                    break
+                except _PauseException:
+                    continue
+                except _FinishException:
+                    raise
 
     def finish(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
         """Finish the session."""
@@ -731,7 +736,7 @@ class CommandSession(BaseSession):
     def _raise(self, e: Exception) -> NoReturn:
         """Raise an exception from the main execution path"""
         if self.waiting:
-            self._future.set_result(e)
+            self._future.set_exception(e)
             raise _YieldException
         else:
             raise e
