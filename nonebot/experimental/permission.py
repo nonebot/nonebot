@@ -5,7 +5,7 @@ be easier or harder to use than the standard one.
 '''
 
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Dict, Optional, Union
+from typing import Any, Awaitable, Callable, Dict, Iterable, Optional, Union
 
 from aiocache.decorators import cached
 from aiocqhttp.event import Event as CQEvent
@@ -81,11 +81,17 @@ class SenderRoles:
     def is_discusschat(self) -> bool:
         return self._min_event.message_type == 'discuss'
 
-    def from_group(self, group_id: int) -> bool:
-        return self._min_event.group_id == group_id
+    def from_group(self, group_id: Union[int, Iterable[int]]) -> bool:
+        '''returns True if the sender belongs to these groups (group_ids)'''
+        if isinstance(group_id, int):
+            return self._min_event.group_id == group_id
+        return self._min_event.group_id in group_id
 
-    def sent_by(self, sender_id: int) -> bool:
-        return self._min_event.sender_id == sender_id
+    def sent_by(self, sender_id: Union[int, Iterable[int]]) -> bool:
+        '''returns True if the sender is one of these people (sender_ids)'''
+        if isinstance(sender_id, int):
+            return self._min_event.user_id == sender_id
+        return self._min_event.user_id in sender_id
 
 
 @cached(ttl=2 * 60)
