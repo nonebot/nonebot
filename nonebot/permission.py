@@ -55,14 +55,18 @@ async def check_permission(bot: NoneBot, event: CQEvent,
     :param permission_required: permission required
     :return: the context has the permission
     """
+    min_event = _get_minevent_from_event(event)
+    return await _check(bot, min_event, permission_required)
+
+
+def _get_minevent_from_event(event: CQEvent) -> _MinEvent:
     min_event_kwargs = {}
     for field in _min_event_fields:
         if field in event:
             min_event_kwargs[field] = event[field]
         else:
             min_event_kwargs[field] = None
-    min_event = _MinEvent(**min_event_kwargs)
-    return await _check(bot, min_event, permission_required)
+    return _MinEvent(**min_event_kwargs)
 
 
 @cached(ttl=2 * 60)  # cache the result for 2 minute
