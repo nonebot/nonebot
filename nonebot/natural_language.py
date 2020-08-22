@@ -26,6 +26,52 @@ class NLProcessor:
         self.only_short_message = only_short_message
         self.allow_empty_message = allow_empty_message
 
+    async def test(self, session: 'NLPSession', 
+                   msg_text_length: Optional[int] = None) -> bool:
+        """
+        Test whether the session matches this (self) NL processor.
+
+        :param session: NLPSession object
+        :param msg_text_length: this argument is `len(session.msg_text)`,
+                                designated to be cached if this function
+                                is invoked in a loop
+        :return: the session context matches this processor
+        """
+        if msg_text_length is None:
+            msg_text_length = len(session.msg_text)
+
+        if not self.allow_empty_message and not session.msg:
+            # don't allow empty msg, but it is one, so no
+            return False
+
+        if self.only_short_message and \
+            msg_text_length > session.bot.config.SHORT_MESSAGE_MAX_LENGTH:
+            return False
+
+        if self.only_to_me and not session.event['to_me']:
+            return False
+
+        should_run = await self._check_perm(session)
+        if should_run and self.keywords:
+            for kw in self.keywords:
+                if kw in session.msg_text:
+                    break
+            else:
+                # no keyword matches
+                should_run = False
+        return should_run
+
+    async def _check_perm(self, session: 'NLPSession') -> bool:
+        """
+        Check if the session has sufficient permission to
+        call the command.
+
+        :param session: NLPSession object
+        :return: the event has the permission
+        """
+        return await perm.check_permission(session.bot, session.event,
+                                           self.permission)
+
 
 class NLPManager:
     _nl_processors: Set[NLProcessor] = set()
@@ -159,26 +205,7 @@ async def handle_natural_language(bot: NoneBot, event: CQEvent,
 
     futures = []
     for p in manager.nl_processors:
-        if not p.allow_empty_message and not session.msg:
-            # don't allow empty msg, but it is one, so skip to next
-            continue
-
-        if p.only_short_message and \
-                msg_text_length > bot.config.SHORT_MESSAGE_MAX_LENGTH:
-            continue
-
-        if p.only_to_me and not event['to_me']:
-            continue
-
-        should_run = await perm.check_permission(bot, event, p.permission)
-        if should_run and p.keywords:
-            for kw in p.keywords:
-                if kw in session.msg_text:
-                    break
-            else:
-                # no keyword matches
-                should_run = False
-
+        should_run = await p.test(session, msg_text_length=msg_text_length)
         if should_run:
             futures.append(asyncio.ensure_future(p.func(session)))
 
