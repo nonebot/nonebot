@@ -16,7 +16,7 @@ class NLProcessor:
     __slots__ = ('func', 'keywords', 'permission', 'only_to_me',
                  'only_short_message', 'allow_empty_message')
 
-    def __init__(self, *, func: Callable, keywords: Optional[Iterable],
+    def __init__(self, *, func: Callable, keywords: Optional[Iterable[str]],
                  permission: int, only_to_me: bool, only_short_message: bool,
                  allow_empty_message: bool):
         self.func = func

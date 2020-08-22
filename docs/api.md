@@ -213,7 +213,7 @@ sidebar: auto
 
 - **说明:**
 
-  机器人的昵称，用于辨别用户是否在和机器人说话（目前仅用于自然语言处理器，命令仍需 @）。
+  机器人的昵称，用于辨别用户是否在和机器人说话。
 
 - **用法:**
 
@@ -1259,7 +1259,7 @@ sidebar: auto
 
 - **参数:**
 
-  - `keywords: Optional[Union[Iterable, str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
+  - `keywords: Optional[Union[Iterable[str], str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
   - `permission: int`: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的消息（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `only_short_message: bool`: 是否只响应短消息
@@ -1279,7 +1279,7 @@ sidebar: auto
   ```python
   @on_natural_language({'天气'}, only_to_me=False)
   async def _(session: NLPSession):
-      return NLPResult(100.0, ('weather',), None)
+      return IntentCommand('weather', 100.0)
   ```
 
   响应所有带有「天气」关键词的消息，当做 `weather` 命令处理。
@@ -2721,7 +2721,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **参数:**
 
-  - `keywords: Optional[Union[Iterable, str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
+  - `keywords: Optional[Union[Iterable[str], str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
   - `permission: int`: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的消息（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `only_short_message: bool`: 是否只响应短消息
@@ -2741,7 +2741,7 @@ session.get('arg1', prompt='请输入 arg1：',
   ```python
   @on_natural_language({'天气'}, only_to_me=False)
   async def _(session: NLPSession):
-      return NLPResult(100.0, ('weather',), None)
+      return IntentCommand('weather', 100.0)
   ```
 
   响应所有带有「天气」关键词的消息，当做 `weather` 命令处理。
