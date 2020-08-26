@@ -4,6 +4,7 @@ import sys
 import shlex
 import warnings
 import importlib
+from functools import partial
 from types import ModuleType
 from typing import Any, Set, Dict, Union, Optional, Iterable, Callable, Type
 
@@ -385,11 +386,13 @@ def on_command(
 
         cmd_name = (name,) if isinstance(name, str) else name
 
+        perm_checker = partial(perm.check_permission, permission_required=permission)
+
         cmd = Command(name=cmd_name,
                       func=func,
-                      permission=permission,
                       only_to_me=only_to_me,
                       privileged=privileged,
+                      perm_checker_func=perm_checker,
                       session_class=session_class)
 
         if shell_like:
@@ -429,13 +432,16 @@ def on_natural_language(keywords: Union[Optional[Iterable], str,
     """
 
     def deco(func: Callable) -> Callable:
+        perm_checker = partial(perm.check_permission, permission_required=permission)
+
         nl_processor = NLProcessor(
             func=func,
             keywords=keywords,  # type: ignore
-            permission=permission,
             only_to_me=only_to_me,
             only_short_message=only_short_message,
-            allow_empty_message=allow_empty_message)
+            allow_empty_message=allow_empty_message,
+            perm_checker_func=perm_checker)
+
         NLPManager.add_nl_processor(nl_processor)
         _tmp_nl_processor.add(nl_processor)
         return func

@@ -1,30 +1,31 @@
 import asyncio
 import warnings
-from typing import Set, Iterable, Optional, Callable, Union, NamedTuple
+from typing import Awaitable, Set, Iterable, Optional, Callable, Union, NamedTuple
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.message import Message
 
 from .log import logger
-from . import NoneBot, permission as perm
+from . import NoneBot
 from .command import call_command
 from .session import BaseSession
 from .typing import CommandName_T, CommandArgs_T
 
 
 class NLProcessor:
-    __slots__ = ('func', 'keywords', 'permission', 'only_to_me',
-                 'only_short_message', 'allow_empty_message')
+    __slots__ = ('func', 'keywords', 'only_to_me', 'only_short_message',
+                 'allow_empty_message', 'perm_checker_func')
 
     def __init__(self, *, func: Callable, keywords: Optional[Iterable],
-                 permission: int, only_to_me: bool, only_short_message: bool,
-                 allow_empty_message: bool):
+                 only_to_me: bool, only_short_message: bool,
+                 allow_empty_message: bool,
+                 perm_checker_func: Callable[[NoneBot, CQEvent], Awaitable[bool]]):
         self.func = func
         self.keywords = keywords
-        self.permission = permission
         self.only_to_me = only_to_me
         self.only_short_message = only_short_message
         self.allow_empty_message = allow_empty_message
+        self.perm_checker_func = perm_checker_func  # returns True if can trigger
 
     async def test(self, session: 'NLPSession', 
                    msg_text_length: Optional[int] = None) -> bool:
@@ -69,8 +70,7 @@ class NLProcessor:
         :param session: NLPSession object
         :return: the event has the permission
         """
-        return await perm.check_permission(session.bot, session.event,
-                                           self.permission)
+        return await self.perm_checker_func(session.bot, session.event)
 
 
 class NLPManager:

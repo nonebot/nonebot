@@ -3,13 +3,13 @@ import asyncio
 import warnings
 from datetime import datetime
 from functools import partial
-from typing import (NoReturn, Tuple, Union, Iterable, Any, Optional, List, Dict,
+from typing import (Callable, NoReturn, Tuple, Union, Iterable, Any, Optional, List, Dict,
                     Awaitable, Pattern, Type)
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.message import Message
 
-from nonebot import NoneBot, permission as perm
+from nonebot import NoneBot
 from nonebot.command.argfilter import ValidateError
 from nonebot.helpers import context_id, send, render_expression
 from nonebot.log import logger
@@ -74,18 +74,19 @@ class SwitchException(CommandInterrupt):
 
 
 class Command:
-    __slots__ = ('name', 'func', 'permission', 'only_to_me', 'privileged',
-                 'args_parser_func', 'session_class')
+    __slots__ = ('name', 'func', 'only_to_me', 'privileged',
+                 'args_parser_func', 'perm_checker_func', 'session_class')
 
     def __init__(self, *, name: CommandName_T, func: CommandHandler_T,
-                 permission: int, only_to_me: bool, privileged: bool,
+                 only_to_me: bool, privileged: bool,
+                 perm_checker_func: Callable[[NoneBot, CQEvent], Awaitable[bool]],
                  session_class: Optional[Type['CommandSession']]):
         self.name = name
         self.func = func
-        self.permission = permission
         self.only_to_me = only_to_me
         self.privileged = privileged
         self.args_parser_func: Optional[CommandHandler_T] = None
+        self.perm_checker_func = perm_checker_func  # returns True if can trigger
         self.session_class = session_class
 
     async def run(self,
@@ -168,8 +169,7 @@ class Command:
         :param session: CommandSession object
         :return: the session has the permission
         """
-        return await perm.check_permission(session.bot, session.event,
-                                           self.permission)
+        return await self.perm_checker_func(session.bot, session.event)
 
     def args_parser(self, parser_func: CommandHandler_T) -> CommandHandler_T:
         """
