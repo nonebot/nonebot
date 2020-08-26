@@ -414,7 +414,7 @@ def on_command(
     return deco
 
 
-def on_natural_language(keywords: Union[Optional[Iterable], str,
+def on_natural_language(keywords: Union[Optional[Iterable[str]], str,
                                         Callable] = None,
                         *,
                         permission: int = perm.EVERYBODY,
