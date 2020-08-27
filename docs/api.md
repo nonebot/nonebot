@@ -2529,7 +2529,7 @@ sidebar: auto
 命令参数过滤器主要有下面几种：
 
 - 提取器，从用户输入的原始参数内容中提取需要的内容，`extractors` 子模块中提供了一些常用提取器
-- 修剪器，将用户输入的原始参数内容进行适当修建，例如 `str.strip` 可以去掉两遍的空白字符
+- 修剪器，将用户输入的原始参数内容进行适当修剪，例如 `str.strip` 可以去掉两遍的空白字符
 - 验证器，验证参数的格式、长度等是否符合要求，`validators` 子模块中提供了一些常用验证器
 - 转换器，将参数进行类型或格式上的转换，例如 `int` 可以将字符串转换成整数，`converters` 子模块中提供了一些常用转换器
 - 控制器，根据用户输入或当前会话状态对会话进行相关控制，例如当用户发送 `算了` 时停止当前会话，`controllers` 子模块中提供了一些常用控制器
@@ -3339,7 +3339,7 @@ async def _(session):
 
 ## `nonebot.experimental` 模块 <Badge text="master"/>
 
-实验性功能模块提供了和 NoneBot 原有特性略有重合但功能更灵活的 API 用于为 NoneBot2 做准备。此模块中的内容可能会再未来版本中随时修改，合并，甚至移除，并且可能缺失注释。在使用前，请仔细阅读文档和开发日志以避免因 API 修改带来的麻烦。
+实验性功能模块提供了和 NoneBot 原有特性略有重合但功能更灵活的 API。此模块中的内容可能会再未来版本中随时修改，合并，甚至移除，并且可能缺失注释。在使用前，请仔细阅读文档和开发日志以避免因 API 修改带来的麻烦。
 
 ## `nonebot.experimental.permission` 模块 <Badge text="master"/>
 
@@ -3377,6 +3377,21 @@ async def _(session):
 - **返回:**
 
   - `SenderRoles`
+
+- **用法:**
+
+  ```python
+  sender = await SenderRoles.create(session.bot, session.event)
+  if sender.is_groupchat:
+    if sender.is_owner:
+        await process_owner(session)
+    elif sender.is_admin:
+        await process_admin(session)
+    else:
+        await process_member(session)
+  ```
+
+  根据发送者的身份决定相应命令处理方式。
 
 #### _readonly property_ `is_superuser`
 
@@ -3516,6 +3531,8 @@ async def _(session):
 
   检查用户是否具有所要求的权限。
 
+  一般用户应该没有必要使用该函数。
+
 - **参数:**
 
   - `bot: NoneBot`: NoneBot 对象
@@ -3536,7 +3553,7 @@ async def _(session):
 
 - **说明:**
 
-  将多个权限检查策略函数使用 AND 操作符连接并返回单个权限检查策略。如果参数中所有的策略都是同步的，则返回值是同步的，否则返回值是异步的。在实现中对这几个策略使用内置 `all` 函数，会尽可能在同步模式的情况下短路。
+  将多个权限检查策略函数使用 AND 操作符连接并返回单个权限检查策略。如果参数中所有的策略都是同步的，则返回值是同步的，否则返回值是异步的。在实现中对这几个策略使用内置 `all` 函数，会优先执行同步函数而且尽可能在同步模式的情况下短路。
 
   在新的策略下，只有事件满足了 `policies` 中所有的原策略，才会返回 `True`。
 
@@ -3622,16 +3639,12 @@ async def _(session):
 - **用法:**
 
   ```python
-  permit_group = { 768887710 }
-  banned_people = { 10000, 10001 }
-  def foo(sender: SenderRoles):
-      return sender.is_groupchat and sender.from_group(permit_group) \
-        and not sender.sendby(banned_people)
-
-  @on_command('echo', aliases=('复读',), permission=foo)
+  @on_command('echo', aliases=('复读',), permission=lambda sender: sender.is_superuser)
   async def _(session: CommandSession):
       ...
   ```
+
+  一个仅对超级用户生效的命令。
 
 ### _decorator_ `on_natural_language(keywords=None, *, permission=lambda _: True, **kwargs)`
 
@@ -3644,6 +3657,20 @@ async def _(session):
   - `keywords: Optional[Union[Iterable[str], str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
   - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 组合。不满足权限的用户将无法触发该处理器
   - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
+
+- **用法:**
+
+  ```python
+  permit_group = { 768887710 }
+  banned_people = { 10000, 10001 }
+  def foo(sender: SenderRoles):
+      return sender.is_groupchat and sender.from_group(permit_group) \
+        and not sender.sendby(banned_people)
+
+  @on_natural_language({'天气'}, only_to_me=False, permission=(foo, db_check))
+  async def _(session: NLPSession):
+      return IntentCommand('weather', 100.0)
+  ```
 
 <!-- 链接 -->
 
