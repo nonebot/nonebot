@@ -168,8 +168,8 @@ def aggregate_policy(policies: Iterable[RoleCheckPolicy]) -> RoleCheckPolicy:
     return checker_async
 
 
-def simple_allow_list(*, user_ids: Iterable[int] = {},
-                      group_ids: Iterable[int] = {},
+def simple_allow_list(*, user_ids: Iterable[int] = set(),
+                      group_ids: Iterable[int] = set(),
                       reverse: bool = False) -> RoleCheckPolicy:
     """
     Creates a policy that only allows senders from these users or groups.
