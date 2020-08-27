@@ -4,6 +4,7 @@ import sys
 import shlex
 import warnings
 import importlib
+from functools import partial
 from types import ModuleType
 from typing import Any, Set, Dict, Union, Optional, Iterable, Callable, Type
 
@@ -12,7 +13,7 @@ from nonebot import permission as perm
 from .command import Command, CommandManager, CommandSession
 from .notice_request import _bus, EventHandler
 from .natural_language import NLProcessor, NLPManager
-from .typing import CommandName_T, CommandHandler_T, Patterns_T
+from .typing import CommandName_T, CommandHandler_T, Patterns_T, PermChecker_T
 
 _tmp_command: Set[Command] = set()
 _tmp_nl_processor: Set[NLProcessor] = set()
@@ -346,33 +347,22 @@ def get_loaded_plugins() -> Set[Plugin]:
     return set(PluginManager._plugins.values())
 
 
-def on_command(
+def on_command_custom(
     name: Union[str, CommandName_T],
     *,
-    aliases: Union[Iterable[str], str] = (),
-    patterns: Patterns_T = (),
-    permission: int = perm.EVERYBODY,
-    only_to_me: bool = True,
-    privileged: bool = False,
-    shell_like: bool = False,
-    session_class: Optional[Type[CommandSession]] = None
+    aliases: Union[Iterable[str], str],
+    patterns: Patterns_T,
+    only_to_me: bool,
+    privileged: bool,
+    shell_like: bool,
+    perm_checker: PermChecker_T,
+    session_class: Optional[Type[CommandSession]]
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
-    Decorator to register a function as a command.
-
-    :param name: command name (e.g. 'echo' or ('random', 'number'))
-    :param aliases: aliases of command name, for convenient access
-    :param patterns: custom regex pattern for the command.
-           Please use this carefully. Abuse may cause performance problem.
-           Also, Plz notice that if a message is matched by this method,
-           it will use the full command as session current_arg.
-    :param permission: permission required by the command
-    :param only_to_me: only handle messages to me
-    :param privileged: can be run even when there is already a session
-    :param shell_like: use shell-like syntax to split arguments
-    :param session_class: session class
+    The implementation of on_command function with custom per checker function.
+    dev: This function may not last long. Kill it when this function is referenced
+    only once
     """
-
     def deco(func: CommandHandler_T) -> CommandHandler_T:
         if not isinstance(name, (str, tuple)):
             raise TypeError('the name of a command must be a str or tuple')
@@ -387,9 +377,9 @@ def on_command(
 
         cmd = Command(name=cmd_name,
                       func=func,
-                      permission=permission,
                       only_to_me=only_to_me,
                       privileged=privileged,
+                      perm_checker_func=perm_checker,
                       session_class=session_class)
 
         if shell_like:
@@ -411,31 +401,62 @@ def on_command(
     return deco
 
 
-def on_natural_language(keywords: Union[Optional[Iterable[str]], str,
-                                        Callable] = None,
-                        *,
-                        permission: int = perm.EVERYBODY,
-                        only_to_me: bool = True,
-                        only_short_message: bool = True,
-                        allow_empty_message: bool = False) -> Callable:
+def on_command(
+    name: Union[str, CommandName_T],
+    *,
+    aliases: Union[Iterable[str], str] = (),
+    patterns: Patterns_T = (),
+    permission: int = perm.EVERYBODY,
+    only_to_me: bool = True,
+    privileged: bool = False,
+    shell_like: bool = False,
+    session_class: Optional[Type[CommandSession]] = None
+) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
-    Decorator to register a function as a natural language processor.
+    Decorator to register a function as a command.
 
-    :param keywords: keywords to respond to, if None, respond to all messages
-    :param permission: permission required by the processor
+    :param name: command name (e.g. 'echo' or ('random', 'number'))
+    :param aliases: aliases of command name, for convenient access
+    :param patterns: custom regex pattern for the command.
+           Please use this carefully. Abuse may cause performance problem.
+           Also, Please notice that if a message is matched by this method,
+           it will use the full command as session current_arg.
+    :param permission: permission required by the command
     :param only_to_me: only handle messages to me
-    :param only_short_message: only handle short messages
-    :param allow_empty_message: handle empty messages
+    :param privileged: can be run even when there is already a session
+    :param shell_like: use shell-like syntax to split arguments
+    :param session_class: session class
+    """
+    perm_checker = partial(perm.check_permission, permission_required=permission)
+    return on_command_custom(name, aliases=aliases, patterns=patterns,
+                             only_to_me=only_to_me, privileged=privileged,
+                             shell_like=shell_like, perm_checker=perm_checker,
+                             session_class=session_class)
+
+
+def on_natural_language_custom(
+    keywords: Union[Optional[Iterable[str]], str, Callable],
+    *,
+    only_to_me: bool,
+    only_short_message: bool,
+    allow_empty_message: bool,
+    perm_checker: PermChecker_T
+):
+    """
+    The implementation of on_natural_language function with custom per checker function.
+    dev: This function may not last long. Kill it when this function is referenced
+    only once
     """
 
     def deco(func: Callable) -> Callable:
         nl_processor = NLProcessor(
             func=func,
             keywords=keywords,  # type: ignore
-            permission=permission,
             only_to_me=only_to_me,
             only_short_message=only_short_message,
-            allow_empty_message=allow_empty_message)
+            allow_empty_message=allow_empty_message,
+            perm_checker_func=perm_checker)
+
         NLPManager.add_nl_processor(nl_processor)
         _tmp_nl_processor.add(nl_processor)
         return func
@@ -447,6 +468,30 @@ def on_natural_language(keywords: Union[Optional[Iterable[str]], str,
         if isinstance(keywords, str):
             keywords = (keywords,)
         return deco
+
+
+def on_natural_language(
+    keywords: Union[Optional[Iterable[str]], str, Callable] = None,
+    *,
+    permission: int = perm.EVERYBODY,
+    only_to_me: bool = True,
+    only_short_message: bool = True,
+    allow_empty_message: bool = False
+) -> Callable:
+    """
+    Decorator to register a function as a natural language processor.
+
+    :param keywords: keywords to respond to, if None, respond to all messages
+    :param permission: permission required by the processor
+    :param only_to_me: only handle messages to me
+    :param only_short_message: only handle short messages
+    :param allow_empty_message: handle empty messages
+    """
+    perm_checker = partial(perm.check_permission, permission_required=permission)
+    return on_natural_language_custom(keywords, only_to_me=only_to_me,
+                                      only_short_message=only_short_message,
+                                      allow_empty_message=allow_empty_message,
+                                      perm_checker=perm_checker)
 
 
 def _make_event_deco(post_type: str) -> Callable:

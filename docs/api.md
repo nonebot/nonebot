@@ -93,6 +93,14 @@ sidebar: auto
       return value
   ```
 
+### `PermChecker_T` <Badge text="master"/>
+
+- **类型:** `Callable[[NoneBot, CQEvent], Awaitable[bool]]`
+
+- **说明:**
+
+  通用的权限检查函数。
+
 ## 配置
 
 ### `API_ROOT`
@@ -3328,6 +3336,314 @@ async def _(session):
 继承自 `apscheduler.schedulers.asyncio.AsyncIOScheduler` 类，功能不变。
 
 当 Python 环境中没有安装 APScheduler 包时，此类不存在，`Scheduler` 为 `None`。
+
+## `nonebot.experimental` 模块 <Badge text="master"/>
+
+实验性功能模块提供了和 NoneBot 原有特性略有重合但功能更灵活的 API 用于为 NoneBot2 做准备。此模块中的内容可能会再未来版本中随时修改，合并，甚至移除，并且可能缺失注释。在使用前，请仔细阅读文档和开发日志以避免因 API 修改带来的麻烦。
+
+## `nonebot.experimental.permission` 模块 <Badge text="master"/>
+
+### _class_ `SenderRoles`
+
+封装了原生的 `CQEvent` 便于权限检查。此类的实例一般会传入权限检查策略作为参数。
+
+#### `bot`
+
+- **类型:** `NoneBot`
+
+#### `event`
+
+- **类型:** `CQEvent`
+
+#### `sender`
+
+- **类型:** `Optional[Dict[str, Any]]`
+
+- **说明:**
+
+  只有消息是群消息的时候才会有这个属性，其内容是 `/get_group_member_info` API 调用的返回值。
+
+#### _staticmethod_ _coroutine_ `create(bot, event)`
+
+- **说明:**
+
+  构造 `SenderRoles`。
+
+- **参数:**
+
+  - `bot: NoneBot`: 接收事件的 NoneBot 对象
+  - `event: CQEvent`: 上报事件
+
+- **返回:**
+
+  - `SenderRoles`
+
+#### _readonly property_ `is_superuser`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  发送者是配置文件中设置的超级用户。
+
+#### _readonly property_ `is_groupchat`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是群聊消息。
+
+#### _readonly property_ `is_anonymous`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是匿名消息。
+
+#### _readonly property_ `is_admin`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  发送者是群管理员。
+
+#### _readonly property_ `is_owner`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  发送者是群主。
+
+#### _readonly property_ `is_privatechat`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是私聊消息。
+
+#### _readonly property_ `is_private_friend`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是好友私聊消息。
+
+#### _readonly property_ `is_private_group`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是群私聊消息。
+
+#### _readonly property_ `is_private_discuss`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是讨论组私聊消息。
+
+#### _readonly property_ `is_discusschat`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是讨论组消息。
+
+#### `from_group(self, group_id)`
+
+- **说明:**
+
+  表示发送者是否来自于群 `group_id`。
+
+- **参数:**
+
+  - `group_id: Union[int, Iterable[int]]`: 群号码，可以为多个群号。
+
+- **返回:**
+
+  `bool`
+
+#### `sent_by(self, sender_id)`
+
+- **说明:**
+
+  表示发送者 QQ 号是否是 `sender_id`。
+
+- **参数:**
+
+  - `sender_id: Union[int, Iterable[int]]`: 发送者 QQ 号，可以是多个。
+
+- **返回:**
+
+  `bool`
+
+### _type_ `RoleCheckPolicy`
+
+- **类型:** `Callable[[SenderRoles], Union[bool, Awaitable[bool]]]`
+
+- **说明:**
+
+  向 `nonebot.experimental.on_command` 传入的权限检查策略。此类型是一个（同步/异步）函数，接受 `nonebot.experimental.SenderRoles` 作为唯一的参数。此函数返回布尔值，返回 `True` 则表示权限检查通过，可以进行下一步处理（触发命令），反之返回 `False`。 下面的例子都是合法的实例：
+
+  ```python
+  # 同步策略：返回值恒为假，即表示所有消息和发送者都没有权限
+  disabled: RoleCheckPolicy = lambda sender: False
+
+  # 同步策略：当消息是群聊，且发送者既不是管理员也不是群主时给予权限
+  def normal_group_member(sender: SenderRoles):
+      return sender.is_groupchat and not sender.is_admin and not sender.is_owner
+
+  # 异步策略：在检查器中查询数据库再根据返回值决定是否给予权限
+  async def db_check(sender: SenderRoles):
+      query = await db.execute('if exists (select * from list where user=?) 1 else 0', (sender.event.user_id,))
+      return query[0] != 0
+  ```
+
+  在实际使用时应当避免挂起太久的异步操作。
+
+### _coroutine_ `check_permission(bot, event, policy)`
+
+- **说明:**
+
+  检查用户是否具有所要求的权限。
+
+- **参数:**
+
+  - `bot: NoneBot`: NoneBot 对象
+  - `event: aiocqhttp.Event`: 消息事件对象
+  - `policy: RoleCheckPolicy`: 返回布尔值的权限检查策略
+
+- **返回:**
+
+  - `bool`: 消息事件所对应的上下文是否具有所要求的权限
+
+- **用法:**
+
+  ```python
+  has_perm = await check_permission(bot, event, normal_group_member)
+  ```
+
+### `aggregate_policy(policies)`
+
+- **说明:**
+
+  将多个权限检查策略函数使用 AND 操作符连接并返回单个权限检查策略。如果参数中所有的策略都是同步的，则返回值是同步的，否则返回值是异步的。在实现中对这几个策略使用内置 `all` 函数，会尽可能在同步模式的情况下短路。
+
+  在新的策略下，只有事件满足了 `policies` 中所有的原策略，才会返回 `True`。
+
+- **参数:**
+
+  - `policies: Iterable[RoleCheckPolicy]`: 要合并的权限检查策略
+
+- **返回:**
+
+  - `RoleCheckPolicy`: 新的权限检查策略
+
+- **用法:**
+
+  ```python
+  # 以下两种方式在效果上等同
+  policy1 = lambda sender: sender.is_groupchat and sender.from_group(123456789)
+
+  policy2 = aggregate_policy(lambda sender: sender.is_groupchat,
+                             lambda sender: sender.from_group(123456789))
+  ```
+
+### `simple_allow_list(*, user_ids=set() , group_ids=set(), reverse=False)`
+
+- **说明:**
+
+  产生一个对应着白名单的权限检查策略。新的权限检查策略只有在发送者的 QQ 号来自于 `user_ids` 或者群组属于 `group_ids` 时才会返回 `True`。
+
+  推荐使用者查看此函数的实现并尝试书写自己的权限检查器。
+
+- **参数:**
+
+  - `user_ids: Iterable[int]`: 要加入白名单的 QQ 号们
+  - `group_ids: Iterable[int]`: 要加入白名单的群号们
+  - `reverse: bool`: 如果为真，则返回值变为黑名单
+
+- **返回:**
+
+  - `RoleCheckPolicy`: 新的权限检查策略
+
+- **用法:**
+
+  ```python
+  from nonebot.experimental.plugin import on_command
+
+  bans_list = simple_allow_list(group_ids={ 123456789, 987654321 }, reverse=True)
+  @on_command('签到', permission=bans_list)
+  async def _(session: CommandSession):
+      # 只有不是这两个群的时候才会执行
+      ...
+  ```
+
+### `simple_time_range(begin_time, end_time, reverse=False, tz_info=None)`
+
+- **说明:**
+
+  产生一个对应着时间白名单的权限检查策略。新的权限检查策略只有在当前时间在 `begin_time` 和 `end_time` 之间时才会返回 `True`。
+
+- **参数:**
+
+  - `begin_time: datetime.time`: 起始时间
+  - `end_time: datetime.time`: 结束时间
+  - `reverse: bool`: 如果为真，则返回值变为黑名单
+  - `tz_info: Any`: 传入 `datetime.datetime.now()` 的时区参数
+
+- **返回:**
+
+  - `RoleCheckPolicy`: 新的权限检查策略
+
+## `nonebot.experimental.plugin` 模块 <Badge text="master"/>
+
+### _decorator_ `on_command(name, *, permission=lambda _: True, **kwargs)`
+
+- **说明:**
+
+  将函数装饰为命令处理器 `CommandHandler_T` 。除 `permission` 外，其他特性和介绍和 `nonebot.plugin` 中的同名装饰器相同。
+
+- **参数:**
+
+  - `name: Union[str, CommandName_T]`: 命令名
+  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 组合
+  - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
+
+- **用法:**
+
+  ```python
+  permit_group = { 768887710 }
+  banned_people = { 10000, 10001 }
+  def foo(sender: SenderRoles):
+      return sender.is_groupchat and sender.from_group(permit_group) \
+        and not sender.sendby(banned_people)
+
+  @on_command('echo', aliases=('复读',), permission=foo)
+  async def _(session: CommandSession):
+      ...
+  ```
+
+### _decorator_ `on_natural_language(keywords=None, *, permission=lambda _: True, **kwargs)`
+
+- **说明:**
+
+  将函数装饰为自然语言处理器。除 `permission` 外，其他特性和介绍和 `nonebot.plugin` 中的同名装饰器相同。
+
+- **参数:**
+
+  - `keywords: Optional[Union[Iterable[str], str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
+  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 组合。不满足权限的用户将无法触发该处理器
+  - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
 
 <!-- 链接 -->
 
