@@ -3,7 +3,7 @@ import asyncio
 import warnings
 from datetime import datetime
 from functools import partial
-from typing import (Callable, NoReturn, Tuple, Union, Iterable, Any, Optional, List, Dict,
+from typing import (NoReturn, Tuple, Union, Iterable, Any, Optional, List, Dict,
                     Awaitable, Pattern, Type)
 
 from aiocqhttp import Event as CQEvent
@@ -15,7 +15,7 @@ from nonebot.helpers import context_id, send, render_expression
 from nonebot.log import logger
 from nonebot.session import BaseSession
 from nonebot.typing import (CommandName_T, CommandArgs_T, CommandHandler_T,
-                            Message_T, State_T, Filter_T, Patterns_T)
+                            Message_T, PermChecker_T, State_T, Filter_T, Patterns_T)
 
 # key: context id
 # value: CommandSession object
@@ -79,7 +79,7 @@ class Command:
 
     def __init__(self, *, name: CommandName_T, func: CommandHandler_T,
                  only_to_me: bool, privileged: bool,
-                 perm_checker_func: Callable[[NoneBot, CQEvent], Awaitable[bool]],
+                 perm_checker_func: PermChecker_T,
                  session_class: Optional[Type['CommandSession']]):
         self.name = name
         self.func = func

@@ -1,6 +1,6 @@
 import asyncio
 import warnings
-from typing import Awaitable, Set, Iterable, Optional, Callable, Union, NamedTuple
+from typing import Set, Iterable, Optional, Callable, Union, NamedTuple
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.message import Message
@@ -9,7 +9,7 @@ from .log import logger
 from . import NoneBot
 from .command import call_command
 from .session import BaseSession
-from .typing import CommandName_T, CommandArgs_T
+from .typing import CommandName_T, CommandArgs_T, PermChecker_T
 
 
 class NLProcessor:
@@ -19,7 +19,7 @@ class NLProcessor:
     def __init__(self, *, func: Callable, keywords: Optional[Iterable[str]],
                  only_to_me: bool, only_short_message: bool,
                  allow_empty_message: bool,
-                 perm_checker_func: Callable[[NoneBot, CQEvent], Awaitable[bool]]):
+                 perm_checker_func: PermChecker_T):
         self.func = func
         self.keywords = keywords
         self.only_to_me = only_to_me
