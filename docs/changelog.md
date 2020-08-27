@@ -7,6 +7,7 @@ sidebar: auto
 ## master
 
 - `CommandSession` 新增 `aget` `apause` 方法， 用于 Session 的异步获取参数
+- 新增 `nonebot.experimental.permission`, `nonebot.experimental.plugin` 模块，用于增强原有的命令权限控制系统
 
 ## v1.7.0
 
