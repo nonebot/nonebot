@@ -2,7 +2,7 @@ import re
 import asyncio
 import warnings
 from datetime import datetime
-from functools import partial
+from functools import partial, wraps
 from typing import (NoReturn, Tuple, Union, Iterable, Any, Optional, List, Dict,
                     Awaitable, Pattern, Type)
 
@@ -15,7 +15,8 @@ from nonebot.helpers import context_id, send, render_expression
 from nonebot.log import logger
 from nonebot.session import BaseSession
 from nonebot.typing import (CommandName_T, CommandArgs_T, CommandHandler_T,
-                            Message_T, PermChecker_T, State_T, Filter_T, Patterns_T)
+                            Message_T, PermChecker_T, State_T, Filter_T,
+                            Patterns_T)
 
 # key: context id
 # value: CommandSession object
@@ -74,8 +75,8 @@ class SwitchException(CommandInterrupt):
 
 
 class Command:
-    __slots__ = ('name', 'func', 'only_to_me', 'privileged',
-                 'args_parser_func', 'perm_checker_func', 'session_class')
+    __slots__ = ('name', 'func', 'only_to_me', 'privileged', 'args_parser_func',
+                 'perm_checker_func', 'session_class')
 
     def __init__(self, *, name: CommandName_T, func: CommandHandler_T,
                  only_to_me: bool, privileged: bool,
@@ -692,7 +693,9 @@ class CommandSession(BaseSession):
             self._run_future(self.send(message, **kwargs))
         self._raise(_PauseException())
 
-    async def apause(self, message: Optional[Message_T] = None, **kwargs) -> None:
+    async def apause(self,
+                     message: Optional[Message_T] = None,
+                     **kwargs) -> None:
         """
         Pause the session for further interaction. The control flow will pick
         up where it is left over when this command session is recalled.
@@ -743,6 +746,27 @@ class CommandSession(BaseSession):
             self._future.set_exception(e)
             raise _YieldException
         raise e
+
+
+class SyncCommandSession(CommandSession):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._run_future = lambda x: x
+
+    def __getattribute__(self, key: str) -> Any:
+        obj = super().__getattribute__(key)
+        if not asyncio.iscoroutinefunction(obj):
+            return obj
+
+        @wraps(obj)
+        def task(*args, **kwargs):
+            loop: asyncio.AbstractEventLoop = self.bot.loop
+            coro = obj(*args, **kwargs)
+            task = asyncio.run_coroutine_threadsafe(coro, loop)
+            return task.result()
+
+        return task
 
 
 async def handle_command(bot: NoneBot, event: CQEvent,

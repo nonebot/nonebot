@@ -6,11 +6,14 @@ import warnings
 import importlib
 from functools import partial
 from types import ModuleType
+from asyncio import iscoroutinefunction
 from typing import Any, Set, Dict, Union, Optional, Iterable, Callable, Type
+
+from aiocqhttp.utils import ensure_async
 
 from .log import logger
 from nonebot import permission as perm
-from .command import Command, CommandManager, CommandSession
+from .command import Command, CommandManager, CommandSession, SyncCommandSession
 from .notice_request import _bus, EventHandler
 from .natural_language import NLProcessor, NLPManager
 from .typing import CommandName_T, CommandHandler_T, Patterns_T, PermChecker_T
@@ -348,22 +351,20 @@ def get_loaded_plugins() -> Set[Plugin]:
 
 
 def on_command_custom(
-    name: Union[str, CommandName_T],
-    *,
-    aliases: Union[Iterable[str], str],
-    patterns: Patterns_T,
-    only_to_me: bool,
-    privileged: bool,
-    shell_like: bool,
-    perm_checker: PermChecker_T,
-    session_class: Optional[Type[CommandSession]]
+    name: Union[str, CommandName_T], *, aliases: Union[Iterable[str], str],
+    patterns: Patterns_T, only_to_me: bool, privileged: bool, shell_like: bool,
+    perm_checker: PermChecker_T, session_class: Optional[Type[CommandSession]]
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
     The implementation of on_command function with custom per checker function.
     dev: This function may not last long. Kill it when this function is referenced
     only once
     """
+
     def deco(func: CommandHandler_T) -> CommandHandler_T:
+        nonlocal session_class
+        session_class = session_class or (
+            CommandSession if iscoroutinefunction(func) else SyncCommandSession)
         if not isinstance(name, (str, tuple)):
             raise TypeError('the name of a command must be a str or tuple')
         if not name:
@@ -376,7 +377,7 @@ def on_command_custom(
         cmd_name = (name,) if isinstance(name, str) else name
 
         cmd = Command(name=cmd_name,
-                      func=func,
+                      func=ensure_async(func),
                       only_to_me=only_to_me,
                       privileged=privileged,
                       perm_checker_func=perm_checker,
@@ -427,21 +428,23 @@ def on_command(
     :param shell_like: use shell-like syntax to split arguments
     :param session_class: session class
     """
-    perm_checker = partial(perm.check_permission, permission_required=permission)
-    return on_command_custom(name, aliases=aliases, patterns=patterns,
-                             only_to_me=only_to_me, privileged=privileged,
-                             shell_like=shell_like, perm_checker=perm_checker,
+    perm_checker = partial(perm.check_permission,
+                           permission_required=permission)
+    return on_command_custom(name,
+                             aliases=aliases,
+                             patterns=patterns,
+                             only_to_me=only_to_me,
+                             privileged=privileged,
+                             shell_like=shell_like,
+                             perm_checker=perm_checker,
                              session_class=session_class)
 
 
-def on_natural_language_custom(
-    keywords: Union[Optional[Iterable[str]], str, Callable],
-    *,
-    only_to_me: bool,
-    only_short_message: bool,
-    allow_empty_message: bool,
-    perm_checker: PermChecker_T
-):
+def on_natural_language_custom(keywords: Union[Optional[Iterable[str]], str,
+                                               Callable], *, only_to_me: bool,
+                               only_short_message: bool,
+                               allow_empty_message: bool,
+                               perm_checker: PermChecker_T):
     """
     The implementation of on_natural_language function with custom per checker function.
     dev: This function may not last long. Kill it when this function is referenced
@@ -470,14 +473,13 @@ def on_natural_language_custom(
         return deco
 
 
-def on_natural_language(
-    keywords: Union[Optional[Iterable[str]], str, Callable] = None,
-    *,
-    permission: int = perm.EVERYBODY,
-    only_to_me: bool = True,
-    only_short_message: bool = True,
-    allow_empty_message: bool = False
-) -> Callable:
+def on_natural_language(keywords: Union[Optional[Iterable[str]], str,
+                                        Callable] = None,
+                        *,
+                        permission: int = perm.EVERYBODY,
+                        only_to_me: bool = True,
+                        only_short_message: bool = True,
+                        allow_empty_message: bool = False) -> Callable:
     """
     Decorator to register a function as a natural language processor.
 
@@ -487,8 +489,10 @@ def on_natural_language(
     :param only_short_message: only handle short messages
     :param allow_empty_message: handle empty messages
     """
-    perm_checker = partial(perm.check_permission, permission_required=permission)
-    return on_natural_language_custom(keywords, only_to_me=only_to_me,
+    perm_checker = partial(perm.check_permission,
+                           permission_required=permission)
+    return on_natural_language_custom(keywords,
+                                      only_to_me=only_to_me,
                                       only_short_message=only_short_message,
                                       allow_empty_message=allow_empty_message,
                                       perm_checker=perm_checker)
