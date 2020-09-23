@@ -100,3 +100,20 @@ async def _check(bot: NoneBot, min_event: _MinEvent,
         permission |= IS_DISCUSS
 
     return bool(permission & permission_required)
+
+
+__all__ = [
+    'PRIVATE_FRIEND',
+    'PRIVATE_GROUP',
+    'PRIVATE_DISCUSS',
+    'PRIVATE_OTHER',
+    'PRIVATE',
+    'DISCUSS',
+    'GROUP_MEMBER',
+    'GROUP_ADMIN',
+    'GROUP_OWNER',
+    'GROUP',
+    'SUPERUSER',
+    'EVERYBODY',
+    'check_permission',
+]
