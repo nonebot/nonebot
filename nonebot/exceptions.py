@@ -1,1 +1,5 @@
-from aiocqhttp import Error as CQHttpError  # noqa: F401
+from aiocqhttp import Error as CQHttpError
+
+__all__ = [
+    'CQHttpError',
+]

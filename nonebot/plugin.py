@@ -359,6 +359,8 @@ def on_command_custom(
     session_class: Optional[Type[CommandSession]]
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
+    INTERNAL API
+
     The implementation of on_command function with custom per checker function.
     dev: This function may not last long. Kill it when this function is referenced
     only once
@@ -443,6 +445,8 @@ def on_natural_language_custom(
     perm_checker: PermChecker_T
 ):
     """
+    INTERNAL API
+
     The implementation of on_natural_language function with custom per checker function.
     dev: This function may not last long. Kill it when this function is referenced
     only once
@@ -521,3 +525,18 @@ def _make_event_deco(post_type: str) -> Callable:
 
 on_notice = _make_event_deco('notice')
 on_request = _make_event_deco('request')
+
+
+__all__ = [
+    'Plugin',
+    'PluginManager',
+    'load_plugin',
+    'reload_plugin',
+    'load_plugins',
+    'load_builtin_plugins',
+    'get_loaded_plugins',
+    'on_command',
+    'on_natural_language',
+    'on_notice',
+    'on_request',
+]

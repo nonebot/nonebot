@@ -12,6 +12,7 @@ _bus = EventBus()
 
 
 class EventHandler:
+    """INTERNAL API"""
     __slots__ = ('events', 'func')
 
     def __init__(self, events: List[str], func: Callable):
@@ -68,6 +69,7 @@ class RequestSession(BaseSession):
 
 
 async def handle_notice_or_request(bot: NoneBot, event: CQEvent) -> None:
+    """INTERNAL API"""
     if event.type == 'notice':
         _log_notice(event)
         session = NoticeSession(bot, event)
@@ -90,3 +92,9 @@ def _log_notice(event: CQEvent) -> None:
 
 def _log_request(event: CQEvent) -> None:
     logger.info(f'Request: {event}')
+
+
+__all__ = [
+    'NoticeSession',
+    'RequestSession',
+]
