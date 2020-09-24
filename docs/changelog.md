@@ -8,6 +8,7 @@ sidebar: auto
 
 - `CommandSession` 新增 `aget` `apause` 方法， 用于 Session 的异步获取参数
 - 新增 `nonebot.experimental.permission`, `nonebot.experimental.plugin` 模块，用于增强原有的命令权限控制系统
+- 各模块添加了 `__all__` 常量，现在可以安全地使用 `*` 来导入公共的 API。
 
 ## v1.7.0
 
