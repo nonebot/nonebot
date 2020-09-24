@@ -7,3 +7,8 @@ class ValidateError(ValueError):
 
     def __init__(self, message: Optional[Message_T] = None):
         self.message = message
+
+
+__all__ = [
+    'ValidateError',
+]
