@@ -13,6 +13,7 @@ from .typing import CommandName_T, CommandArgs_T, PermChecker_T
 
 
 class NLProcessor:
+    """INTERNAL API"""
     __slots__ = ('func', 'keywords', 'only_to_me', 'only_short_message',
                  'allow_empty_message', 'perm_checker_func')
 
@@ -74,6 +75,7 @@ class NLProcessor:
 
 
 class NLPManager:
+    """INTERNAL API"""
     _nl_processors: Set[NLProcessor] = set()
 
     def __init__(self):
@@ -188,6 +190,8 @@ class IntentCommand(NamedTuple):
 async def handle_natural_language(bot: NoneBot, event: CQEvent,
                                   manager: NLPManager) -> bool:
     """
+    INTERNAL API
+
     Handle a message as natural language.
 
     This function is typically called by "handle_message".
@@ -241,3 +245,10 @@ async def handle_natural_language(bot: NoneBot, event: CQEvent,
         else:
             logger.debug('No intent command has enough confidence')
     return False
+
+
+__all__ = [
+    'NLPSession',
+    'NLPResult',
+    'IntentCommand',
+]

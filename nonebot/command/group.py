@@ -24,3 +24,8 @@ class CommandGroup:
         final_kwargs = self.base_kwargs.copy()
         final_kwargs.update(kwargs)
         return on_command(name, **final_kwargs)
+
+
+__all__ = [
+    'CommandGroup',
+]

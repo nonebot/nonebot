@@ -4,6 +4,7 @@ from .command import CommandSession
 
 
 class ParserExit(RuntimeError):
+    """INTERNAL API"""
 
     def __init__(self, status=0, message=None):
         self.status = status
@@ -40,3 +41,8 @@ class ArgumentParser(ArgumentParser):
                 self._session_finish(self.usage or self.format_help())
             else:
                 self._session_finish('参数不足或不正确，请使用 --help 参数查询使用帮助')
+
+
+__all__ = [
+    'ArgumentParser',
+]

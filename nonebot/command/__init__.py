@@ -23,6 +23,7 @@ _sessions = {}  # type: Dict[str, "CommandSession"]
 
 
 class CommandInterrupt(Exception):
+    """INTERNAL API"""
     pass
 
 
@@ -57,6 +58,8 @@ class _FinishException(CommandInterrupt):
 
 class SwitchException(CommandInterrupt):
     """
+    INTERNAL API
+
     Raised by session.switch() indicating that the command session
     should be stopped and replaced with a new one (going through
     handle_message() again).
@@ -74,6 +77,7 @@ class SwitchException(CommandInterrupt):
 
 
 class Command:
+    """INTERNAL API"""
     __slots__ = ('name', 'func', 'only_to_me', 'privileged',
                  'args_parser_func', 'perm_checker_func', 'session_class')
 
@@ -748,6 +752,8 @@ class CommandSession(BaseSession):
 async def handle_command(bot: NoneBot, event: CQEvent,
                          manager: CommandManager) -> Optional[bool]:
     """
+    INTERNAL API
+
     Handle a message as a command.
 
     This function is typically called by "handle_message".
@@ -938,4 +944,13 @@ def kill_current_session(event: CQEvent) -> None:
         del _sessions[ctx_id]
 
 
-from nonebot.command.group import CommandGroup  # noqa: F401
+from nonebot.command.group import CommandGroup
+
+
+__all__ = [
+    'CommandManager',
+    'CommandSession',
+    'call_command',
+    'kill_current_session',
+    'CommandGroup',
+]
