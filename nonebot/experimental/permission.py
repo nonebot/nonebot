@@ -90,6 +90,7 @@ class SenderRoles(NamedTuple):
         return self.event.user_id in sender_id
 
 
+# AS OF this commit: same as original _get_member_info()
 @cached(ttl=2 * 60)
 async def _get_member_info(bot: NoneBot,
                            self_id: int,
@@ -131,16 +132,28 @@ async def check_permission(bot: NoneBot, event: CQEvent,
 RoleCheckPolicy = Callable[[SenderRoles], Union[bool, Awaitable[bool]]]
 
 
-def aggregate_policy(policies: Iterable[RoleCheckPolicy]) -> RoleCheckPolicy:
+def aggregate_policy(
+    policies: Iterable[RoleCheckPolicy],
+    aggregator: Callable[[Iterable[object]], bool] = all
+) -> RoleCheckPolicy:
     """
-    Merge several role checkers into one using the AND operator. if all given
-    policies are sync, the merged one is sync, otherwise it is async. This is
-    useful to concatenate policies like applying [blocklist, groupchat, ...]
-    altogether.
+    Merge several role checkers into one using the AND operator (if `aggregator`
+    is builtin function `all` - by default). if all given policies are sync,
+    the merged one is sync, otherwise it is async. This is useful to concatenate
+    policies like applying [blocklist, groupchat, ...] altogether.
 
     async functions are slow maybe. use with caution.
 
+    The `aggregator` parameter is recommended to be the bultin functions such as
+    `all` (performing AND operations on each checkers), or `any` (performing OR
+    operations) because they short circuit. However it is possible to define more
+    complex aggregators.
+
+    Be aware that the order of checkers being called is not specified.
+
     :param policies: list of policies
+    :param aggregator: the function used to combine the results of each separate
+                       checkers as items consumed in iterators.
     """
     syncs = []  # type: List[Callable[[SenderRoles], bool]]
     asyncs = []  # type: List[Callable[[SenderRoles], Awaitable[bool]]]
@@ -153,7 +166,7 @@ def aggregate_policy(policies: Iterable[RoleCheckPolicy]) -> RoleCheckPolicy:
             syncs.append(f)  # type: ignore
 
     def checker_sync(sender: SenderRoles) -> bool:
-        return all(f(sender) for f in syncs)
+        return aggregator(f(sender) for f in syncs)
 
     if len(asyncs) == 0:
         return checker_sync
@@ -163,7 +176,7 @@ def aggregate_policy(policies: Iterable[RoleCheckPolicy]) -> RoleCheckPolicy:
             return False
         # no short circuiting currently :-(
         coros = [f(sender) for f in asyncs]
-        return all(await asyncio.gather(*coros))
+        return aggregator(await asyncio.gather(*coros))
 
     return checker_async
 

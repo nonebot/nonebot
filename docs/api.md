@@ -3549,17 +3549,22 @@ async def _(session):
   has_perm = await check_permission(bot, event, normal_group_member)
   ```
 
-### `aggregate_policy(policies)`
+### `aggregate_policy(policies, aggregator=all)`
 
 - **说明:**
 
-  将多个权限检查策略函数使用 AND 操作符连接并返回单个权限检查策略。如果参数中所有的策略都是同步的，则返回值是同步的，否则返回值是异步的。在实现中对这几个策略使用内置 `all` 函数，会优先执行同步函数而且尽可能在同步模式的情况下短路。
+  在默认参数下，将多个权限检查策略函数使用 AND 操作符连接并返回单个权限检查策略。在实现中对这几个策略使用内置 `all` 函数，会优先执行同步函数而且尽可能在同步模式的情况下短路。
 
   在新的策略下，只有事件满足了 `policies` 中所有的原策略，才会返回 `True`。
+
+  `aggregator` 参数也可以设置为其他函数，例如 `any`：在此情况下会使用 `OR` 操作符连接。
+
+  如果参数中所有的策略都是同步的，则返回值是同步的，否则返回值是异步函数。
 
 - **参数:**
 
   - `policies: Iterable[RoleCheckPolicy]`: 要合并的权限检查策略
+  - `aggregator: Callable[[Iterable[object]], bool]`: 用于合并策略的函数
 
 - **返回:**
 
@@ -3599,6 +3604,8 @@ async def _(session):
   from nonebot.experimental.plugin import on_command
 
   bans_list = simple_allow_list(group_ids={ 123456789, 987654321 }, reverse=True)
+  # bans_list(987654321) -> False
+  # bans_list(987654322) -> True
   @on_command('签到', permission=bans_list)
   async def _(session: CommandSession):
       # 只有不是这两个群的时候才会执行
@@ -3633,7 +3640,7 @@ async def _(session):
 - **参数:**
 
   - `name: Union[str, CommandName_T]`: 命令名
-  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 组合
+  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 和其默认参数组合
   - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
 
 - **用法:**
@@ -3646,6 +3653,12 @@ async def _(session):
 
   一个仅对超级用户生效的命令。
 
+  当迁移到新装饰器时，用户可以定义与自带 API 相似的常量兼容原有代码。
+
+  ```python
+  SUPERUSERS = lambda sender: sender.is_superuser
+  ```
+
 ### _decorator_ `on_natural_language(keywords=None, *, permission=lambda _: True, **kwargs)`
 
 - **说明:**
@@ -3655,7 +3668,7 @@ async def _(session):
 - **参数:**
 
   - `keywords: Optional[Union[Iterable[str], str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
-  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 组合。不满足权限的用户将无法触发该处理器
+  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 和其默认参数组合。不满足权限的用户将无法触发该处理器
   - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
 
 - **用法:**
@@ -3667,7 +3680,9 @@ async def _(session):
       return sender.is_groupchat and sender.from_group(permit_group) \
         and not sender.sendby(banned_people)
 
-  @on_natural_language({'天气'}, only_to_me=False, permission=(foo, db_check))
+  @on_natural_language({'天气'}, only_to_me=False, permission=(foo, db_check))                       # 需要同时满足 foo 和 db_check
+                                                 # permission=aggregate_policy((foo, db_check))      # 需要同时满足 foo 和 db_check
+                                                 # permission=aggregate_policy((foo, db_check), any) # 只需满足一个
   async def _(session: NLPSession):
       return IntentCommand('weather', 100.0)
   ```
