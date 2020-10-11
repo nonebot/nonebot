@@ -30,7 +30,7 @@ sidebar: auto
 
 ### `Expression_T`
 
-- **类型:** `Union[str, Sequence[str], Callable[..., str]]` <Badge text="master"/>
+- **类型:** `Union[str, Sequence[str], Callable[..., str]]` <Badge text="v1.8.0+"/>
 
 - **说明:**
 
@@ -62,7 +62,7 @@ sidebar: auto
 
 ### `Patterns_T` <Badge text="1.7.0+"/>
 
-- **类型:** `Union[Iterable[str], str, Iterable[Pattern[str]], Pattern[str]]` <Badge text="master"/>
+- **类型:** `Union[Iterable[str], str, Iterable[Pattern[str]], Pattern[str]]` <Badge text="v1.8.0+"/>
 
 - **说明:**
 
@@ -93,7 +93,7 @@ sidebar: auto
       return value
   ```
 
-### `PermChecker_T` <Badge text="master"/>
+### `PermChecker_T` <Badge text="v1.8.0+"/>
 
 - **类型:** `Callable[[NoneBot, CQEvent], Awaitable[bool]]`
 
@@ -2325,7 +2325,7 @@ sidebar: auto
 
   获取可选的时间参数。
 
-#### _coroutine_ `aget(key=..., *, prompt=None, arg_filters=None, force_update=..., **kwargs)` <Badge text="master"/>
+#### _coroutine_ `aget(key=..., *, prompt=None, arg_filters=None, force_update=..., **kwargs)` <Badge text="v1.8.0+"/>
 
 - **说明:**
 
@@ -2394,7 +2394,7 @@ sidebar: auto
 
   需要连续接收用户输入，并且过程中不需要改变 `current_key` 时，使用此函数暂停会话。
 
-#### _coroutine_ `apause(message=None, **kwargs)` <Badge text="master"/>
+#### _coroutine_ `apause(message=None, **kwargs)` <Badge text="v1.8.0+"/>
 
 - **说明:**
 
@@ -3337,11 +3337,11 @@ async def _(session):
 
 当 Python 环境中没有安装 APScheduler 包时，此类不存在，`Scheduler` 为 `None`。
 
-## `nonebot.experimental` 模块 <Badge text="master"/>
+## `nonebot.experimental` 模块 <Badge text="v1.8.0+"/>
 
-实验性功能模块提供了和 NoneBot 原有特性略有重合但功能更灵活的 API。此模块中的内容可能会再未来版本中随时修改，合并，甚至移除，并且可能缺失注释。在使用前，请仔细阅读文档和开发日志以避免因 API 修改带来的麻烦。
+实验性功能模块提供了和 NoneBot 原有特性略有重合但功能更灵活的 API。此模块中的内容可能会再未来版本中随时修改，合并，并且可能缺失注释。在使用前，请仔细阅读文档和开发日志以避免因 API 修改带来的麻烦。
 
-## `nonebot.experimental.permission` 模块 <Badge text="master"/>
+## `nonebot.experimental.permission` 模块 <Badge text="v1.8.0+"/>
 
 ### _class_ `SenderRoles`
 
@@ -3629,7 +3629,7 @@ async def _(session):
 
   - `RoleCheckPolicy`: 新的权限检查策略
 
-## `nonebot.experimental.plugin` 模块 <Badge text="master"/>
+## `nonebot.experimental.plugin` 模块 <Badge text="v1.8.0+"/>
 
 ### _decorator_ `on_command(name, *, permission=lambda _: True, **kwargs)`
 

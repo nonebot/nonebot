@@ -4,11 +4,12 @@ sidebar: auto
 
 # 更新日志
 
-## master
+## v1.8.0
 
 - `CommandSession` 新增 `aget` `apause` 方法， 用于 Session 的异步获取参数
 - 新增 `nonebot.experimental.permission`, `nonebot.experimental.plugin` 模块，用于增强原有的命令权限控制系统
 - 各模块添加了 `__all__` 常量，现在可以安全地使用 `*` 来导入公共的 API。
+- 项目现在采用自动发布模式，Pypi index 会根据仓库 Release 发布新版本。
 
 ## v1.7.0
 
