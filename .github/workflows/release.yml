@@ -1,0 +1,81 @@
+name: Publish Releases
+
+env:
+  CHANGELOG_PATH: docs/changelog.md
+  CHANGELOG_REGEX: '##\sv(\d+\.\d+\.\d+)'
+
+on: 
+  push:
+    tags: 
+      - 'v*'
+
+jobs:
+  pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Prepare Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      
+      - name: Install requirements
+        run: |
+          pip install twine requests
+      
+      - name: Build dists
+        run: |
+          python setup.py sdist
+      
+      - name: Publish package
+        env:
+          TWINE_REPOSITORY: pypi
+          TWINE_NON_INTERACTIVE: true
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          twine upload dist/* 
+      
+  im:
+    name: Push release message
+    needs: [pypi]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repositoiry
+        uses: actions/checkout@v2
+      
+      - name: Prepare Python environent
+        uses: actions/setup-python@v2
+        with:
+          python_version: 3.8
+      
+      - name: Install requirements
+        run: |
+          pip install requests
+  
+      - name: Get version information
+        shell: python
+        run: |
+          import re
+          import os
+          import json
+          
+          changelog_path = os.environ['CHANGELOG_PATH']
+          changelog_regex = os.environ['CHANGELOG_REGEX']
+          
+          with open(changelog_path,'rt',encoding='utf-8') as f:
+            textlog = '\n'.join(f.readlines())
+          
+          ver,log = re.split(changelog_regex,textlog)[1:3]
+          data = json.dumps({'ver':ver,'log':log})
+          
+          print('::set-env name=RELEASE_DATA::%s' % data)
+          
+      - name: Push Messages
+        run: |
+          echo "::warning:: Not implemented yet! Current release data is $RELEASE_DATA"
