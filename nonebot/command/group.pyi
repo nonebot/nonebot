@@ -22,3 +22,8 @@ class CommandGroup:
                 only_to_me: bool = ...,
                 privileged: bool = ...,
                 shell_like: bool = ...) -> Callable: ...
+
+
+__all__ = [
+    'CommandGroup',
+]
