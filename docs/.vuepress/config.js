@@ -1,6 +1,6 @@
 module.exports = {
     title: 'NoneBot',
-    description: '基于 酷Q 的 Python 异步 QQ 机器人框架',
+    description: '基于 OneBot（原 CQHTTP）标准的 Python 异步 QQ 机器人框架',
     markdown: {
         lineNumbers: true
     },
@@ -25,6 +25,7 @@ module.exports = {
         lastUpdated: '上次更新',
         activeHeaderLinks: false,
         nav: [
+            { text: 'v2', link: 'https://v2.nonebot.dev' },
             { text: '主页', link: '/' },
             { text: '指南', link: '/guide/' },
             { text: '进阶', link: '/advanced/' },
