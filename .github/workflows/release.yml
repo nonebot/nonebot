@@ -33,7 +33,7 @@ jobs:
       
       - name: Publish package
         env:
-          TWINE_REPOSITORY: nonebot
+          TWINE_REPOSITORY: pypi
           TWINE_NON_INTERACTIVE: true
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
