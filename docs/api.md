@@ -2025,6 +2025,14 @@ sidebar: auto
 
   命令开关状态字典。
 
+#### `patterns` <Badge text="1.7.0+"/>
+
+- **类型:** `Dict[Pattern[str], Command]`
+
+- **说明:**
+
+  命令正则匹配字典。
+
 #### _class method_ `add_command(cls, cmd_name, cmd)`
 
 - **说明:**
