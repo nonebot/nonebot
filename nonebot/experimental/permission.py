@@ -154,6 +154,7 @@ def aggregate_policy(
     :param policies: list of policies
     :param aggregator: the function used to combine the results of each separate
                        checkers as items consumed in iterators.
+    :return: new policy
     """
     syncs = []  # type: List[Callable[[SenderRoles], bool]]
     asyncs = []  # type: List[Callable[[SenderRoles], Awaitable[bool]]]
@@ -194,6 +195,7 @@ def simple_allow_list(*, user_ids: Iterable[int] = set(),
     :param group_ids: set of group ids to allow
     :param reverse: if this is true, then bans the aforementioned
                     senders instead (policy becomes blocklist)
+    :return: new policy
     """
     user_ids = set(user_ids)
     group_ids = set(group_ids)
@@ -218,6 +220,7 @@ def simple_time_range(begin_time: time, end_time: time,
     :param reverse: if this is true, then bans the aforementioned
                     time ranges instead
     :param tz_info: argument to pass to datetime.now()
+    :return: new policy
     """
     # source: https://stackoverflow.com/questions/10048249/how-do-i-determine-if-current-time-is-within-a-specified-range-using-pythons-da
     def checker(_: Any) -> bool:

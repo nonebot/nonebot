@@ -633,6 +633,7 @@ class CommandSession(BaseSession):
         :param key: argument key
         :param prompt: prompt to ask the user
         :param arg_filters: argument filters for the next user input
+        :param kwargs: other keyword arguments used in BeseSession.send()
         :return: the argument value
         """
         if key in self.state:
@@ -662,6 +663,7 @@ class CommandSession(BaseSession):
         :param prompt: prompt to ask the user
         :param arg_filters: argument filters for the next user input
         :param force_update: true to ignore the current argument
+        :param kwargs: other keyword arguments used in BeseSession.send()
         :return: the argument value
         """
         if key is ...:
@@ -691,7 +693,12 @@ class CommandSession(BaseSession):
         return self.state.get(key, default)
 
     def pause(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
-        """Pause the session for further interaction."""
+        """
+        Pause the session for further interaction. This function never returns.
+
+        :param message: message to send to the user
+        :param kwargs: other keyword arguments used in BeseSession.send()
+        """
         if message:
             self._run_future(self.send(message, **kwargs))
         self._raise(_PauseException())
@@ -700,6 +707,9 @@ class CommandSession(BaseSession):
         """
         Pause the session for further interaction. The control flow will pick
         up where it is left over when this command session is recalled.
+
+        :param message: message to send to the user
+        :param kwargs: other keyword arguments used in BeseSession.send()
         """
         if message:
             self._run_future(self.send(message, **kwargs))
@@ -717,7 +727,12 @@ class CommandSession(BaseSession):
                 raise
 
     def finish(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
-        """Finish the session."""
+        """
+        Finish the session. This function never returns.
+
+        :param message: message to send to the user when this command exits
+        :param kwargs: other keyword arguments used in BeseSession.send()
+        """
         if message:
             self._run_future(self.send(message, **kwargs))
         self._raise(_FinishException())

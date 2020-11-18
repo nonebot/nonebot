@@ -71,7 +71,7 @@ def init(config_object: Optional[Any] = None,
 
     This function must be called at the very beginning of code,
     otherwise the get_bot() function will return None and nothing
-    is gonna work properly.
+    will work properly.
 
     :param config_object: configuration object
     """
