@@ -4,6 +4,11 @@ sidebar: auto
 
 # 更新日志
 
+## maaster
+
+- 修复 `CommandGroup` 缺失属性，属性和方法类型和文档不一致的问题 ([issue 242](https://github.com/nonebot/nonebot/issues/242))。
+- 删除 `command/group.pyi`
+
 ## v1.8.0
 
 - `CommandSession` 新增 `aget` `apause` 方法， 用于 Session 的异步获取参数

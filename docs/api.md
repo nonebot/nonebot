@@ -1918,6 +1918,10 @@ sidebar: auto
 
 命令组，用于声明一组有相同名称前缀的命令。
 
+- **注:**
+
+  在 master 之前，此类文档与实际表现不一致 ([issue 242](https://github.com/nonebot/nonebot/issues/242))。
+
 #### `basename`
 
 - **类型:** `CommandName_T`
@@ -1981,7 +1985,7 @@ sidebar: auto
 - **参数:**
 
   - `name: Union[str, CommandName_T]`: 命令名，注册命令处理器时会加上命令组的前缀
-  - `aliases: Optional[Iterable[str]]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值，则使用 `on_command` 装饰器的默认值
+  - `aliases: Optional[Iterable[str], str]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值（属性为 `None`）时，则使用 `on_command` 装饰器的默认值
   - `permission: Optional[int]`: 同上
   - `only_to_me: Optional[bool]`: 同上
   - `privileged: Optional[bool]`: 同上
@@ -1993,7 +1997,7 @@ sidebar: auto
   sched = CommandGroup('scheduler')
 
   @sched.command('add', permission=PRIVATE)
-  async def _(session: CommandSession)
+  async def _(session: CommandSession):
       pass
   ```
 
