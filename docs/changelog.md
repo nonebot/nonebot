@@ -6,8 +6,7 @@ sidebar: auto
 
 ## master
 
-- 修复 `CommandGroup` 缺失属性，属性和方法类型和文档不一致的问题 ([issue 242](https://github.com/nonebot/nonebot/issues/242))。
-- 删除 `command/group.pyi`
+- 修复 `CommandGroup` 缺失属性，属性和方法类型和文档不一致的问题 ([issue 242](https://github.com/nonebot/nonebot/issues/242))。删除 `command/group.pyi` （回滚 347318a)
 - 更正 `CommandHandler_T` 返回值为 `Awaitable`，在此之前命令处理器传入同步函数会报错
 
 ## v1.8.0

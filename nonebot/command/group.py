@@ -1,7 +1,7 @@
 from typing import Optional, Union, Callable, Iterable
 
 from nonebot.plugin import on_command
-from nonebot.typing import CommandName_T
+from nonebot.typing import CommandHandler_T, CommandName_T
 
 
 class CommandGroup:
@@ -28,7 +28,8 @@ class CommandGroup:
                 permission: Optional[int] = None,
                 only_to_me: Optional[bool] = None,
                 privileged: Optional[bool] = None,
-                shell_like: Optional[bool] = None) -> Callable:
+                shell_like: Optional[bool] = None
+                ) -> Callable[[CommandHandler_T], CommandHandler_T]:
         """
         Decorator to register a function as a command. Its has the same usage as
         `on_command`.
