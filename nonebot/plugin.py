@@ -6,14 +6,14 @@ import warnings
 import importlib
 from functools import partial
 from types import ModuleType
-from typing import Any, Set, Dict, Union, Optional, Iterable, Callable, Type
+from typing import Any, Set, Dict, TypeVar, Union, Optional, Iterable, Callable, Type, overload
 
 from .log import logger
 from nonebot import permission as perm
 from .command import Command, CommandManager, CommandSession
 from .notice_request import _bus, EventHandler
 from .natural_language import NLProcessor, NLPManager
-from .typing import CommandName_T, CommandHandler_T, Patterns_T, PermChecker_T
+from .typing import CommandName_T, CommandHandler_T, NLPHandler_T, NoticeHandler_T, Patterns_T, PermChecker_T, RequestHandler_T
 
 _tmp_command: Set[Command] = set()
 _tmp_nl_processor: Set[NLProcessor] = set()
@@ -437,13 +437,13 @@ def on_command(
 
 
 def on_natural_language_custom(
-    keywords: Union[Optional[Iterable[str]], str, Callable],
+    keywords: Union[Optional[Iterable[str]], str, NLPHandler_T],
     *,
     only_to_me: bool,
     only_short_message: bool,
     allow_empty_message: bool,
     perm_checker: PermChecker_T
-):
+) -> Union[Callable[[NLPHandler_T], NLPHandler_T], NLPHandler_T]:
     """
     INTERNAL API
 
@@ -452,7 +452,7 @@ def on_natural_language_custom(
     only once
     """
 
-    def deco(func: Callable) -> Callable:
+    def deco(func: NLPHandler_T) -> NLPHandler_T:
         nl_processor = NLProcessor(
             func=func,
             keywords=keywords,  # type: ignore
@@ -467,6 +467,7 @@ def on_natural_language_custom(
 
     if callable(keywords):
         # here "keywords" is the function to be decorated
+        # applies default args provided by this function
         return on_natural_language()(keywords)
     else:
         if isinstance(keywords, str):
@@ -474,14 +475,29 @@ def on_natural_language_custom(
         return deco
 
 
+@overload
+def on_natural_language(func: NLPHandler_T) -> NLPHandler_T: ...
+
+
+@overload
 def on_natural_language(
-    keywords: Union[Optional[Iterable[str]], str, Callable] = None,
+    keywords: Optional[Union[Iterable[str], str]] = None,
     *,
     permission: int = perm.EVERYBODY,
     only_to_me: bool = True,
     only_short_message: bool = True,
     allow_empty_message: bool = False
-) -> Callable:
+) -> Callable[[NLPHandler_T], NLPHandler_T]: ...
+
+
+def on_natural_language(
+    keywords: Union[Optional[Iterable[str]], str, NLPHandler_T] = None,
+    *,
+    permission: int = perm.EVERYBODY,
+    only_to_me: bool = True,
+    only_short_message: bool = True,
+    allow_empty_message: bool = False
+):
     """
     Decorator to register a function as a natural language processor.
 
@@ -498,15 +514,18 @@ def on_natural_language(
                                       perm_checker=perm_checker)
 
 
-def _make_event_deco(post_type: str) -> Callable:
+_Teh = TypeVar('_Teh', NoticeHandler_T, RequestHandler_T)
 
-    def deco_deco(arg: Optional[Union[str, Callable]] = None,
-                  *events: str) -> Callable:
 
-        def deco(func: Callable) -> Callable:
+def _make_event_deco(post_type: str):
+
+    def deco_deco(arg: Optional[Union[str, _Teh]] = None,
+                  *events: str) -> Union[Callable[[_Teh], _Teh], _Teh]:
+
+        def deco(func: _Teh) -> _Teh:
             if isinstance(arg, str):
                 events_tmp = list(
-                    map(lambda x: f"{post_type}.{x}", [arg] + list(events)))
+                    map(lambda x: f"{post_type}.{x}", [arg, *events]))  # if arg is part of events str
                 for e in events_tmp:
                     _bus.subscribe(e, func)
                 handler = EventHandler(events_tmp, func)
@@ -517,14 +536,34 @@ def _make_event_deco(post_type: str) -> Callable:
             return func
 
         if callable(arg):
-            return deco(arg)  # type: ignore
+            return deco(arg)
         return deco
 
     return deco_deco
 
 
-on_notice = _make_event_deco('notice')
-on_request = _make_event_deco('request')
+@overload
+def on_notice(func: NoticeHandler_T) -> NoticeHandler_T: ...
+
+
+@overload
+def on_notice(*events: str) -> Callable[[NoticeHandler_T], NoticeHandler_T]: ...
+
+
+def on_notice(*args):
+    return _make_event_deco('notice')(*args)
+
+
+@overload
+def on_request(func: RequestHandler_T) -> RequestHandler_T: ...
+
+
+@overload
+def on_request(*events: str) -> Callable[[RequestHandler_T], RequestHandler_T]: ...
+
+
+def on_request(*args):
+    return _make_event_deco('request')(*args)
 
 
 __all__ = [

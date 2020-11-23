@@ -101,6 +101,30 @@ sidebar: auto
 
   通用的权限检查函数。
 
+### `NLPHandler_T` <Badge text="master"/>
+
+- **类型:** `Callable[[NLPSession], Awaitable[Optional[IntentCommand]]]`
+
+- **说明:**
+
+  自然语言处理函数。
+
+### `NoticeHandler_T` <Badge text="master"/>
+
+- **类型:** `Callable[[NoticeSession], Awaitable[Any]]`
+
+- **说明:**
+
+  通知处理函数。
+
+### `RequestHandler_T` <Badge text="master"/>
+
+- **类型:** `Callable[[RequestSession], Awaitable[Any]]`
+
+- **说明:**
+
+  请求处理函数。
+
 ## 配置
 
 ### `API_ROOT`

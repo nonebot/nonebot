@@ -5,13 +5,13 @@ be easier or harder to use than the standard one.
 """
 
 from functools import partial
-from typing import Callable, Iterable, Optional, Type, Union
+from typing import Callable, Iterable, Optional, Type, Union, overload
 
 from nonebot.command import CommandSession
 from nonebot.experimental.permission import (RoleCheckPolicy, aggregate_policy,
                                              check_permission)
 from nonebot.plugin import on_command_custom, on_natural_language_custom
-from nonebot.typing import CommandHandler_T, CommandName_T, Patterns_T
+from nonebot.typing import CommandHandler_T, CommandName_T, Patterns_T, NLPHandler_T
 
 
 def on_command(
@@ -39,14 +39,29 @@ def on_command(
                              session_class=session_class)
 
 
+@overload
+def on_natural_language(func: NLPHandler_T) -> NLPHandler_T: ...
+
+
+@overload
 def on_natural_language(
-    keywords: Union[Optional[Iterable[str]], str, Callable] = None,
+    keywords: Optional[Union[Iterable[str], str]] = None,
     *,
     permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]] = lambda _: True,
     only_to_me: bool = True,
     only_short_message: bool = True,
     allow_empty_message: bool = False
-) -> Callable:
+) -> Callable[[NLPHandler_T], NLPHandler_T]: ...
+
+
+def on_natural_language(
+    keywords: Union[Optional[Iterable[str]], str, NLPHandler_T] = None,
+    *,
+    permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]] = lambda _: True,
+    only_to_me: bool = True,
+    only_short_message: bool = True,
+    allow_empty_message: bool = False
+):
     """
     Decorator to register a function as a natural language processor.
 

@@ -8,6 +8,18 @@ sidebar: auto
 
 - 修复 `CommandGroup` 缺失属性，属性和方法类型和文档不一致的问题 ([issue 242](https://github.com/nonebot/nonebot/issues/242))。删除 `command/group.pyi` （回滚 347318a)
 - 更正 `CommandHandler_T` 返回值为 `Awaitable`，在此之前命令处理器传入同步函数会报错
+- 形如 `on_request` 的装饰器现在有了重载的类型定义，`typing` 中也加入了处理函数的类型。对于 Pyright 用户，编辑器可以提前发现错误：
+
+```python
+@on_request
+async def _(s: RequestSession): ... # ok
+
+@on_request('group.invite')
+async def _(s: RequestSession): ... # ok
+
+@on_request('group.invite')
+async def _(s: CommandSession): ... # 错误，函数类型不对
+```
 
 ## v1.8.0
 
