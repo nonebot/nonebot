@@ -54,7 +54,7 @@ sidebar: auto
 
 ### `CommandHandler_T` <Badge text="1.6.0+"/>
 
-- **类型:** `Callable[[CommandSession], Any]`
+- **类型:** `Callable[[CommandSession], Awaitable[Any]]` <Badge text="master"/>
 
 - **说明:**
 
@@ -100,6 +100,30 @@ sidebar: auto
 - **说明:**
 
   通用的权限检查函数。
+
+### `NLPHandler_T` <Badge text="master"/>
+
+- **类型:** `Callable[[NLPSession], Awaitable[Optional[IntentCommand]]]`
+
+- **说明:**
+
+  自然语言处理函数。
+
+### `NoticeHandler_T` <Badge text="master"/>
+
+- **类型:** `Callable[[NoticeSession], Awaitable[Any]]`
+
+- **说明:**
+
+  通知处理函数。
+
+### `RequestHandler_T` <Badge text="master"/>
+
+- **类型:** `Callable[[RequestSession], Awaitable[Any]]`
+
+- **说明:**
+
+  请求处理函数。
 
 ## 配置
 

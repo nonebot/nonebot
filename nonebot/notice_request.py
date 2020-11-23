@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List, Union
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.bus import EventBus
@@ -8,6 +8,8 @@ from .log import logger
 from .exceptions import CQHttpError
 from .session import BaseSession
 
+from .typing import NoticeHandler_T, RequestHandler_T
+
 _bus = EventBus()
 
 
@@ -15,7 +17,7 @@ class EventHandler:
     """INTERNAL API"""
     __slots__ = ('events', 'func')
 
-    def __init__(self, events: List[str], func: Callable):
+    def __init__(self, events: List[str], func: Union[NoticeHandler_T, RequestHandler_T]):
         self.events = events
         self.func = func
 
