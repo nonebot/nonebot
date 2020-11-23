@@ -476,18 +476,31 @@ def on_natural_language_custom(
 
 
 @overload
-def on_natural_language(func: NLPHandler_T) -> NLPHandler_T: ...
+def on_natural_language(func: NLPHandler_T) -> NLPHandler_T:
+    """
+    Decorator to register a function as a natural language processor with
+    default kwargs.
+    """
 
 
 @overload
 def on_natural_language(
-    keywords: Optional[Union[Iterable[str], str]] = None,
+    keywords: Optional[Union[Iterable[str], str]] = ...,
     *,
-    permission: int = perm.EVERYBODY,
-    only_to_me: bool = True,
-    only_short_message: bool = True,
-    allow_empty_message: bool = False
-) -> Callable[[NLPHandler_T], NLPHandler_T]: ...
+    permission: int = ...,
+    only_to_me: bool = ...,
+    only_short_message: bool = ...,
+    allow_empty_message: bool = ...
+) -> Callable[[NLPHandler_T], NLPHandler_T]:
+    """
+    Decorator to register a function as a natural language processor.
+
+    :param keywords: keywords to respond to, if None, respond to all messages
+    :param permission: permission required by the processor
+    :param only_to_me: only handle messages to me
+    :param only_short_message: only handle short messages
+    :param allow_empty_message: handle empty messages
+    """
 
 
 def on_natural_language(
@@ -499,13 +512,7 @@ def on_natural_language(
     allow_empty_message: bool = False
 ):
     """
-    Decorator to register a function as a natural language processor.
-
-    :param keywords: keywords to respond to, if None, respond to all messages
-    :param permission: permission required by the processor
-    :param only_to_me: only handle messages to me
-    :param only_short_message: only handle short messages
-    :param allow_empty_message: handle empty messages
+    Implementation of on_natural_language overloads.
     """
     perm_checker = partial(perm.check_permission, permission_required=permission)
     return on_natural_language_custom(keywords, only_to_me=only_to_me,

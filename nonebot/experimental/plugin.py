@@ -40,18 +40,28 @@ def on_command(
 
 
 @overload
-def on_natural_language(func: NLPHandler_T) -> NLPHandler_T: ...
+def on_natural_language(func: NLPHandler_T) -> NLPHandler_T:
+    """
+    Decorator to register a function as a natural language processor with
+    default kwargs.
+    """
 
 
 @overload
 def on_natural_language(
-    keywords: Optional[Union[Iterable[str], str]] = None,
+    keywords: Optional[Union[Iterable[str], str]] = ...,
     *,
-    permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]] = lambda _: True,
-    only_to_me: bool = True,
-    only_short_message: bool = True,
-    allow_empty_message: bool = False
-) -> Callable[[NLPHandler_T], NLPHandler_T]: ...
+    permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]] = ...,
+    only_to_me: bool = ...,
+    only_short_message: bool = ...,
+    allow_empty_message: bool = ...
+) -> Callable[[NLPHandler_T], NLPHandler_T]:
+    """
+    Decorator to register a function as a natural language processor.
+
+    This function's description is consistent with nonebot.plugin.on_natural_language,
+    except permission, where you pass a function instead of an int.
+    """
 
 
 def on_natural_language(
@@ -63,9 +73,7 @@ def on_natural_language(
     allow_empty_message: bool = False
 ):
     """
-    Decorator to register a function as a natural language processor.
-
-    This function's description is consistent with nonebot.plugin.on_natural_language.
+    Implementation of on_natural_language overloads.
     """
     if isinstance(permission, Iterable):
         permission = aggregate_policy(permission)
