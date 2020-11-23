@@ -54,7 +54,7 @@ sidebar: auto
 
 ### `CommandHandler_T` <Badge text="1.6.0+"/>
 
-- **类型:** `Callable[[CommandSession], Any]`
+- **类型:** `Callable[[CommandSession], Awaitable[Any]]` <Badge text="master"/>
 
 - **说明:**
 
