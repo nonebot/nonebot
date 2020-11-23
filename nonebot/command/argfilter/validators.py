@@ -57,14 +57,14 @@ def match_regex(pattern: str, message=None, *, flags=0,
     Validate any string object to ensure it matches a given pattern.
     """
 
-    pattern = re.compile(pattern, flags)
+    pattern_ = re.compile(pattern, flags)
 
     def validate(value):
         if fullmatch:
-            if not re.fullmatch(pattern, value):
+            if not re.fullmatch(pattern_, value):
                 _raise_failure(message)
         else:
-            if not re.match(pattern, value):
+            if not re.match(pattern_, value):
                 _raise_failure(message)
         return value
 
