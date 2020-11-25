@@ -53,15 +53,15 @@ class NLProcessor:
         if self.only_to_me and not session.event['to_me']:
             return False
 
-        should_run = await self._check_perm(session)
-        if should_run and self.keywords:
+        if self.keywords:
             for kw in self.keywords:
                 if kw in session.msg_text:
                     break
             else:
                 # no keyword matches
-                should_run = False
-        return should_run
+                return False
+
+        return await self._check_perm(session)
 
     async def _check_perm(self, session: 'NLPSession') -> bool:
         """
