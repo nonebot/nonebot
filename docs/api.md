@@ -125,6 +125,14 @@ sidebar: auto
 
   请求处理函数。
 
+### `MessagePreprocessor_T` <Badge text="master"/>
+
+- **类型:** `Callable[[NoneBot, CQEvent, PluginManager], Awaitable[Any]]`
+
+- **说明:**
+
+  消息预处理函数。
+
 ## 配置
 
 ### `API_ROOT`

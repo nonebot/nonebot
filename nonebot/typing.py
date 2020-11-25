@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Optional, Union, List, Dict, Any, Sequence, Ca
 if TYPE_CHECKING:
     from aiocqhttp import Event as CQEvent
     from nonebot import NoneBot
+    from nonebot.plugin import PluginManager
     from nonebot.command import CommandSession
     from nonebot.natural_language import NLPSession, IntentCommand
     from nonebot.notice_request import NoticeSession, RequestSession
@@ -20,6 +21,7 @@ PermChecker_T = Callable[["NoneBot", "CQEvent"], Awaitable[bool]]
 NLPHandler_T = Callable[["NLPSession"], Awaitable[Optional["IntentCommand"]]]
 NoticeHandler_T = Callable[["NoticeSession"], Awaitable[Any]]
 RequestHandler_T = Callable[["RequestSession"] , Awaitable[Any]]
+MessagePreprocessor_T = Callable[["NoneBot", "CQEvent", "PluginManager"], Awaitable[Any]]
 
 
 __all__ = [
