@@ -319,64 +319,12 @@ class CommandManager:
                 continue
             cls._patterns[pattern] = cmd
 
-    def _add_command_to_tree(self, cmd_name: CommandName_T, cmd: Command,
-                             tree: Dict[str, Union[Dict, Command]]) -> None:
-        """Add command to the target command tree.
-        
-        Args:
-            cmd_name (CommandName_T): Name of the command
-            cmd (Command): Command object
-            tree (Dict[str, Union[Dict, Command]): Target command tree
-        """
-        current_parent = tree
-        for parent_key in cmd_name[:-1]:
-            current_parent[parent_key] = current_parent.get(parent_key) or {}
-            current_parent = current_parent[parent_key]
-
-            if not isinstance(current_parent, dict):
-                warnings.warn(f"{current_parent} is not a registry dict")
-                return
-        if cmd_name[-1] in current_parent:
-            warnings.warn(f"There is already a command named {cmd_name}")
-            return
-        current_parent[cmd_name[-1]] = cmd
-
-    def _generate_command_tree(
-        self, commands: Dict[CommandName_T,
-                             Command]) -> Dict[str, Union[Dict, Command]]:
-        """Generate command tree from commands dictionary.
-        
-        Args:
-            commands (Dict[CommandName_T, Command]): Dictionary of commands
-        
-        Returns:
-            Dict[str, Union[Dict, "Command"]]: Command tree
-        """
-        cmd_tree = {}  # type: Dict[str, Union[Dict, "Command"]]
-        for cmd_name, cmd in commands.items():
-            self._add_command_to_tree(cmd_name, cmd, cmd_tree)
-        return cmd_tree
-
     def _find_command(self, name: Union[str,
                                         CommandName_T]) -> Optional[Command]:
         cmd_name = (name,) if isinstance(name, str) else name
         if not cmd_name:
             return None
 
-        # cmd_tree = self._generate_command_tree({
-        #     name: cmd
-        #     for name, cmd in self.commands.items()
-        #     if self.switches.get(cmd, True)
-        # })
-        # for part in cmd_name[:-1]:
-        #     if part not in cmd_tree or not isinstance(
-        #             cmd_tree[part],  #type: ignore
-        #             dict):
-        #         return None
-        #     cmd_tree = cmd_tree[part]  # type: ignore
-
-        # cmd = cmd_tree.get(cmd_name[-1])  # type: ignore
-        # return cmd if isinstance(cmd, Command) else None
         cmd = {
             name: cmd
             for name, cmd in self.commands.items()
