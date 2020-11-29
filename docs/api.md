@@ -1962,39 +1962,15 @@ sidebar: auto
 
   命令名前缀。
 
-#### `permission`
+#### `base_kwargs`
 
-- **类型:** `Optional[int]`
-
-- **说明:**
-
-  命令组内命令的默认 `permission` 属性。
-
-#### `only_to_me`
-
-- **类型:** `Optional[bool]`
+- **类型:** `dict`
 
 - **说明:**
 
-  命令组内命令的默认 `only_to_me` 属性。
+  此对象初始化时传递的 `permission`, `only_to_me`, `privileged`, `shell_like`。如果没有传递，则此字典也不存在相应键值。
 
-#### `privileged`
-
-- **类型:** `Optional[bool]`
-
-- **说明:**
-
-  命令组内命令的默认 `privileged` 属性。
-
-#### `shell_like`
-
-- **类型:** `Optional[bool]`
-
-- **说明:**
-
-  命令组内命令的默认 `shell_like` 属性。
-
-#### `__init__(name, permission=None, *, only_to_me=None, privileged=None, shell_like=None)`
+#### `__init__(name, *, permission=..., only_to_me=..., privileged=..., shell_like=...)`
 
 - **说明:**
 
@@ -2003,12 +1979,12 @@ sidebar: auto
 - **参数:**
 
   - `name: Union[str, CommandName_T]`: 命令名前缀，若传入字符串，则会自动转换成元组
-  - `permission: Optional[int]`: 对应 `permission` 属性
-  - `only_to_me: Optional[bool]`: 对应 `only_to_me` 属性
-  - `privileged: Optional[bool]`: 对应 `privileged` 属性
-  - `shell_like: Optional[bool]`: 对应 `shell_like` 属性
+  - `permission: int`: 对应 `permission` 属性
+  - `only_to_me: bool`: 对应 `only_to_me` 属性
+  - `privileged: bool`: 对应 `privileged` 属性
+  - `shell_like: bool`: 对应 `shell_like` 属性
 
-#### _decorator_ `command(name, *, aliases=None, permission=None, only_to_me=None, privileged=None, shell_like=None)`
+#### _decorator_ `command(name, *, aliases=..., permission=..., only_to_me=..., privileged=..., shell_like=...)`
 
 - **说明:**
 
@@ -2017,11 +1993,11 @@ sidebar: auto
 - **参数:**
 
   - `name: Union[str, CommandName_T]`: 命令名，注册命令处理器时会加上命令组的前缀
-  - `aliases: Optional[Iterable[str], str]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值（属性为 `None`）时，则使用 `on_command` 装饰器的默认值
-  - `permission: Optional[int]`: 同上
-  - `only_to_me: Optional[bool]`: 同上
-  - `privileged: Optional[bool]`: 同上
-  - `shell_like: Optional[bool]`: 同上
+  - `aliases: Iterable[str], str]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值时，则使用 `on_command` 装饰器的默认值
+  - `permission: int`: 同上
+  - `only_to_me: bool`: 同上
+  - `privileged: bool`: 同上
+  - `shell_like: bool`: 同上
 
 - **用法:**
 

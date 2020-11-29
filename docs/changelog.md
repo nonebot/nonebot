@@ -6,7 +6,7 @@ sidebar: auto
 
 ## master
 
-- 修复 `CommandGroup` 缺失属性，属性和方法类型和文档不一致的问题 ([issue 242](https://github.com/nonebot/nonebot/issues/242))。删除 `command/group.pyi` （回滚 347318a)
+- 调整 `CommandGroup` 实际表现和文档不一致的问题。
 - 调整自然语言处理器检查权限的逻辑
 - 更正 `CommandHandler_T` 返回值为 `Awaitable`，在此之前用户会以为 `on_command` 可以传递同步函数而产生运行时报错
 - 形如 `on_request` 的装饰器现在有了重载的类型定义，`typing` 中也加入 `RequestHandler_T` 等处理函数的类型。对于 Pyright 用户，编辑器可以提前发现类型错误：
