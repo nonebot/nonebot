@@ -12,11 +12,9 @@ class CommandGroup:
     __slots__ = ('basename', 'base_kwargs')
 
     def __init__(self, name: Union[str, CommandName_T], **kwargs):
+        if 'aliases' in kwargs or 'patterns' in kwargs:
+            raise ValueError('aliases or patterns should not be used as base kwargs for group')
         self.basename = (name,) if isinstance(name, str) else name
-        if 'aliases' in kwargs:
-            del kwargs['aliases']
-        if 'pattern' in kwargs:
-            del kwargs['pattern']
         self.base_kwargs = kwargs
 
     def command(self, name: Union[str, CommandName_T],

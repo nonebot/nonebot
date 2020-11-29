@@ -1964,17 +1964,17 @@ sidebar: auto
 
 #### `base_kwargs`
 
-- **类型:** `dict`
+- **类型:** `Dict[str, Any]`
 
 - **说明:**
 
-  此对象初始化时传递的 `permission`, `only_to_me`, `privileged`, `shell_like`。如果没有传递，则此字典也不存在相应键值。
+  此对象初始化时传递的 `permission`, `only_to_me`, `privileged`, `shell_like`, `session_class`。如果没有传递，则此字典也不存在相应键值。
 
-#### `__init__(name, *, permission=..., only_to_me=..., privileged=..., shell_like=...)`
+#### `__init__(name, *, permission=..., only_to_me=..., privileged=..., shell_like=..., session_class=...)`
 
 - **说明:**
 
-  初始化命令组，参数即为上面的三个属性。
+  初始化命令组，参数即为上面的属性。
 
 - **参数:**
 
@@ -1983,8 +1983,9 @@ sidebar: auto
   - `only_to_me: bool`: 对应 `only_to_me` 属性
   - `privileged: bool`: 对应 `privileged` 属性
   - `shell_like: bool`: 对应 `shell_like` 属性
+  - `session_class: Optional[Type[CommandSession]]` <Badge text="master"/>：对应 `session_class` 属性
 
-#### _decorator_ `command(name, *, aliases=..., permission=..., only_to_me=..., privileged=..., shell_like=...)`
+#### _decorator_ `command(name, *, aliases=..., patterns=..., permission=..., only_to_me=..., privileged=..., shell_like=..., session_class=...)`
 
 - **说明:**
 
@@ -1994,10 +1995,12 @@ sidebar: auto
 
   - `name: Union[str, CommandName_T]`: 命令名，注册命令处理器时会加上命令组的前缀
   - `aliases: Iterable[str], str]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值时，则使用 `on_command` 装饰器的默认值
+  - `patterns: Patterns_T` <Badge text="master"/>：同上
   - `permission: int`: 同上
   - `only_to_me: bool`: 同上
   - `privileged: bool`: 同上
   - `shell_like: bool`: 同上
+  - `session_class: Optional[Type[CommandSession]]` <Badge text="master"/>：同上
 
 - **用法:**
 
