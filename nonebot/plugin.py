@@ -557,8 +557,7 @@ def on_notice(func: NoticeHandler_T) -> NoticeHandler_T: ...
 def on_notice(*events: str) -> Callable[[NoticeHandler_T], NoticeHandler_T]: ...
 
 
-def on_notice(*args):
-    return _make_event_deco('notice')(*args)
+on_notice = _make_event_deco('notice')  # type: ignore[override]
 
 
 @overload
@@ -569,8 +568,7 @@ def on_request(func: RequestHandler_T) -> RequestHandler_T: ...
 def on_request(*events: str) -> Callable[[RequestHandler_T], RequestHandler_T]: ...
 
 
-def on_request(*args):
-    return _make_event_deco('request')(*args)
+on_request = _make_event_deco('request')  # type: ignore[override]
 
 
 __all__ = [

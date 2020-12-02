@@ -16,7 +16,7 @@ setup(
     long_description_content_type='text/markdown',
     packages=packages,
     package_data={
-        '': ['*.pyi'],
+        '': ['*.pyi', 'py.typed'],
     },
     install_requires=['aiocqhttp>=1.3', 'aiocache>=0.10,<1.0'],
     extras_require={
