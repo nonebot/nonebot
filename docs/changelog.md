@@ -4,12 +4,12 @@ sidebar: auto
 
 # 更新日志
 
-## master
+## v1.8.1
 
 - 调整 `CommandGroup` 实际表现和文档不一致的问题。
-- 调整自然语言处理器检查权限的逻辑
-- 更正 `CommandHandler_T` 返回值为 `Awaitable`，在此之前用户会以为 `on_command` 可以传递同步函数而产生运行时报错
-- 形如 `on_request` 的装饰器现在有了重载的类型定义，`typing` 中也加入 `RequestHandler_T` 等处理函数的类型。对于 Pyright 用户，编辑器可以提前发现类型错误：
+- 调整自然语言处理器并发检查权限的逻辑
+- 调整 `CommandHandler_T` 返回值为 `Awaitable`，在此之前用户会以为 `on_command` 可以传递同步函数而产生运行时报错
+- 形如 `on_request` 的装饰器现在有了重载的类型定义，`typing` 中也加入 `RequestHandler_T` 等处理函数的类型。mypy 用户的编辑器可以提前发现类型错误：
 
 ```python
 @on_request

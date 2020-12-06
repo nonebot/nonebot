@@ -54,7 +54,7 @@ sidebar: auto
 
 ### `CommandHandler_T` <Badge text="1.6.0+"/>
 
-- **类型:** `Callable[[CommandSession], Awaitable[Any]]` <Badge text="master"/>
+- **类型:** `Callable[[CommandSession], Awaitable[Any]]` <Badge text="1.8.1+"/>
 
 - **说明:**
 
@@ -101,7 +101,7 @@ sidebar: auto
 
   通用的权限检查函数。
 
-### `NLPHandler_T` <Badge text="master"/>
+### `NLPHandler_T` <Badge text="1.8.1+"/>
 
 - **类型:** `Callable[[NLPSession], Awaitable[Optional[IntentCommand]]]`
 
@@ -109,7 +109,7 @@ sidebar: auto
 
   自然语言处理函数。
 
-### `NoticeHandler_T` <Badge text="master"/>
+### `NoticeHandler_T` <Badge text="1.8.1+"/>
 
 - **类型:** `Callable[[NoticeSession], Awaitable[Any]]`
 
@@ -117,7 +117,7 @@ sidebar: auto
 
   通知处理函数。
 
-### `RequestHandler_T` <Badge text="master"/>
+### `RequestHandler_T` <Badge text="1.8.1+"/>
 
 - **类型:** `Callable[[RequestSession], Awaitable[Any]]`
 
@@ -125,7 +125,7 @@ sidebar: auto
 
   请求处理函数。
 
-### `MessagePreprocessor_T` <Badge text="master"/>
+### `MessagePreprocessor_T` <Badge text="1.8.1+"/>
 
 - **类型:** `Callable[[NoneBot, CQEvent, PluginManager], Awaitable[Any]]`
 
@@ -1952,7 +1952,7 @@ sidebar: auto
 
 - **注:**
 
-  在 master 之前，此类文档与实际表现不一致 ([issue 242](https://github.com/nonebot/nonebot/issues/242))。
+  在 1.8.1 之前，此类文档与实际表现不一致 ([issue 242](https://github.com/nonebot/nonebot/issues/242))。
 
 #### `basename`
 
@@ -1983,7 +1983,7 @@ sidebar: auto
   - `only_to_me: bool`: 对应 `only_to_me` 属性
   - `privileged: bool`: 对应 `privileged` 属性
   - `shell_like: bool`: 对应 `shell_like` 属性
-  - `session_class: Optional[Type[CommandSession]]` <Badge text="master"/>：对应 `session_class` 属性
+  - `session_class: Optional[Type[CommandSession]]` <Badge text="1.8.1+"/>：对应 `session_class` 属性
 
 #### _decorator_ `command(name, *, aliases=..., patterns=..., permission=..., only_to_me=..., privileged=..., shell_like=..., session_class=...)`
 
@@ -1995,12 +1995,12 @@ sidebar: auto
 
   - `name: Union[str, CommandName_T]`: 命令名，注册命令处理器时会加上命令组的前缀
   - `aliases: Iterable[str], str]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值时，则使用 `on_command` 装饰器的默认值
-  - `patterns: Patterns_T` <Badge text="master"/>：同上
+  - `patterns: Patterns_T` <Badge text="1.8.1+"/>：同上
   - `permission: int`: 同上
   - `only_to_me: bool`: 同上
   - `privileged: bool`: 同上
   - `shell_like: bool`: 同上
-  - `session_class: Optional[Type[CommandSession]]` <Badge text="master"/>：同上
+  - `session_class: Optional[Type[CommandSession]]` <Badge text="1.8.1+"/>：同上
 
 - **用法:**
 
