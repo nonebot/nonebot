@@ -22,7 +22,7 @@ async def weather(session: CommandSession):
 
 除此之外还存在着例如群管理员 (`GROUP_ADMIN`)，超级用户 (`SUPERUSER`) 等设置。这些常量彼此可以通过 `|` 来合并（取联合）。
 
-对于更多的权限声明常量，请参考 [API 文档](https://nonebot.cqp.moe/api.html#%E6%9D%83%E9%99%90%E5%A3%B0%E6%98%8E%E5%B8%B8%E9%87%8F)。
+对于更多的权限声明常量，请参考 [API 文档](https://docs.nonebot.dev/api.html#%E6%9D%83%E9%99%90%E5%A3%B0%E6%98%8E%E5%B8%B8%E9%87%8F)。
 
 ## 当心 NLP 造成的权限泄露！
 
