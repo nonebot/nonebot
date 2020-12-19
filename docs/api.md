@@ -533,7 +533,7 @@ sidebar: auto
 
   获取用于 API 调用的 `Callable` 对象。
 
-  对返回结果进行函数调用会调用 CQHTTP 的相应 API，请注意捕获 `CQHttpError` 异常，具体请参考 aiocqhttp 的 [API 调用](https://aiocqhttp.cqp.moe/#/what-happened#api-%E8%B0%83%E7%94%A8)。
+  对返回结果进行函数调用会调用 CQHTTP 的相应 API，请注意捕获 `CQHttpError` 异常，具体请参考 aiocqhttp 的 [API 调用](https://aiocqhttp.nonebot.dev/#/what-happened#api-%E8%B0%83%E7%94%A8)。
 
 - **参数:**
 
@@ -3035,7 +3035,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **说明:**
 
-  CQHTTP 上报的事件数据对象，具体请参考 [`aiocqhttp.Event`](https://aiocqhttp.cqp.moe/module/aiocqhttp/index.html#aiocqhttp.Event) 和 [事件上报](https://cqhttp.cc/docs/#/Post)。
+  CQHTTP 上报的事件数据对象，具体请参考 [`aiocqhttp.Event`](https://aiocqhttp.nonebot.dev/module/aiocqhttp/index.html#aiocqhttp.Event) 和 [事件上报](https://cqhttp.cc/docs/#/Post)。
 
 - **用法:**
 
@@ -3094,7 +3094,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **返回:**
 
-  - `Any` <Badge text="1.1.0+"/>: 返回 CQHTTP 插件发送消息接口的调用返回值，具体见 aiocqhttp 的 [API 调用](https://aiocqhttp.cqp.moe/#/what-happened#api-%E8%B0%83%E7%94%A8)
+  - `Any` <Badge text="1.1.0+"/>: 返回 CQHTTP 插件发送消息接口的调用返回值，具体见 aiocqhttp 的 [API 调用](https://aiocqhttp.nonebot.dev/#/what-happened#api-%E8%B0%83%E7%94%A8)
 
 - **异常:**
 
@@ -3221,7 +3221,7 @@ async def _(session):
 
 - **返回:**
 
-  - `Any` <Badge text="1.1.0+"/>: 返回 CQHTTP 插件发送消息接口的调用返回值，具体见 aiocqhttp 的 [API 调用](https://aiocqhttp.cqp.moe/#/what-happened#api-%E8%B0%83%E7%94%A8)
+  - `Any` <Badge text="1.1.0+"/>: 返回 CQHTTP 插件发送消息接口的调用返回值，具体见 aiocqhttp 的 [API 调用](https://aiocqhttp.nonebot.dev/#/what-happened#api-%E8%B0%83%E7%94%A8)
 
 - **异常:**
 
