@@ -1325,6 +1325,8 @@ sidebar: auto
   ```
 
   响应所有带有「天气」关键词的消息，当做 `weather` 命令处理。
+  
+  如果有多个自然语言处理器同时处理了一条消息，则置信度最高的 `IntentCommand` 会被选择。处理器可以返回 `None`，表示不把消息当作任何命令处理。
 
 ### _decorator_ `on_notice(*events)` <Badge text="1.6.0+" />
 
