@@ -6,6 +6,7 @@ sidebar: auto
 
 ## master
 - 手工创建的 `Plugin` 对象现在会对传递的集合参数进行浅拷贝
+- 修复 `CommandSession.apause` 方法在命令过期后泄露的问题
 
 ## v1.8.1
 

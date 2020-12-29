@@ -667,11 +667,14 @@ class CommandSession(BaseSession):
             try:
                 self._future = asyncio.get_event_loop().create_future()
                 self.running = False
-                await self._future
+                timeout = None
+                if self.bot.config.SESSION_EXPIRE_TIMEOUT:
+                    timeout = self.bot.config.SESSION_EXPIRE_TIMEOUT.total_seconds()
+                await asyncio.wait_for(self._future, timeout)
                 break
             except _PauseException:
                 continue
-            except _FinishException:
+            except (_FinishException, asyncio.TimeoutError):
                 raise
 
     def finish(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
