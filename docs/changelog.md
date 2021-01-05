@@ -4,9 +4,6 @@ sidebar: auto
 
 # 更新日志
 
-## master
-- 手工创建的 `Plugin` 对象现在会对传递的集合参数进行浅拷贝
-
 ## v1.8.1
 
 - 调整 `CommandGroup` 实际表现和文档不一致的问题。

@@ -20,12 +20,6 @@ _tmp_nl_processor: Set[NLProcessor] = set()
 _tmp_event_handler: Set[EventHandler] = set()
 
 
-def _clear_temps():
-    _tmp_command.clear()
-    _tmp_nl_processor.clear()
-    _tmp_event_handler.clear()
-
-
 class Plugin:
     __slots__ = ('module', 'name', 'usage', 'commands', 'nl_processors',
                  'event_handlers')
@@ -37,16 +31,12 @@ class Plugin:
                  commands: Set[Command] = set(),
                  nl_processors: Set[NLProcessor] = set(),
                  event_handlers: Set[EventHandler] = set()):
-        """
-        Create a new NoneBot Plugin instance. The set arguments passed here
-        will be shallow-copied and assigned to this new instance.
-        """
         self.module = module
         self.name = name
         self.usage = usage
-        self.commands = set(commands)
-        self.nl_processors = set(nl_processors)
-        self.event_handlers = set(event_handlers)
+        self.commands = commands
+        self.nl_processors = nl_processors
+        self.event_handlers = event_handlers
 
 
 class PluginManager:
@@ -255,16 +245,19 @@ def load_plugin(module_path: str) -> Optional[Plugin]:
     Returns:
         Optional[Plugin]: Plugin object loaded
     """
-    _clear_temps()
+    # Make sure tmp is clean
+    _tmp_command.clear()
+    _tmp_nl_processor.clear()
+    _tmp_event_handler.clear()
     try:
-        # this import possibly calls @on_command etc. to insert items to _tmp_command
-        # and etc.
         module = importlib.import_module(module_path)
         name = getattr(module, '__plugin_name__', None)
         usage = getattr(module, '__plugin_usage__', None)
-        # and then we use these temp set snapshots to construct a plugin
-        plugin = Plugin(module, name, usage, _tmp_command, _tmp_nl_processor,
-                        _tmp_event_handler)
+        commands = _tmp_command.copy()
+        nl_processors = _tmp_nl_processor.copy()
+        event_handlers = _tmp_event_handler.copy()
+        plugin = Plugin(module, name, usage, commands, nl_processors,
+                        event_handlers)
         PluginManager.add_plugin(module_path, plugin)
         logger.info(f'Succeeded to import "{module_path}"')
         return plugin
@@ -283,13 +276,18 @@ def reload_plugin(module_path: str) -> Optional[Plugin]:
             filter(lambda x: x.startswith(module_path), sys.modules.keys())):
         del sys.modules[module]
 
-    _clear_temps()
+    _tmp_command.clear()
+    _tmp_nl_processor.clear()
+    _tmp_event_handler.clear()
     try:
         module = importlib.import_module(module_path)
         name = getattr(module, '__plugin_name__', None)
         usage = getattr(module, '__plugin_usage__', None)
-        plugin = Plugin(module, name, usage, _tmp_command, _tmp_nl_processor,
-                        _tmp_event_handler)
+        commands = _tmp_command.copy()
+        nl_processors = _tmp_nl_processor.copy()
+        event_handlers = _tmp_event_handler.copy()
+        plugin = Plugin(module, name, usage, commands, nl_processors,
+                        event_handlers)
         PluginManager.add_plugin(module_path, plugin)
         logger.info(f'Succeeded to reload "{module_path}"')
         return plugin
