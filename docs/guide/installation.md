@@ -22,7 +22,11 @@ python setup.py install
 
 以上命令中的 `pip`、`python` 可能需要根据情况换成 `pip3`、`python3`。
 
-## 酷Q
+## 酷Q (已弃用)
+
+:::danger 重要
+请查看下一小节。
+:::
 
 前往 酷Q 官方论坛的 [版本发布](https://cqp.cc/b/news) 页面根据需要下载最新版本的 酷Q Air 或 Pro，解压后启动 `CQA.exe` 或 `CQP.exe` 并登录 QQ 机器人账号。
 
@@ -39,8 +43,7 @@ CQHTTP 插件在 2020 年 8 月后已经无法使用。目前推荐使用功能�
 
 其余支持 [OneBot (旧 CQHTTP)](https://github.com/howmanybots/onebot) 的方式有：
 
-* [cqhttp-mirai](https://github.com/yyuueexxiinngg/cqhttp-mirai)
-* [cqhttp-mirai embedded](https://github.com/yyuueexxiinngg/cqhttp-mirai/tree/embedded)
+* [OneBot Mirai](https://github.com/yyuueexxiinngg/onebot-kotlin)
 * [mirai-native](https://github.com/iTXTech/mirai-native) + CQHTTP
 
 此表并不完整，你可以选择合适的替代并且按照相应文档完成配置。

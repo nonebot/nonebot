@@ -788,8 +788,6 @@ sidebar: auto
 
   已加载的插件模块（importlib 导入的 Python 模块）。
 
-  在 master 之后手工创建的该对象会将传递的集合参数进行浅拷贝。
-
 #### `name`
 
 - **类型:** `Optional[str]`

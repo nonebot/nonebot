@@ -15,16 +15,6 @@ from .notice_request import _bus, EventHandler
 from .natural_language import NLProcessor, NLPManager
 from .typing import CommandName_T, CommandHandler_T, NLPHandler_T, NoticeHandler_T, Patterns_T, PermChecker_T, RequestHandler_T
 
-_tmp_command: Set[Command] = set()
-_tmp_nl_processor: Set[NLProcessor] = set()
-_tmp_event_handler: Set[EventHandler] = set()
-
-
-def _clear_temps():
-    _tmp_command.clear()
-    _tmp_nl_processor.clear()
-    _tmp_event_handler.clear()
-
 
 class Plugin:
     __slots__ = ('module', 'name', 'usage', 'commands', 'nl_processors',
@@ -34,19 +24,42 @@ class Plugin:
                  module: ModuleType,
                  name: Optional[str] = None,
                  usage: Optional[Any] = None,
-                 commands: Set[Command] = set(),
-                 nl_processors: Set[NLProcessor] = set(),
-                 event_handlers: Set[EventHandler] = set()):
-        """
-        Create a new NoneBot Plugin instance. The set arguments passed here
-        will be shallow-copied and assigned to this new instance.
-        """
+                 commands: Set[Command] = ...,
+                 nl_processors: Set[NLProcessor] = ...,
+                 event_handlers: Set[EventHandler] = ...):
+        """Creates a plugin with no name, no usage, and no handlers."""
+
         self.module = module
         self.name = name
         self.usage = usage
-        self.commands = set(commands)
-        self.nl_processors = set(nl_processors)
-        self.event_handlers = set(event_handlers)
+        self.commands: Set[Command] = \
+            commands if commands is not ... else set()
+        self.nl_processors: Set[NLProcessor] = \
+            nl_processors if nl_processors is not ... else set()
+        self.event_handlers: Set[EventHandler] = \
+            event_handlers if event_handlers is not ... else set()
+
+    class GlobalTemp:
+        """INTERNAL API"""
+
+        commands: Set[Command] = set()
+        nl_processors: Set[NLProcessor] = set()
+        event_handlers: Set[EventHandler] = set()
+
+        @classmethod
+        def clear(cls):
+            cls.commands.clear()
+            cls.nl_processors.clear()
+            cls.event_handlers.clear()
+
+        @classmethod
+        def make_plugin(cls, module: ModuleType):
+            return Plugin(module=module,
+                          name=getattr(module, '__plugin_name__', None),
+                          usage=getattr(module, '__plugin_usage__', None),
+                          commands={*cls.commands},
+                          nl_processors={*cls.nl_processors},
+                          event_handlers={*cls.event_handlers})
 
 
 class PluginManager:
@@ -255,16 +268,10 @@ def load_plugin(module_path: str) -> Optional[Plugin]:
     Returns:
         Optional[Plugin]: Plugin object loaded
     """
-    _clear_temps()
+    Plugin.GlobalTemp.clear()
     try:
-        # this import possibly calls @on_command etc. to insert items to _tmp_command
-        # and etc.
         module = importlib.import_module(module_path)
-        name = getattr(module, '__plugin_name__', None)
-        usage = getattr(module, '__plugin_usage__', None)
-        # and then we use these temp set snapshots to construct a plugin
-        plugin = Plugin(module, name, usage, _tmp_command, _tmp_nl_processor,
-                        _tmp_event_handler)
+        plugin = Plugin.GlobalTemp.make_plugin(module)
         PluginManager.add_plugin(module_path, plugin)
         logger.info(f'Succeeded to import "{module_path}"')
         return plugin
@@ -283,13 +290,10 @@ def reload_plugin(module_path: str) -> Optional[Plugin]:
             filter(lambda x: x.startswith(module_path), sys.modules.keys())):
         del sys.modules[module]
 
-    _clear_temps()
+    Plugin.GlobalTemp.clear()
     try:
         module = importlib.import_module(module_path)
-        name = getattr(module, '__plugin_name__', None)
-        usage = getattr(module, '__plugin_usage__', None)
-        plugin = Plugin(module, name, usage, _tmp_command, _tmp_nl_processor,
-                        _tmp_event_handler)
+        plugin = Plugin.GlobalTemp.make_plugin(module)
         PluginManager.add_plugin(module_path, plugin)
         logger.info(f'Succeeded to reload "{module_path}"')
         return plugin
@@ -397,7 +401,7 @@ def on_command_custom(
         CommandManager.add_aliases(aliases, cmd)
         CommandManager.add_patterns(patterns, cmd)
 
-        _tmp_command.add(cmd)
+        Plugin.GlobalTemp.commands.add(cmd)
         func.args_parser = cmd.args_parser
 
         return func
@@ -464,7 +468,7 @@ def on_natural_language_custom(
             perm_checker_func=perm_checker)
 
         NLPManager.add_nl_processor(nl_processor)
-        _tmp_nl_processor.add(nl_processor)
+        Plugin.GlobalTemp.nl_processors.add(nl_processor)
         return func
 
     if callable(keywords):
@@ -541,7 +545,7 @@ def _make_event_deco(post_type: str):
             else:
                 _bus.subscribe(post_type, func)
                 handler = EventHandler([post_type], func)
-            _tmp_event_handler.add(handler)
+            Plugin.GlobalTemp.event_handlers.add(handler)
             return func
 
         if callable(arg):
