@@ -3,6 +3,8 @@ sidebar: auto
 ---
 
 # 更新日志
+## master
+- 修复 `CommandSession.apause` 方法在命令过期后泄露的问题
 
 ## v1.8.1
 
