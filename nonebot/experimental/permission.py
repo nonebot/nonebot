@@ -6,7 +6,7 @@ be easier or harder to use than the standard one.
 
 import asyncio
 from datetime import datetime, time
-from typing import Any, Awaitable, Callable, Dict, Iterable, NamedTuple, Optional, Union, List
+from typing import Any, Awaitable, Callable, Container, Dict, Iterable, NamedTuple, Optional, Union, List
 
 from aiocache.decorators import cached
 from aiocqhttp.event import Event as CQEvent
@@ -77,13 +77,13 @@ class SenderRoles(NamedTuple):
     def is_discusschat(self) -> bool:
         return self.event.get('message_type') == 'discuss'
 
-    def from_group(self, group_id: Union[int, Iterable[int]]) -> bool:
+    def from_group(self, group_id: Union[int, Container[int]]) -> bool:
         """returns True if the sender belongs to these groups (group_ids)"""
         if isinstance(group_id, int):
             return self.event.group_id == group_id
         return self.event.group_id in group_id
 
-    def sent_by(self, sender_id: Union[int, Iterable[int]]) -> bool:
+    def sent_by(self, sender_id: Union[int, Container[int]]) -> bool:
         """returns True if the sender is one of these people (sender_ids)"""
         if isinstance(sender_id, int):
             return self.event.user_id == sender_id
@@ -182,8 +182,8 @@ def aggregate_policy(
     return checker_async
 
 
-def simple_allow_list(*, user_ids: Iterable[int] = set(),
-                      group_ids: Iterable[int] = set(),
+def simple_allow_list(*, user_ids: Container[int] = ...,
+                      group_ids: Container[int] = ...,
                       reverse: bool = False) -> RoleCheckPolicy:
     """
     Creates a policy that only allows senders from these users or groups.
@@ -197,8 +197,8 @@ def simple_allow_list(*, user_ids: Iterable[int] = set(),
                     senders instead (policy becomes blocklist)
     :return: new policy
     """
-    user_ids = set(user_ids)
-    group_ids = set(group_ids)
+    user_ids = user_ids if user_ids is not ... else set()
+    group_ids = group_ids if group_ids is not ... else set()
 
     def checker(sender: SenderRoles) -> bool:
         is_in = sender.sent_by(user_ids) or sender.from_group(group_ids)

@@ -3506,7 +3506,7 @@ async def _(session):
 
 - **参数:**
 
-  - `group_id: Union[int, Iterable[int]]`: 群号码，可以为多个群号。
+  - `group_id: Union[int, Container[int]]` <Badge text="master"/>: 群号码，可以为多个群号。
 
 - **返回:**
 
@@ -3520,7 +3520,7 @@ async def _(session):
 
 - **参数:**
 
-  - `sender_id: Union[int, Iterable[int]]`: 发送者 QQ 号，可以是多个。
+  - `sender_id: Union[int, Container[int]]` <Badge text="master"/>: 发送者 QQ 号，可以是多个。
 
 - **返回:**
 
@@ -3605,7 +3605,7 @@ async def _(session):
                              lambda sender: sender.from_group(123456789))
   ```
 
-### `simple_allow_list(*, user_ids=set() , group_ids=set(), reverse=False)`
+### `simple_allow_list(*, user_ids=... , group_ids=..., reverse=False)`
 
 - **说明:**
 
@@ -3615,8 +3615,8 @@ async def _(session):
 
 - **参数:**
 
-  - `user_ids: Iterable[int]`: 要加入白名单的 QQ 号们
-  - `group_ids: Iterable[int]`: 要加入白名单的群号们
+  - `user_ids: Container[int]` <Badge text="master"/>: 要加入白名单的 QQ 号们，默认为空
+  - `group_ids: Container[int]` <Badge text="master"/>: 要加入白名单的群号们，默认为空
   - `reverse: bool`: 如果为真，则返回值变为黑名单
 
 - **返回:**
