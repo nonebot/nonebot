@@ -498,10 +498,12 @@ class CommandSession(BaseSession):
 
     @property
     def running(self) -> bool:
+        """INTERNAL API"""
         return self._running
 
     @running.setter
     def running(self, value) -> None:
+        """INTERNAL API"""
         if self._running is True and value is False:
             # change status from running to not running, record the time
             self._last_interaction = datetime.now()
@@ -509,17 +511,23 @@ class CommandSession(BaseSession):
 
     @property
     def waiting(self) -> bool:
+        """INTERNAL API"""
         return self._future is not None and not self._future.done()
 
     @property
     def expire_timeout(self) -> Optional[timedelta]:
+        """INTERNAL API"""
         if self.cmd.expire_timeout is not ...:
             return self.cmd.expire_timeout
         return self.bot.config.SESSION_EXPIRE_TIMEOUT
 
     @property
     def is_valid(self) -> bool:
-        """Check whether the session has expired or not."""
+        """
+        INTERNAL API
+
+        Check whether the session has expired or not.
+        """
         tm = self.expire_timeout
         if tm and self._last_interaction and \
             datetime.now() - self._last_interaction > tm:
@@ -566,6 +574,8 @@ class CommandSession(BaseSession):
                 *,
                 current_arg: Optional[str] = '') -> None:
         """
+        INTERNAL API
+
         Refill the session with a new message event.
 
         :param event: new message event
