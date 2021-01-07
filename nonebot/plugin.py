@@ -4,6 +4,7 @@ import sys
 import shlex
 import warnings
 import importlib
+from datetime import timedelta
 from functools import partial
 from types import ModuleType
 from typing import Any, Set, Dict, TypeVar, Union, Optional, Iterable, Callable, Type, overload
@@ -362,6 +363,7 @@ def on_command_custom(
     privileged: bool,
     shell_like: bool,
     perm_checker: PermChecker_T,
+    expire_timeout: Optional[timedelta],
     session_class: Optional[Type[CommandSession]]
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
@@ -388,6 +390,7 @@ def on_command_custom(
                       only_to_me=only_to_me,
                       privileged=privileged,
                       perm_checker_func=perm_checker,
+                      expire_timeout=expire_timeout,
                       session_class=session_class)
 
         if shell_like:
@@ -418,6 +421,7 @@ def on_command(
     only_to_me: bool = True,
     privileged: bool = False,
     shell_like: bool = False,
+    expire_timeout: Optional[timedelta] = ...,
     session_class: Optional[Type[CommandSession]] = None
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
@@ -433,13 +437,14 @@ def on_command(
     :param only_to_me: only handle messages to me
     :param privileged: can be run even when there is already a session
     :param shell_like: use shell-like syntax to split arguments
+    :param expire_timeout: will override SESSION_EXPIRE_TIMEOUT if provided
     :param session_class: session class
     """
     perm_checker = partial(perm.check_permission, permission_required=permission)
     return on_command_custom(name, aliases=aliases, patterns=patterns,
                              only_to_me=only_to_me, privileged=privileged,
                              shell_like=shell_like, perm_checker=perm_checker,
-                             session_class=session_class)
+                             expire_timeout=expire_timeout, session_class=session_class)
 
 
 def on_natural_language_custom(

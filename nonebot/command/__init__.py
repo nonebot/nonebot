@@ -1,7 +1,7 @@
 import re
 import asyncio
 import warnings
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import partial
 from typing import (NoReturn, Tuple, Union, Iterable, Any, Optional, List, Dict,
                     Awaitable, Pattern, Type)
@@ -77,13 +77,19 @@ class SwitchException(CommandInterrupt):
 
 
 class Command:
-    """INTERNAL API"""
-    __slots__ = ('name', 'func', 'only_to_me', 'privileged',
-                 'args_parser_func', 'perm_checker_func', 'session_class')
+    """
+    INTERNAL API
+
+    Note ... (Ellipsis) is a valid value for field expire_timeout. However I
+    cannot type it until Python 3.10. see bugs.python.org/issue41810.
+    """
+    __slots__ = ('name', 'func', 'only_to_me', 'privileged', 'args_parser_func',
+                 'perm_checker_func', 'expire_timeout', 'session_class')
 
     def __init__(self, *, name: CommandName_T, func: CommandHandler_T,
                  only_to_me: bool, privileged: bool,
                  perm_checker_func: PermChecker_T,
+                 expire_timeout: Optional[timedelta],
                  session_class: Optional[Type['CommandSession']]):
         self.name = name
         self.func = func
@@ -91,6 +97,7 @@ class Command:
         self.privileged = privileged
         self.args_parser_func: Optional[CommandHandler_T] = None
         self.perm_checker_func = perm_checker_func  # returns True if can trigger
+        self.expire_timeout = expire_timeout
         self.session_class = session_class
 
     async def run(self,
@@ -505,12 +512,17 @@ class CommandSession(BaseSession):
         return self._future is not None and not self._future.done()
 
     @property
+    def expire_timeout(self) -> Optional[timedelta]:
+        if self.cmd.expire_timeout is not ...:
+            return self.cmd.expire_timeout
+        return self.bot.config.SESSION_EXPIRE_TIMEOUT
+
+    @property
     def is_valid(self) -> bool:
-        """Check if the session is expired or not."""
-        if self.bot.config.SESSION_EXPIRE_TIMEOUT and \
-                self._last_interaction and \
-                datetime.now() - self._last_interaction > \
-                self.bot.config.SESSION_EXPIRE_TIMEOUT:
+        """Check whether the session has expired or not."""
+        tm = self.expire_timeout
+        if tm and self._last_interaction and \
+            datetime.now() - self._last_interaction > tm:
             return False
         return True
 
@@ -667,9 +679,8 @@ class CommandSession(BaseSession):
             try:
                 self._future = asyncio.get_event_loop().create_future()
                 self.running = False
-                timeout = None
-                if self.bot.config.SESSION_EXPIRE_TIMEOUT:
-                    timeout = self.bot.config.SESSION_EXPIRE_TIMEOUT.total_seconds()
+                timeout_opt = self.expire_timeout
+                timeout = timeout_opt.total_seconds() if timeout_opt else None
                 await asyncio.wait_for(self._future, timeout)
                 break
             except _PauseException:
@@ -771,7 +782,7 @@ async def handle_command(bot: NoneBot, event: CQEvent,
             check_perm = False
         else:
             # the session is expired, remove it
-            logger.debug(f'Session of command {session.cmd.name} is expired')
+            logger.debug(f'Session of command {session.cmd.name} has expired')
             if ctx_id in _sessions:
                 del _sessions[ctx_id]
             session = None

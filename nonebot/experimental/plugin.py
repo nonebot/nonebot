@@ -4,6 +4,7 @@ in Nonebot. This, yet another implementation, is experimental and may
 be easier or harder to use than the standard one.
 """
 
+from datetime import timedelta
 from functools import partial
 from typing import Callable, Iterable, Optional, Type, Union, overload
 
@@ -23,6 +24,7 @@ def on_command(
     only_to_me: bool = True,
     privileged: bool = False,
     shell_like: bool = False,
+    expire_timeout: Optional[timedelta] = ...,
     session_class: Optional[Type[CommandSession]] = None
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
@@ -36,7 +38,7 @@ def on_command(
     return on_command_custom(name, aliases=aliases, patterns=patterns,
                              only_to_me=only_to_me, privileged=privileged,
                              shell_like=shell_like, perm_checker=perm_checker,
-                             session_class=session_class)
+                             expire_timeout=expire_timeout, session_class=session_class)
 
 
 @overload
