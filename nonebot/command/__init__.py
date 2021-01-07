@@ -80,16 +80,17 @@ class Command:
     """
     INTERNAL API
 
-    Note ... (Ellipsis) is a valid value for field expire_timeout. However I
-    cannot type it until Python 3.10. see bugs.python.org/issue41810.
+    Note ... (Ellipsis) is a valid value for field expire_timeout and run_timeout.
+    However I cannot type it until Python 3.10. see bugs.python.org/issue41810.
     """
     __slots__ = ('name', 'func', 'only_to_me', 'privileged', 'args_parser_func',
-                 'perm_checker_func', 'expire_timeout', 'session_class')
+                 'perm_checker_func', 'expire_timeout', 'run_timeout', 'session_class')
 
     def __init__(self, *, name: CommandName_T, func: CommandHandler_T,
                  only_to_me: bool, privileged: bool,
                  perm_checker_func: PermChecker_T,
                  expire_timeout: Optional[timedelta],
+                 run_timeout: Optional[timedelta],
                  session_class: Optional[Type['CommandSession']]):
         self.name = name
         self.func = func
@@ -97,7 +98,8 @@ class Command:
         self.privileged = privileged
         self.args_parser_func: Optional[CommandHandler_T] = None
         self.perm_checker_func = perm_checker_func  # returns True if can trigger
-        self.expire_timeout = expire_timeout
+        self.expire_timeout = expire_timeout  # includes EllipsisType
+        self.run_timeout = run_timeout  # includes EllipsisType
         self.session_class = session_class
 
     async def run(self,
@@ -522,6 +524,13 @@ class CommandSession(BaseSession):
         return self.bot.config.SESSION_EXPIRE_TIMEOUT
 
     @property
+    def run_timeout(self) -> Optional[timedelta]:
+        """INTERNAL API"""
+        if self.cmd.run_timeout is not ...:
+            return self.cmd.run_timeout
+        return self.bot.config.SESSION_RUN_TIMEOUT
+
+    @property
     def is_valid(self) -> bool:
         """
         INTERNAL API
@@ -865,9 +874,8 @@ async def _real_run_command(session: CommandSession,
         logger.debug(f'Running command {session.cmd.name}')
         session.running = True
         future = asyncio.ensure_future(session.cmd.run(session, **kwargs))
-        timeout = None
-        if session.bot.config.SESSION_RUN_TIMEOUT:
-            timeout = session.bot.config.SESSION_RUN_TIMEOUT.total_seconds()
+        timeout_opt = session.run_timeout
+        timeout = timeout_opt.total_seconds() if timeout_opt else None
 
         try:
             await asyncio.wait_for(future, timeout)

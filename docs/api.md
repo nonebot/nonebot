@@ -1223,7 +1223,7 @@ sidebar: auto
                      '\n'.join(map(lambda p: p.name, filter(lambda p: p.name, plugins))))
   ```
 
-### _decorator_ `on_command(name, *, aliases=(), permission=perm.EVERYBODY, only_to_me=True, privileged=False, shell_like=False, expire_timeout=..., session_class=None)` <Badge text="1.6.0+" />
+### _decorator_ `on_command(name, *, aliases=(), permission=perm.EVERYBODY, only_to_me=True, privileged=False, shell_like=False, expire_timeout=..., run_timeout=..., session_class=None)` <Badge text="1.6.0+" />
 
 - **说明:**
 
@@ -1244,6 +1244,7 @@ sidebar: auto
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
   - `shell_like: bool`: 是否使用类 shell 语法，若是，则会自动使用 `shlex` 模块进行分割（无需手动编写参数解析器），分割后的参数列表放入 `session.args['argv']`
   - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 命令过期时间。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_EXPIRE_TIMEOUT`，如果提供则使用提供的值。
+  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 命令会话的运行超时时长。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_RUN_TIMEOUT`，如果提供则使用提供的值。
   - `session_class: Optional[Type[CommandSession]]` <Badge text="1.7.0+"/>: 自定义 `CommandSession` 子类，若传入此参数，则命令处理函数的参数 `session` 类型为 `session_class`
 
 - **要求:**

@@ -25,6 +25,7 @@ def on_command(
     privileged: bool = False,
     shell_like: bool = False,
     expire_timeout: Optional[timedelta] = ...,
+    run_timeout: Optional[timedelta] = ...,
     session_class: Optional[Type[CommandSession]] = None
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
@@ -38,7 +39,8 @@ def on_command(
     return on_command_custom(name, aliases=aliases, patterns=patterns,
                              only_to_me=only_to_me, privileged=privileged,
                              shell_like=shell_like, perm_checker=perm_checker,
-                             expire_timeout=expire_timeout, session_class=session_class)
+                             expire_timeout=expire_timeout, run_timeout=run_timeout,
+                             session_class=session_class)
 
 
 @overload
