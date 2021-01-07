@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.bus import EventBus
@@ -10,8 +10,6 @@ from .session import BaseSession
 
 from .typing import NoticeHandler_T, RequestHandler_T
 
-_bus = EventBus()
-
 
 class EventHandler:
     """INTERNAL API"""
@@ -20,6 +18,32 @@ class EventHandler:
     def __init__(self, events: List[str], func: Union[NoticeHandler_T, RequestHandler_T]):
         self.events = events
         self.func = func
+
+
+class EventManager:
+    """INTERNAL API"""
+    bus = EventBus()
+
+    @classmethod
+    def add_event_handler(cls, handler: EventHandler) -> None:
+        for event in handler.events:
+            cls.bus.subscribe(event, handler.func)
+
+    @classmethod
+    def remove_event_handler(cls, handler: EventHandler) -> None:
+        for event in handler.events:
+            cls.bus.unsubscribe(event, handler.func)
+
+    @classmethod
+    def switch_event_handler_global(cls,
+                                    handler: EventHandler,
+                                    state: Optional[bool] = None) -> None:
+        for event in handler.events:
+            if handler.func in cls.bus._subscribers[event] and not state:
+                cls.bus.unsubscribe(event, handler.func)
+            elif handler.func not in cls.bus._subscribers[
+                    event] and state is not False:
+                cls.bus.subscribe(event, handler.func)
 
 
 class NoticeSession(BaseSession):
@@ -82,7 +106,7 @@ async def handle_notice_or_request(bot: NoneBot, event: CQEvent) -> None:
     ev_name = event.name
     logger.debug(f'Emitting event: {ev_name}')
     try:
-        await _bus.emit(ev_name, session)
+        await EventManager.bus.emit(ev_name, session)
     except Exception as e:
         logger.error(f'An exception occurred while handling event {ev_name}:')
         logger.exception(e)

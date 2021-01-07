@@ -12,7 +12,7 @@ from typing import Any, Set, Dict, TypeVar, Union, Optional, Iterable, Callable,
 from .log import logger
 from nonebot import permission as perm
 from .command import Command, CommandManager, CommandSession
-from .notice_request import _bus, EventHandler
+from .notice_request import EventHandler, EventManager
 from .natural_language import NLProcessor, NLPManager
 from .typing import CommandName_T, CommandHandler_T, NLPHandler_T, NoticeHandler_T, Patterns_T, PermChecker_T, RequestHandler_T
 
@@ -117,8 +117,7 @@ class PluginManager:
         for nl_processor in plugin.nl_processors:
             NLPManager.remove_nl_processor(nl_processor)
         for event_handler in plugin.event_handlers:
-            for event in event_handler.events:
-                _bus.unsubscribe(event, event_handler.func)
+            EventManager.remove_event_handler(event_handler)
         del cls._plugins[module_path]
         return True
 
@@ -141,12 +140,7 @@ class PluginManager:
         for nl_processor in plugin.nl_processors:
             NLPManager.switch_nlprocessor_global(nl_processor, state)
         for event_handler in plugin.event_handlers:
-            for event in event_handler.events:
-                if event_handler.func in _bus._subscribers[event] and not state:
-                    _bus.unsubscribe(event, event_handler.func)
-                elif event_handler.func not in _bus._subscribers[
-                        event] and state is not False:
-                    _bus.subscribe(event, event_handler.func)
+            EventManager.switch_event_handler_global(event_handler, state)
 
     @classmethod
     def switch_command_global(cls,
@@ -197,12 +191,7 @@ class PluginManager:
             warnings.warn(f"Plugin {module_path} not found")
             return
         for event_handler in plugin.event_handlers:
-            for event in event_handler.events:
-                if event_handler.func in _bus._subscribers[event] and not state:
-                    _bus.unsubscribe(event, event_handler.func)
-                elif event_handler.func not in _bus._subscribers[
-                        event] and state is not False:
-                    _bus.subscribe(event, event_handler.func)
+            EventManager.switch_event_handler_global(event_handler, state)
 
     def switch_plugin(self,
                       module_path: str,
@@ -549,12 +538,10 @@ def _make_event_deco(post_type: str):
             if isinstance(arg, str):
                 events_tmp = list(
                     map(lambda x: f"{post_type}.{x}", [arg, *events]))  # if arg is part of events str
-                for e in events_tmp:
-                    _bus.subscribe(e, func)
                 handler = EventHandler(events_tmp, func)
             else:
-                _bus.subscribe(post_type, func)
                 handler = EventHandler([post_type], func)
+            EventManager.add_event_handler(handler)
             Plugin.GlobalTemp.event_handlers.add(handler)
             return func
 
