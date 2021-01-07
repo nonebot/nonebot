@@ -1972,9 +1972,9 @@ sidebar: auto
 
 - **说明:**
 
-  此对象初始化时传递的 `permission`, `only_to_me`, `privileged`, `shell_like`, `session_class`。如果没有传递，则此字典也不存在相应键值。
+  此对象初始化时传递的 `permission`, `only_to_me`, `privileged`, `shell_like`, `expire_timeout`, `run_timeout`, `session_class`。如果没有传递，则此字典也不存在相应键值。
 
-#### `__init__(name, *, permission=..., only_to_me=..., privileged=..., shell_like=..., session_class=...)`
+#### `__init__(name, *, permission=..., only_to_me=..., privileged=..., shell_like=..., expire_timeout=..., run_timeout=... session_class=...)`
 
 - **说明:**
 
@@ -1987,9 +1987,11 @@ sidebar: auto
   - `only_to_me: bool`: 对应 `only_to_me` 属性
   - `privileged: bool`: 对应 `privileged` 属性
   - `shell_like: bool`: 对应 `shell_like` 属性
+  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 对应 `expire_timeout` 属性
+  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 对应 `run_timeout` 属性
   - `session_class: Optional[Type[CommandSession]]` <Badge text="1.8.1+"/>：对应 `session_class` 属性
 
-#### _decorator_ `command(name, *, aliases=..., patterns=..., permission=..., only_to_me=..., privileged=..., shell_like=..., session_class=...)`
+#### _decorator_ `command(name, *, aliases=..., patterns=..., permission=..., only_to_me=..., privileged=..., shell_like=..., expire_timeout=..., run_timeout=..., session_class=...)`
 
 - **说明:**
 
@@ -2004,6 +2006,8 @@ sidebar: auto
   - `only_to_me: bool`: 同上
   - `privileged: bool`: 同上
   - `shell_like: bool`: 同上
+  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 同上
+  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 同上
   - `session_class: Optional[Type[CommandSession]]` <Badge text="1.8.1+"/>：同上
 
 - **用法:**
