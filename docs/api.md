@@ -1243,8 +1243,8 @@ sidebar: auto
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
   - `shell_like: bool`: 是否使用类 shell 语法，若是，则会自动使用 `shlex` 模块进行分割（无需手动编写参数解析器），分割后的参数列表放入 `session.args['argv']`
-  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 命令过期时间。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_EXPIRE_TIMEOUT`，如果提供则使用提供的值。
-  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 命令会话的运行超时时长。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_RUN_TIMEOUT`，如果提供则使用提供的值。
+  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 命令过期时间。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_EXPIRE_TIMEOUT`，如果提供则使用提供的值。
+  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 命令会话的运行超时时长。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_RUN_TIMEOUT`，如果提供则使用提供的值。
   - `session_class: Optional[Type[CommandSession]]` <Badge text="1.7.0+"/>: 自定义 `CommandSession` 子类，若传入此参数，则命令处理函数的参数 `session` 类型为 `session_class`
 
 - **要求:**
@@ -1987,8 +1987,8 @@ sidebar: auto
   - `only_to_me: bool`: 对应 `only_to_me` 属性
   - `privileged: bool`: 对应 `privileged` 属性
   - `shell_like: bool`: 对应 `shell_like` 属性
-  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 对应 `expire_timeout` 属性
-  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 对应 `run_timeout` 属性
+  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 对应 `expire_timeout` 属性
+  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 对应 `run_timeout` 属性
   - `session_class: Optional[Type[CommandSession]]` <Badge text="1.8.1+"/>：对应 `session_class` 属性
 
 #### _decorator_ `command(name, *, aliases=..., patterns=..., permission=..., only_to_me=..., privileged=..., shell_like=..., expire_timeout=..., run_timeout=..., session_class=...)`
@@ -2006,8 +2006,8 @@ sidebar: auto
   - `only_to_me: bool`: 同上
   - `privileged: bool`: 同上
   - `shell_like: bool`: 同上
-  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 同上
-  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="master"/>: 同上
+  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 同上
+  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 同上
   - `session_class: Optional[Type[CommandSession]]` <Badge text="1.8.1+"/>：同上
 
 - **用法:**
@@ -3512,7 +3512,7 @@ async def _(session):
 
 - **参数:**
 
-  - `group_id: Union[int, Container[int]]` <Badge text="master"/>: 群号码，可以为多个群号。
+  - `group_id: Union[int, Container[int]]` <Badge text="1.8.2+"/>: 群号码，可以为多个群号。
 
 - **返回:**
 
@@ -3526,7 +3526,7 @@ async def _(session):
 
 - **参数:**
 
-  - `sender_id: Union[int, Container[int]]` <Badge text="master"/>: 发送者 QQ 号，可以是多个。
+  - `sender_id: Union[int, Container[int]]` <Badge text="1.8.2+"/>: 发送者 QQ 号，可以是多个。
 
 - **返回:**
 
@@ -3621,8 +3621,8 @@ async def _(session):
 
 - **参数:**
 
-  - `user_ids: Container[int]` <Badge text="master"/>: 要加入白名单的 QQ 号们，默认为空
-  - `group_ids: Container[int]` <Badge text="master"/>: 要加入白名单的群号们，默认为空
+  - `user_ids: Container[int]` <Badge text="1.8.2+"/>: 要加入白名单的 QQ 号们，默认为空
+  - `group_ids: Container[int]` <Badge text="1.8.2+"/>: 要加入白名单的群号们，默认为空
   - `reverse: bool`: 如果为真，则返回值变为黑名单
 
 - **返回:**

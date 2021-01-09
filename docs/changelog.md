@@ -3,7 +3,7 @@ sidebar: auto
 ---
 
 # 更新日志
-## master
+## v1.8.2
 - 修复 `CommandSession.apause` 方法在命令过期后泄露的问题
 - 不同命令 (`on_command`) 现在可以设置不同的运行和过期超时时间
 
