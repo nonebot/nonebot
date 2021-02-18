@@ -6,7 +6,7 @@ be easier or harder to use than the standard one.
 
 import asyncio
 from datetime import datetime, time
-from typing import Any, Awaitable, Callable, Dict, Iterable, NamedTuple, Optional, Union, List
+from typing import Any, Awaitable, Callable, Container, Dict, Iterable, NamedTuple, Optional, Union, List
 
 from aiocache.decorators import cached
 from aiocqhttp.event import Event as CQEvent
@@ -77,19 +77,20 @@ class SenderRoles(NamedTuple):
     def is_discusschat(self) -> bool:
         return self.event.get('message_type') == 'discuss'
 
-    def from_group(self, group_id: Union[int, Iterable[int]]) -> bool:
+    def from_group(self, group_id: Union[int, Container[int]]) -> bool:
         """returns True if the sender belongs to these groups (group_ids)"""
         if isinstance(group_id, int):
             return self.event.group_id == group_id
         return self.event.group_id in group_id
 
-    def sent_by(self, sender_id: Union[int, Iterable[int]]) -> bool:
+    def sent_by(self, sender_id: Union[int, Container[int]]) -> bool:
         """returns True if the sender is one of these people (sender_ids)"""
         if isinstance(sender_id, int):
             return self.event.user_id == sender_id
         return self.event.user_id in sender_id
 
 
+# AS OF this commit: same as original _get_member_info()
 @cached(ttl=2 * 60)
 async def _get_member_info(bot: NoneBot,
                            self_id: int,
@@ -131,16 +132,29 @@ async def check_permission(bot: NoneBot, event: CQEvent,
 RoleCheckPolicy = Callable[[SenderRoles], Union[bool, Awaitable[bool]]]
 
 
-def aggregate_policy(policies: Iterable[RoleCheckPolicy]) -> RoleCheckPolicy:
+def aggregate_policy(
+    policies: Iterable[RoleCheckPolicy],
+    aggregator: Callable[[Iterable[object]], bool] = all
+) -> RoleCheckPolicy:
     """
-    Merge several role checkers into one using the AND operator. if all given
-    policies are sync, the merged one is sync, otherwise it is async. This is
-    useful to concatenate policies like applying [blocklist, groupchat, ...]
-    altogether.
+    Merge several role checkers into one using the AND operator (if `aggregator`
+    is builtin function `all` - by default). if all given policies are sync,
+    the merged one is sync, otherwise it is async. This is useful to concatenate
+    policies like applying [blocklist, groupchat, ...] altogether.
 
     async functions are slow maybe. use with caution.
 
+    The `aggregator` parameter is recommended to be the bultin functions such as
+    `all` (performing AND operations on each checkers), or `any` (performing OR
+    operations) because they short circuit. However it is possible to define more
+    complex aggregators.
+
+    Be aware that the order of checkers being called is not specified.
+
     :param policies: list of policies
+    :param aggregator: the function used to combine the results of each separate
+                       checkers as items consumed in iterators.
+    :return: new policy
     """
     syncs = []  # type: List[Callable[[SenderRoles], bool]]
     asyncs = []  # type: List[Callable[[SenderRoles], Awaitable[bool]]]
@@ -153,7 +167,7 @@ def aggregate_policy(policies: Iterable[RoleCheckPolicy]) -> RoleCheckPolicy:
             syncs.append(f)  # type: ignore
 
     def checker_sync(sender: SenderRoles) -> bool:
-        return all(f(sender) for f in syncs)
+        return aggregator(f(sender) for f in syncs)
 
     if len(asyncs) == 0:
         return checker_sync
@@ -163,13 +177,13 @@ def aggregate_policy(policies: Iterable[RoleCheckPolicy]) -> RoleCheckPolicy:
             return False
         # no short circuiting currently :-(
         coros = [f(sender) for f in asyncs]
-        return all(await asyncio.gather(*coros))
+        return aggregator(await asyncio.gather(*coros))
 
     return checker_async
 
 
-def simple_allow_list(*, user_ids: Iterable[int] = set(),
-                      group_ids: Iterable[int] = set(),
+def simple_allow_list(*, user_ids: Container[int] = ...,
+                      group_ids: Container[int] = ...,
                       reverse: bool = False) -> RoleCheckPolicy:
     """
     Creates a policy that only allows senders from these users or groups.
@@ -181,9 +195,10 @@ def simple_allow_list(*, user_ids: Iterable[int] = set(),
     :param group_ids: set of group ids to allow
     :param reverse: if this is true, then bans the aforementioned
                     senders instead (policy becomes blocklist)
+    :return: new policy
     """
-    user_ids = set(user_ids)
-    group_ids = set(group_ids)
+    user_ids = user_ids if user_ids is not ... else set()
+    group_ids = group_ids if group_ids is not ... else set()
 
     def checker(sender: SenderRoles) -> bool:
         is_in = sender.sent_by(user_ids) or sender.from_group(group_ids)
@@ -205,6 +220,7 @@ def simple_time_range(begin_time: time, end_time: time,
     :param reverse: if this is true, then bans the aforementioned
                     time ranges instead
     :param tz_info: argument to pass to datetime.now()
+    :return: new policy
     """
     # source: https://stackoverflow.com/questions/10048249/how-do-i-determine-if-current-time-is-within-a-specified-range-using-pythons-da
     def checker(_: Any) -> bool:

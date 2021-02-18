@@ -6,6 +6,7 @@ from nonebot.command.argfilter import ValidateError
 
 
 class BaseValidator:
+    """INTERNAL API"""
 
     def __init__(self, message=None):
         self.message = message
@@ -56,14 +57,14 @@ def match_regex(pattern: str, message=None, *, flags=0,
     Validate any string object to ensure it matches a given pattern.
     """
 
-    pattern = re.compile(pattern, flags)
+    pattern_ = re.compile(pattern, flags)
 
     def validate(value):
         if fullmatch:
-            if not re.fullmatch(pattern, value):
+            if not re.fullmatch(pattern_, value):
                 _raise_failure(message)
         else:
-            if not re.match(pattern, value):
+            if not re.match(pattern_, value):
                 _raise_failure(message)
         return value
 
@@ -98,3 +99,12 @@ def between_inclusive(start=None, end=None, message=None) -> Filter_T:
         return value
 
     return validate
+
+
+__all__ = [
+    'not_empty',
+    'fit_size',
+    'match_regex',
+    'ensure_true',
+    'between_inclusive',
+]

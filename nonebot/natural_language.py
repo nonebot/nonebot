@@ -1,6 +1,6 @@
 import asyncio
 import warnings
-from typing import Set, Iterable, Optional, Callable, Union, NamedTuple
+from typing import Any, List, Set, Iterable, Optional, Tuple, Union, NamedTuple
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.message import Message
@@ -9,14 +9,15 @@ from .log import logger
 from . import NoneBot
 from .command import call_command
 from .session import BaseSession
-from .typing import CommandName_T, CommandArgs_T, PermChecker_T
+from .typing import CommandName_T, CommandArgs_T, PermChecker_T, NLPHandler_T
 
 
 class NLProcessor:
+    """INTERNAL API"""
     __slots__ = ('func', 'keywords', 'only_to_me', 'only_short_message',
                  'allow_empty_message', 'perm_checker_func')
 
-    def __init__(self, *, func: Callable, keywords: Optional[Iterable[str]],
+    def __init__(self, *, func: NLPHandler_T, keywords: Optional[Iterable[str]],
                  only_to_me: bool, only_short_message: bool,
                  allow_empty_message: bool,
                  perm_checker_func: PermChecker_T):
@@ -52,15 +53,15 @@ class NLProcessor:
         if self.only_to_me and not session.event['to_me']:
             return False
 
-        should_run = await self._check_perm(session)
-        if should_run and self.keywords:
+        if self.keywords:
             for kw in self.keywords:
                 if kw in session.msg_text:
                     break
             else:
                 # no keyword matches
-                should_run = False
-        return should_run
+                return False
+
+        return await self._check_perm(session)
 
     async def _check_perm(self, session: 'NLPSession') -> bool:
         """
@@ -74,6 +75,7 @@ class NLProcessor:
 
 
 class NLPManager:
+    """INTERNAL API"""
     _nl_processors: Set[NLProcessor] = set()
 
     def __init__(self):
@@ -188,6 +190,8 @@ class IntentCommand(NamedTuple):
 async def handle_natural_language(bot: NoneBot, event: CQEvent,
                                   manager: NLPManager) -> bool:
     """
+    INTERNAL API
+
     Handle a message as natural language.
 
     This function is typically called by "handle_message".
@@ -203,41 +207,55 @@ async def handle_natural_language(bot: NoneBot, event: CQEvent,
     # at the same time some plugins may want to handle it
     msg_text_length = len(session.msg_text)
 
-    futures = []
-    for p in manager.nl_processors:
-        should_run = await p.test(session, msg_text_length=msg_text_length)
-        if should_run:
-            futures.append(asyncio.ensure_future(p.func(session)))
+    # returns 1. processor result; 2. whether this processor is considered handled
+    async def try_run_nlp(p: NLProcessor) -> Tuple[Any, bool]:
+        try:
+            should_run = await p.test(session, msg_text_length=msg_text_length)
+            if should_run:
+                return await p.func(session), True
+            return None, False
+        except Exception as e:
+            logger.error('An exception occurred while running '
+                         'some natural language processor:')
+            logger.exception(e)
+            return None, True
 
-    if futures:
-        # wait for intent commands, and sort them by confidence
-        intent_commands = []
-        for fut in futures:
-            try:
-                res = await fut
-                if isinstance(res, NLPResult):
-                    intent_commands.append(res.to_intent_command())
-                elif isinstance(res, IntentCommand):
-                    intent_commands.append(res)
-            except Exception as e:
-                logger.error('An exception occurred while running '
-                             'some natural language processor:')
-                logger.exception(e)
+    intent_commands: List[IntentCommand] = []
+    procs_empty = True
 
-        intent_commands.sort(key=lambda ic: ic.confidence, reverse=True)
-        logger.debug(f'Intent commands: {intent_commands}')
+    for res in asyncio.as_completed([try_run_nlp(p) for p in manager.nl_processors]):
+        result, should_run = await res
+        if not should_run:
+            continue
+        procs_empty = False
+        if isinstance(result, NLPResult):
+            intent_commands.append(result.to_intent_command())
+        elif isinstance(result, IntentCommand):
+            intent_commands.append(result)
 
-        if intent_commands and intent_commands[0].confidence >= 60.0:
-            # choose the intent command with highest confidence
-            chosen_cmd = intent_commands[0]
-            logger.debug(
-                f'Intent command with highest confidence: {chosen_cmd}')
-            return await call_command(bot,
-                                      event,
-                                      chosen_cmd.name,
-                                      args=chosen_cmd.args,
-                                      current_arg=chosen_cmd.current_arg,
-                                      check_perm=False)  # type: ignore
-        else:
-            logger.debug('No intent command has enough confidence')
+    if procs_empty:
+        return False
+
+    intent_commands.sort(key=lambda ic: ic.confidence, reverse=True)
+    logger.debug(f'Intent commands: {intent_commands}')
+
+    if intent_commands and intent_commands[0].confidence >= 60.0:
+        # choose the intent command with highest confidence
+        chosen_cmd = intent_commands[0]
+        logger.debug(
+            f'Intent command with highest confidence: {chosen_cmd}')
+        return await call_command(bot,
+                                  event,
+                                  chosen_cmd.name,
+                                  args=chosen_cmd.args,
+                                  current_arg=chosen_cmd.current_arg,
+                                  check_perm=False) or False
+    logger.debug('No intent command has enough confidence')
     return False
+
+
+__all__ = [
+    'NLPSession',
+    'NLPResult',
+    'IntentCommand',
+]

@@ -1,21 +1,22 @@
 import re
 import asyncio
-from typing import Callable, Iterable
+from typing import Set, Iterable
 
 from aiocqhttp import Event as CQEvent
-from aiocqhttp.message import escape, unescape  # noqa: F401
 from aiocqhttp.message import Message, MessageSegment
+from aiocqhttp.message import escape, unescape
 
 from . import NoneBot
 from .log import logger
 from .natural_language import handle_natural_language
 from .command import handle_command, SwitchException
 from .plugin import PluginManager
+from .typing import MessagePreprocessor_T
 
-_message_preprocessors = set()
+_message_preprocessors: Set[MessagePreprocessor_T] = set()
 
 
-def message_preprocessor(func: Callable) -> Callable:
+def message_preprocessor(func: MessagePreprocessor_T) -> MessagePreprocessor_T:
     _message_preprocessors.add(func)
     return func
 
@@ -34,6 +35,7 @@ class CanceledException(Exception):
 
 
 async def handle_message(bot: NoneBot, event: CQEvent) -> None:
+    """INTERNAL API"""
     _log_message(event)
 
     assert isinstance(event.message, Message)
@@ -142,3 +144,13 @@ def _log_message(event: CQEvent) -> None:
     logger.info(f'Self: {event.self_id}, '
                 f'Message {event.message_id} from {msg_from}: '
                 f'{repr(str(event.message))}')
+
+
+__all__ = [
+    'message_preprocessor',
+    'CanceledException',
+    'Message',
+    'MessageSegment',
+    'escape',
+    'unescape',
+]

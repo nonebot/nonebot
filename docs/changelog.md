@@ -3,11 +3,34 @@ sidebar: auto
 ---
 
 # 更新日志
+## v1.8.2
+- 修复 `CommandSession.apause` 方法在命令过期后泄露的问题
+- 不同命令 (`on_command`) 现在可以设置不同的运行和过期超时时间
 
-## master
+## v1.8.1
+
+- 调整 `CommandGroup` 实际表现和文档不一致的问题。
+- 调整自然语言处理器并发检查权限的逻辑
+- 调整 `CommandHandler_T` 返回值为 `Awaitable`，在此之前用户会以为 `on_command` 可以传递同步函数而产生运行时报错
+- 形如 `on_request` 的装饰器现在有了重载的类型定义，`typing` 中也加入 `RequestHandler_T` 等处理函数的类型。mypy 用户的编辑器可以提前发现类型错误：
+
+```python
+@on_request
+async def _(s: RequestSession): ... # ok
+
+@on_request('group.invite')
+async def _(s: RequestSession): ... # ok
+
+@on_request('group.invite')
+def _(s: CommandSession): ... # 错误，函数类型不对
+```
+
+## v1.8.0
 
 - `CommandSession` 新增 `aget` `apause` 方法， 用于 Session 的异步获取参数
 - 新增 `nonebot.experimental.permission`, `nonebot.experimental.plugin` 模块，用于增强原有的命令权限控制系统
+- 各模块添加了 `__all__` 常量，现在可以安全地使用 `*` 来导入公共的 API。
+- 项目现在采用自动发布模式，Pypi index 会根据仓库 Release 发布新版本。
 
 ## v1.7.0
 

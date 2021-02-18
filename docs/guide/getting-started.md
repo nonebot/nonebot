@@ -42,11 +42,15 @@ Running on http://127.0.0.1:8080 (CTRL + C to quit)
 
 除此之外可能有一些红色的提示信息如 `ujson module not found, using json` 等，可以忽略。
 
-## 配置 CQHTTP 插件
+## 配置 CQHTTP 插件 (已弃用)
+
+:::danger 重要
+CQHTTP 插件在 2020 年 8 月后已经无法使用。
+:::
 
 单纯运行 NoneBot 实例并不会产生任何效果，因为此刻 酷Q 这边还不知道 NoneBot 的存在，也就无法把消息发送给它，因此现在需要对 CQHTTP 插件做一个简单的配置来让它把消息等事件上报给 NoneBot。
 
-如果你在之前已经按照 [安装](/guide/installation.md) 的建议使用默认配置运行了一次 CQHTTP 插件，此时 酷Q 的 `data/app/io.github.richardchien.coolqhttpapi/config/` 目录中应该已经有了一个名为 `<user-id>.json` 的文件（`<user-id>` 为你登录的 QQ 账号）。修改这个文件，**修改如下配置项（如果不存在相应字段则添加）**：
+如果你在之前已经按照 [安装](/guide/installation.md#cqhttp-插件-已弃用) 的建议使用默认配置运行了一次 CQHTTP 插件，此时 酷Q 的 `data/app/io.github.richardchien.coolqhttpapi/config/` 目录中应该已经有了一个名为 `<user-id>.json` 的文件（`<user-id>` 为你登录的 QQ 账号）。修改这个文件，**修改如下配置项（如果不存在相应字段则添加）**：
 
 :::warning 注意
 如果使用 CQHTTP 插件官方 Docker 镜像运行 酷Q，则配置文件所在目录可能是 `app/io.github.richardchien.coolqhttpapi/config/`。

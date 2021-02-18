@@ -1,8 +1,8 @@
 import re
 import asyncio
 import warnings
-from datetime import datetime
 from functools import partial, wraps
+from datetime import datetime, timedelta
 from typing import (NoReturn, Tuple, Union, Iterable, Any, Optional, List, Dict,
                     Awaitable, Pattern, Type)
 
@@ -24,6 +24,7 @@ _sessions = {}  # type: Dict[str, "CommandSession"]
 
 
 class CommandInterrupt(Exception):
+    """INTERNAL API"""
     pass
 
 
@@ -58,6 +59,8 @@ class _FinishException(CommandInterrupt):
 
 class SwitchException(CommandInterrupt):
     """
+    INTERNAL API
+
     Raised by session.switch() indicating that the command session
     should be stopped and replaced with a new one (going through
     handle_message() again).
@@ -75,12 +78,20 @@ class SwitchException(CommandInterrupt):
 
 
 class Command:
+    """
+    INTERNAL API
+
+    Note ... (Ellipsis) is a valid value for field expire_timeout and run_timeout.
+    However I cannot type it until Python 3.10. see bugs.python.org/issue41810.
+    """
     __slots__ = ('name', 'func', 'only_to_me', 'privileged', 'args_parser_func',
-                 'perm_checker_func', 'session_class')
+                 'perm_checker_func', 'expire_timeout', 'run_timeout', 'session_class')
 
     def __init__(self, *, name: CommandName_T, func: CommandHandler_T,
                  only_to_me: bool, privileged: bool,
                  perm_checker_func: PermChecker_T,
+                 expire_timeout: Optional[timedelta],
+                 run_timeout: Optional[timedelta],
                  session_class: Optional[Type['CommandSession']]):
         self.name = name
         self.func = func
@@ -88,6 +99,8 @@ class Command:
         self.privileged = privileged
         self.args_parser_func: Optional[CommandHandler_T] = None
         self.perm_checker_func = perm_checker_func  # returns True if can trigger
+        self.expire_timeout = expire_timeout  # includes EllipsisType
+        self.run_timeout = run_timeout  # includes EllipsisType
         self.session_class = session_class
 
     async def run(self,
@@ -316,64 +329,12 @@ class CommandManager:
                 continue
             cls._patterns[pattern] = cmd
 
-    def _add_command_to_tree(self, cmd_name: CommandName_T, cmd: Command,
-                             tree: Dict[str, Union[Dict, Command]]) -> None:
-        """Add command to the target command tree.
-        
-        Args:
-            cmd_name (CommandName_T): Name of the command
-            cmd (Command): Command object
-            tree (Dict[str, Union[Dict, Command]): Target command tree
-        """
-        current_parent = tree
-        for parent_key in cmd_name[:-1]:
-            current_parent[parent_key] = current_parent.get(parent_key) or {}
-            current_parent = current_parent[parent_key]
-
-            if not isinstance(current_parent, dict):
-                warnings.warn(f"{current_parent} is not a registry dict")
-                return
-        if cmd_name[-1] in current_parent:
-            warnings.warn(f"There is already a command named {cmd_name}")
-            return
-        current_parent[cmd_name[-1]] = cmd
-
-    def _generate_command_tree(
-        self, commands: Dict[CommandName_T,
-                             Command]) -> Dict[str, Union[Dict, Command]]:
-        """Generate command tree from commands dictionary.
-        
-        Args:
-            commands (Dict[CommandName_T, Command]): Dictionary of commands
-        
-        Returns:
-            Dict[str, Union[Dict, "Command"]]: Command tree
-        """
-        cmd_tree = {}  # type: Dict[str, Union[Dict, "Command"]]
-        for cmd_name, cmd in commands.items():
-            self._add_command_to_tree(cmd_name, cmd, cmd_tree)
-        return cmd_tree
-
     def _find_command(self, name: Union[str,
                                         CommandName_T]) -> Optional[Command]:
         cmd_name = (name,) if isinstance(name, str) else name
         if not cmd_name:
             return None
 
-        # cmd_tree = self._generate_command_tree({
-        #     name: cmd
-        #     for name, cmd in self.commands.items()
-        #     if self.switches.get(cmd, True)
-        # })
-        # for part in cmd_name[:-1]:
-        #     if part not in cmd_tree or not isinstance(
-        #             cmd_tree[part],  #type: ignore
-        #             dict):
-        #         return None
-        #     cmd_tree = cmd_tree[part]  # type: ignore
-
-        # cmd = cmd_tree.get(cmd_name[-1])  # type: ignore
-        # return cmd if isinstance(cmd, Command) else None
         cmd = {
             name: cmd
             for name, cmd in self.commands.items()
@@ -540,10 +501,12 @@ class CommandSession(BaseSession):
 
     @property
     def running(self) -> bool:
+        """INTERNAL API"""
         return self._running
 
     @running.setter
     def running(self, value) -> None:
+        """INTERNAL API"""
         if self._running is True and value is False:
             # change status from running to not running, record the time
             self._last_interaction = datetime.now()
@@ -551,15 +514,33 @@ class CommandSession(BaseSession):
 
     @property
     def waiting(self) -> bool:
+        """INTERNAL API"""
         return self._future is not None and not self._future.done()
 
     @property
+    def expire_timeout(self) -> Optional[timedelta]:
+        """INTERNAL API"""
+        if self.cmd.expire_timeout is not ...:
+            return self.cmd.expire_timeout
+        return self.bot.config.SESSION_EXPIRE_TIMEOUT
+
+    @property
+    def run_timeout(self) -> Optional[timedelta]:
+        """INTERNAL API"""
+        if self.cmd.run_timeout is not ...:
+            return self.cmd.run_timeout
+        return self.bot.config.SESSION_RUN_TIMEOUT
+
+    @property
     def is_valid(self) -> bool:
-        """Check if the session is expired or not."""
-        if self.bot.config.SESSION_EXPIRE_TIMEOUT and \
-                self._last_interaction and \
-                datetime.now() - self._last_interaction > \
-                self.bot.config.SESSION_EXPIRE_TIMEOUT:
+        """
+        INTERNAL API
+
+        Check whether the session has expired or not.
+        """
+        tm = self.expire_timeout
+        if tm and self._last_interaction and \
+            datetime.now() - self._last_interaction > tm:
             return False
         return True
 
@@ -603,6 +584,8 @@ class CommandSession(BaseSession):
                 *,
                 current_arg: Optional[str] = '') -> None:
         """
+        INTERNAL API
+
         Refill the session with a new message event.
 
         :param event: new message event
@@ -630,6 +613,7 @@ class CommandSession(BaseSession):
         :param key: argument key
         :param prompt: prompt to ask the user
         :param arg_filters: argument filters for the next user input
+        :param kwargs: other keyword arguments used in BeseSession.send()
         :return: the argument value
         """
         if key in self.state:
@@ -659,6 +643,7 @@ class CommandSession(BaseSession):
         :param prompt: prompt to ask the user
         :param arg_filters: argument filters for the next user input
         :param force_update: true to ignore the current argument
+        :param kwargs: other keyword arguments used in BeseSession.send()
         :return: the argument value
         """
         if key is ...:
@@ -688,7 +673,12 @@ class CommandSession(BaseSession):
         return self.state.get(key, default)
 
     def pause(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
-        """Pause the session for further interaction."""
+        """
+        Pause the session for further interaction. This function never returns.
+
+        :param message: message to send to the user
+        :param kwargs: other keyword arguments used in BeseSession.send()
+        """
         if message:
             self._run_future(self.send(message, **kwargs))
         self._raise(_PauseException())
@@ -699,6 +689,9 @@ class CommandSession(BaseSession):
         """
         Pause the session for further interaction. The control flow will pick
         up where it is left over when this command session is recalled.
+
+        :param message: message to send to the user
+        :param kwargs: other keyword arguments used in BeseSession.send()
         """
         if message:
             self._run_future(self.send(message, **kwargs))
@@ -708,15 +701,22 @@ class CommandSession(BaseSession):
             try:
                 self._future = asyncio.get_event_loop().create_future()
                 self.running = False
-                await self._future
+                timeout_opt = self.expire_timeout
+                timeout = timeout_opt.total_seconds() if timeout_opt else None
+                await asyncio.wait_for(self._future, timeout)
                 break
             except _PauseException:
                 continue
-            except _FinishException:
+            except (_FinishException, asyncio.TimeoutError):
                 raise
 
     def finish(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
-        """Finish the session."""
+        """
+        Finish the session. This function never returns.
+
+        :param message: message to send to the user when this command exits
+        :param kwargs: other keyword arguments used in BeseSession.send()
+        """
         if message:
             self._run_future(self.send(message, **kwargs))
         self._raise(_FinishException())
@@ -772,6 +772,8 @@ class SyncCommandSession(CommandSession):
 async def handle_command(bot: NoneBot, event: CQEvent,
                          manager: CommandManager) -> Optional[bool]:
     """
+    INTERNAL API
+
     Handle a message as a command.
 
     This function is typically called by "handle_message".
@@ -823,7 +825,7 @@ async def handle_command(bot: NoneBot, event: CQEvent,
             check_perm = False
         else:
             # the session is expired, remove it
-            logger.debug(f'Session of command {session.cmd.name} is expired')
+            logger.debug(f'Session of command {session.cmd.name} has expired')
             if ctx_id in _sessions:
                 del _sessions[ctx_id]
             session = None
@@ -896,9 +898,8 @@ async def _real_run_command(session: CommandSession,
         logger.debug(f'Running command {session.cmd.name}')
         session.running = True
         future = asyncio.ensure_future(session.cmd.run(session, **kwargs))
-        timeout = None
-        if session.bot.config.SESSION_RUN_TIMEOUT:
-            timeout = session.bot.config.SESSION_RUN_TIMEOUT.total_seconds()
+        timeout_opt = session.run_timeout
+        timeout = timeout_opt.total_seconds() if timeout_opt else None
 
         try:
             await asyncio.wait_for(future, timeout)
@@ -962,4 +963,13 @@ def kill_current_session(event: CQEvent) -> None:
         del _sessions[ctx_id]
 
 
-from nonebot.command.group import CommandGroup  # noqa: F401
+from nonebot.command.group import CommandGroup
+
+
+__all__ = [
+    'CommandManager',
+    'CommandSession',
+    'call_command',
+    'kill_current_session',
+    'CommandGroup',
+]

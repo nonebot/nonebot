@@ -10,3 +10,8 @@ if AsyncIOScheduler:
         pass
 else:
     Scheduler = None
+
+
+__all__ = [
+    'Scheduler',
+]

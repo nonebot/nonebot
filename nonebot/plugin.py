@@ -4,10 +4,11 @@ import sys
 import shlex
 import warnings
 import importlib
+from datetime import timedelta
 from functools import partial
 from types import ModuleType
 from asyncio import iscoroutinefunction
-from typing import Any, Set, Dict, Union, Optional, Iterable, Callable, Type
+from typing import Any, Set, Dict, TypeVar, Union, Optional, Iterable, Callable, Type, overload
 
 from aiocqhttp.utils import ensure_async
 
@@ -16,11 +17,7 @@ from nonebot import permission as perm
 from .command import Command, CommandManager, CommandSession, SyncCommandSession
 from .notice_request import _bus, EventHandler
 from .natural_language import NLProcessor, NLPManager
-from .typing import CommandName_T, CommandHandler_T, Patterns_T, PermChecker_T
-
-_tmp_command: Set[Command] = set()
-_tmp_nl_processor: Set[NLProcessor] = set()
-_tmp_event_handler: Set[EventHandler] = set()
+from .typing import CommandName_T, CommandHandler_T, NLPHandler_T, NoticeHandler_T, Patterns_T, PermChecker_T, RequestHandler_T
 
 
 class Plugin:
@@ -31,15 +28,42 @@ class Plugin:
                  module: ModuleType,
                  name: Optional[str] = None,
                  usage: Optional[Any] = None,
-                 commands: Set[Command] = set(),
-                 nl_processors: Set[NLProcessor] = set(),
-                 event_handlers: Set[EventHandler] = set()):
+                 commands: Set[Command] = ...,
+                 nl_processors: Set[NLProcessor] = ...,
+                 event_handlers: Set[EventHandler] = ...):
+        """Creates a plugin with no name, no usage, and no handlers."""
+
         self.module = module
         self.name = name
         self.usage = usage
-        self.commands = commands
-        self.nl_processors = nl_processors
-        self.event_handlers = event_handlers
+        self.commands: Set[Command] = \
+            commands if commands is not ... else set()
+        self.nl_processors: Set[NLProcessor] = \
+            nl_processors if nl_processors is not ... else set()
+        self.event_handlers: Set[EventHandler] = \
+            event_handlers if event_handlers is not ... else set()
+
+    class GlobalTemp:
+        """INTERNAL API"""
+
+        commands: Set[Command] = set()
+        nl_processors: Set[NLProcessor] = set()
+        event_handlers: Set[EventHandler] = set()
+
+        @classmethod
+        def clear(cls):
+            cls.commands.clear()
+            cls.nl_processors.clear()
+            cls.event_handlers.clear()
+
+        @classmethod
+        def make_plugin(cls, module: ModuleType):
+            return Plugin(module=module,
+                          name=getattr(module, '__plugin_name__', None),
+                          usage=getattr(module, '__plugin_usage__', None),
+                          commands={*cls.commands},
+                          nl_processors={*cls.nl_processors},
+                          event_handlers={*cls.event_handlers})
 
 
 class PluginManager:
@@ -248,19 +272,10 @@ def load_plugin(module_path: str) -> Optional[Plugin]:
     Returns:
         Optional[Plugin]: Plugin object loaded
     """
-    # Make sure tmp is clean
-    _tmp_command.clear()
-    _tmp_nl_processor.clear()
-    _tmp_event_handler.clear()
+    Plugin.GlobalTemp.clear()
     try:
         module = importlib.import_module(module_path)
-        name = getattr(module, '__plugin_name__', None)
-        usage = getattr(module, '__plugin_usage__', None)
-        commands = _tmp_command.copy()
-        nl_processors = _tmp_nl_processor.copy()
-        event_handlers = _tmp_event_handler.copy()
-        plugin = Plugin(module, name, usage, commands, nl_processors,
-                        event_handlers)
+        plugin = Plugin.GlobalTemp.make_plugin(module)
         PluginManager.add_plugin(module_path, plugin)
         logger.info(f'Succeeded to import "{module_path}"')
         return plugin
@@ -279,18 +294,10 @@ def reload_plugin(module_path: str) -> Optional[Plugin]:
             filter(lambda x: x.startswith(module_path), sys.modules.keys())):
         del sys.modules[module]
 
-    _tmp_command.clear()
-    _tmp_nl_processor.clear()
-    _tmp_event_handler.clear()
+    Plugin.GlobalTemp.clear()
     try:
         module = importlib.import_module(module_path)
-        name = getattr(module, '__plugin_name__', None)
-        usage = getattr(module, '__plugin_usage__', None)
-        commands = _tmp_command.copy()
-        nl_processors = _tmp_nl_processor.copy()
-        event_handlers = _tmp_event_handler.copy()
-        plugin = Plugin(module, name, usage, commands, nl_processors,
-                        event_handlers)
+        plugin = Plugin.GlobalTemp.make_plugin(module)
         PluginManager.add_plugin(module_path, plugin)
         logger.info(f'Succeeded to reload "{module_path}"')
         return plugin
@@ -351,11 +358,21 @@ def get_loaded_plugins() -> Set[Plugin]:
 
 
 def on_command_custom(
-    name: Union[str, CommandName_T], *, aliases: Union[Iterable[str], str],
-    patterns: Patterns_T, only_to_me: bool, privileged: bool, shell_like: bool,
-    perm_checker: PermChecker_T, session_class: Optional[Type[CommandSession]]
+    name: Union[str, CommandName_T],
+    *,
+    aliases: Union[Iterable[str], str],
+    patterns: Patterns_T,
+    only_to_me: bool,
+    privileged: bool,
+    shell_like: bool,
+    perm_checker: PermChecker_T,
+    expire_timeout: Optional[timedelta],
+    run_timeout: Optional[timedelta],
+    session_class: Optional[Type[CommandSession]]
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
+    INTERNAL API
+
     The implementation of on_command function with custom per checker function.
     dev: This function may not last long. Kill it when this function is referenced
     only once
@@ -381,6 +398,8 @@ def on_command_custom(
                       only_to_me=only_to_me,
                       privileged=privileged,
                       perm_checker_func=perm_checker,
+                      expire_timeout=expire_timeout,
+                      run_timeout=run_timeout,
                       session_class=session_class)
 
         if shell_like:
@@ -394,7 +413,7 @@ def on_command_custom(
         CommandManager.add_aliases(aliases, cmd)
         CommandManager.add_patterns(patterns, cmd)
 
-        _tmp_command.add(cmd)
+        Plugin.GlobalTemp.commands.add(cmd)
         func.args_parser = cmd.args_parser
 
         return func
@@ -411,6 +430,8 @@ def on_command(
     only_to_me: bool = True,
     privileged: bool = False,
     shell_like: bool = False,
+    expire_timeout: Optional[timedelta] = ...,
+    run_timeout: Optional[timedelta] = ...,
     session_class: Optional[Type[CommandSession]] = None
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
@@ -426,32 +447,35 @@ def on_command(
     :param only_to_me: only handle messages to me
     :param privileged: can be run even when there is already a session
     :param shell_like: use shell-like syntax to split arguments
+    :param expire_timeout: will override SESSION_EXPIRE_TIMEOUT if provided
+    :param run_timeout: will override SESSION_RUN_TIMEOUT if provided
     :param session_class: session class
     """
-    perm_checker = partial(perm.check_permission,
-                           permission_required=permission)
-    return on_command_custom(name,
-                             aliases=aliases,
-                             patterns=patterns,
-                             only_to_me=only_to_me,
-                             privileged=privileged,
-                             shell_like=shell_like,
-                             perm_checker=perm_checker,
+    perm_checker = partial(perm.check_permission, permission_required=permission)
+    return on_command_custom(name, aliases=aliases, patterns=patterns,
+                             only_to_me=only_to_me, privileged=privileged,
+                             shell_like=shell_like, perm_checker=perm_checker,
+                             expire_timeout=expire_timeout, run_timeout=run_timeout,
                              session_class=session_class)
 
 
-def on_natural_language_custom(keywords: Union[Optional[Iterable[str]], str,
-                                               Callable], *, only_to_me: bool,
-                               only_short_message: bool,
-                               allow_empty_message: bool,
-                               perm_checker: PermChecker_T):
+def on_natural_language_custom(
+    keywords: Union[Optional[Iterable[str]], str, NLPHandler_T],
+    *,
+    only_to_me: bool,
+    only_short_message: bool,
+    allow_empty_message: bool,
+    perm_checker: PermChecker_T
+) -> Union[Callable[[NLPHandler_T], NLPHandler_T], NLPHandler_T]:
     """
+    INTERNAL API
+
     The implementation of on_natural_language function with custom per checker function.
     dev: This function may not last long. Kill it when this function is referenced
     only once
     """
 
-    def deco(func: Callable) -> Callable:
+    def deco(func: NLPHandler_T) -> NLPHandler_T:
         nl_processor = NLProcessor(
             func=func,
             keywords=keywords,  # type: ignore
@@ -461,11 +485,12 @@ def on_natural_language_custom(keywords: Union[Optional[Iterable[str]], str,
             perm_checker_func=perm_checker)
 
         NLPManager.add_nl_processor(nl_processor)
-        _tmp_nl_processor.add(nl_processor)
+        Plugin.GlobalTemp.nl_processors.add(nl_processor)
         return func
 
     if callable(keywords):
         # here "keywords" is the function to be decorated
+        # applies default args provided by this function
         return on_natural_language()(keywords)
     else:
         if isinstance(keywords, str):
@@ -473,13 +498,23 @@ def on_natural_language_custom(keywords: Union[Optional[Iterable[str]], str,
         return deco
 
 
-def on_natural_language(keywords: Union[Optional[Iterable[str]], str,
-                                        Callable] = None,
-                        *,
-                        permission: int = perm.EVERYBODY,
-                        only_to_me: bool = True,
-                        only_short_message: bool = True,
-                        allow_empty_message: bool = False) -> Callable:
+@overload
+def on_natural_language(func: NLPHandler_T) -> NLPHandler_T:
+    """
+    Decorator to register a function as a natural language processor with
+    default kwargs.
+    """
+
+
+@overload
+def on_natural_language(
+    keywords: Optional[Union[Iterable[str], str]] = ...,
+    *,
+    permission: int = ...,
+    only_to_me: bool = ...,
+    only_short_message: bool = ...,
+    allow_empty_message: bool = ...
+) -> Callable[[NLPHandler_T], NLPHandler_T]:
     """
     Decorator to register a function as a natural language processor.
 
@@ -489,39 +524,86 @@ def on_natural_language(keywords: Union[Optional[Iterable[str]], str,
     :param only_short_message: only handle short messages
     :param allow_empty_message: handle empty messages
     """
-    perm_checker = partial(perm.check_permission,
-                           permission_required=permission)
-    return on_natural_language_custom(keywords,
-                                      only_to_me=only_to_me,
+
+
+def on_natural_language(
+    keywords: Union[Optional[Iterable[str]], str, NLPHandler_T] = None,
+    *,
+    permission: int = perm.EVERYBODY,
+    only_to_me: bool = True,
+    only_short_message: bool = True,
+    allow_empty_message: bool = False
+):
+    """
+    Implementation of on_natural_language overloads.
+    """
+    perm_checker = partial(perm.check_permission, permission_required=permission)
+    return on_natural_language_custom(keywords, only_to_me=only_to_me,
                                       only_short_message=only_short_message,
                                       allow_empty_message=allow_empty_message,
                                       perm_checker=perm_checker)
 
 
-def _make_event_deco(post_type: str) -> Callable:
+_Teh = TypeVar('_Teh', NoticeHandler_T, RequestHandler_T)
 
-    def deco_deco(arg: Optional[Union[str, Callable]] = None,
-                  *events: str) -> Callable:
 
-        def deco(func: Callable) -> Callable:
+def _make_event_deco(post_type: str):
+
+    def deco_deco(arg: Optional[Union[str, _Teh]] = None,
+                  *events: str) -> Union[Callable[[_Teh], _Teh], _Teh]:
+
+        def deco(func: _Teh) -> _Teh:
             if isinstance(arg, str):
                 events_tmp = list(
-                    map(lambda x: f"{post_type}.{x}", [arg] + list(events)))
+                    map(lambda x: f"{post_type}.{x}", [arg, *events]))  # if arg is part of events str
                 for e in events_tmp:
                     _bus.subscribe(e, func)
                 handler = EventHandler(events_tmp, func)
             else:
                 _bus.subscribe(post_type, func)
                 handler = EventHandler([post_type], func)
-            _tmp_event_handler.add(handler)
+            Plugin.GlobalTemp.event_handlers.add(handler)
             return func
 
         if callable(arg):
-            return deco(arg)  # type: ignore
+            return deco(arg)
         return deco
 
     return deco_deco
 
 
-on_notice = _make_event_deco('notice')
-on_request = _make_event_deco('request')
+@overload
+def on_notice(func: NoticeHandler_T) -> NoticeHandler_T: ...
+
+
+@overload
+def on_notice(*events: str) -> Callable[[NoticeHandler_T], NoticeHandler_T]: ...
+
+
+on_notice = _make_event_deco('notice')  # type: ignore[override]
+
+
+@overload
+def on_request(func: RequestHandler_T) -> RequestHandler_T: ...
+
+
+@overload
+def on_request(*events: str) -> Callable[[RequestHandler_T], RequestHandler_T]: ...
+
+
+on_request = _make_event_deco('request')  # type: ignore[override]
+
+
+__all__ = [
+    'Plugin',
+    'PluginManager',
+    'load_plugin',
+    'reload_plugin',
+    'load_plugins',
+    'load_builtin_plugins',
+    'get_loaded_plugins',
+    'on_command',
+    'on_natural_language',
+    'on_notice',
+    'on_request',
+]

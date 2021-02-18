@@ -22,7 +22,11 @@ python setup.py install
 
 以上命令中的 `pip`、`python` 可能需要根据情况换成 `pip3`、`python3`。
 
-## 酷Q
+## 酷Q (已弃用)
+
+:::danger 重要
+请查看下一小节。
+:::
 
 前往 酷Q 官方论坛的 [版本发布](https://cqp.cc/b/news) 页面根据需要下载最新版本的 酷Q Air 或 Pro，解压后启动 `CQA.exe` 或 `CQP.exe` 并登录 QQ 机器人账号。
 
@@ -32,7 +36,18 @@ python setup.py install
 如果这是你第一次使用 酷Q，建议完成它自带的新手教程，以对 酷Q 的运行机制有所了解。
 :::
 
-## CQHTTP 插件
+## CQHTTP 插件 (已弃用)
+
+:::danger 重要
+CQHTTP 插件在 2020 年 8 月后已经无法使用。目前推荐使用功能和配置方式类似的 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp) 来与 NoneBot 协同工作。
+
+其余支持 [OneBot (旧 CQHTTP)](https://github.com/howmanybots/onebot) 的方式有：
+
+* [OneBot Mirai](https://github.com/yyuueexxiinngg/onebot-kotlin)
+* [mirai-native](https://github.com/iTXTech/mirai-native) + CQHTTP
+
+此表并不完整，你可以选择合适的替代并且按照相应文档完成配置。
+:::
 
 前往 [CQHTTP 插件文档](https://cqhttp.cc/docs/)，按照其教程的「使用方法」安装插件。安装后，请先使用默认配置运行，并查看 酷Q 日志窗口的输出，以确定插件的加载、配置的生成和读取、插件版本等符合预期。
 

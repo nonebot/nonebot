@@ -30,7 +30,7 @@ sidebar: auto
 
 ### `Expression_T`
 
-- **类型:** `Union[str, Sequence[str], Callable[..., str]]` <Badge text="master"/>
+- **类型:** `Union[str, Sequence[str], Callable[..., str]]` <Badge text="v1.8.0+"/>
 
 - **说明:**
 
@@ -54,7 +54,7 @@ sidebar: auto
 
 ### `CommandHandler_T` <Badge text="1.6.0+"/>
 
-- **类型:** `Callable[[CommandSession], Any]`
+- **类型:** `Callable[[CommandSession], Awaitable[Any]]` <Badge text="1.8.1+"/>
 
 - **说明:**
 
@@ -62,7 +62,7 @@ sidebar: auto
 
 ### `Patterns_T` <Badge text="1.7.0+"/>
 
-- **类型:** `Union[Iterable[str], str, Iterable[Pattern[str]], Pattern[str]]` <Badge text="master"/>
+- **类型:** `Union[Iterable[str], str, Iterable[Pattern[str]], Pattern[str]]` <Badge text="v1.8.0+"/>
 
 - **说明:**
 
@@ -93,13 +93,45 @@ sidebar: auto
       return value
   ```
 
-### `PermChecker_T` <Badge text="master"/>
+### `PermChecker_T` <Badge text="v1.8.0+"/>
 
 - **类型:** `Callable[[NoneBot, CQEvent], Awaitable[bool]]`
 
 - **说明:**
 
   通用的权限检查函数。
+
+### `NLPHandler_T` <Badge text="1.8.1+"/>
+
+- **类型:** `Callable[[NLPSession], Awaitable[Optional[IntentCommand]]]`
+
+- **说明:**
+
+  自然语言处理函数。
+
+### `NoticeHandler_T` <Badge text="1.8.1+"/>
+
+- **类型:** `Callable[[NoticeSession], Awaitable[Any]]`
+
+- **说明:**
+
+  通知处理函数。
+
+### `RequestHandler_T` <Badge text="1.8.1+"/>
+
+- **类型:** `Callable[[RequestSession], Awaitable[Any]]`
+
+- **说明:**
+
+  请求处理函数。
+
+### `MessagePreprocessor_T` <Badge text="1.8.1+"/>
+
+- **类型:** `Callable[[NoneBot, CQEvent, PluginManager], Awaitable[Any]]`
+
+- **说明:**
+
+  消息预处理函数。
 
 ## 配置
 
@@ -501,7 +533,7 @@ sidebar: auto
 
   获取用于 API 调用的 `Callable` 对象。
 
-  对返回结果进行函数调用会调用 CQHTTP 的相应 API，请注意捕获 `CQHttpError` 异常，具体请参考 aiocqhttp 的 [API 调用](https://aiocqhttp.cqp.moe/#/what-happened#api-%E8%B0%83%E7%94%A8)。
+  对返回结果进行函数调用会调用 CQHTTP 的相应 API，请注意捕获 `CQHttpError` 异常，具体请参考 aiocqhttp 的 [API 调用](https://aiocqhttp.nonebot.dev/#/what-happened#api-%E8%B0%83%E7%94%A8)。
 
 - **参数:**
 
@@ -1191,7 +1223,7 @@ sidebar: auto
                      '\n'.join(map(lambda p: p.name, filter(lambda p: p.name, plugins))))
   ```
 
-### _decorator_ `on_command(name, *, aliases=(), permission=perm.EVERYBODY, only_to_me=True, privileged=False, shell_like=False, session_class=None)` <Badge text="1.6.0+" />
+### _decorator_ `on_command(name, *, aliases=(), permission=perm.EVERYBODY, only_to_me=True, privileged=False, shell_like=False, expire_timeout=..., run_timeout=..., session_class=None)` <Badge text="1.6.0+" />
 
 - **说明:**
 
@@ -1211,6 +1243,8 @@ sidebar: auto
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
   - `shell_like: bool`: 是否使用类 shell 语法，若是，则会自动使用 `shlex` 模块进行分割（无需手动编写参数解析器），分割后的参数列表放入 `session.args['argv']`
+  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 命令过期时间。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_EXPIRE_TIMEOUT`，如果提供则使用提供的值。
+  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 命令会话的运行超时时长。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_RUN_TIMEOUT`，如果提供则使用提供的值。
   - `session_class: Optional[Type[CommandSession]]` <Badge text="1.7.0+"/>: 自定义 `CommandSession` 子类，若传入此参数，则命令处理函数的参数 `session` 类型为 `session_class`
 
 - **要求:**
@@ -1291,6 +1325,8 @@ sidebar: auto
   ```
 
   响应所有带有「天气」关键词的消息，当做 `weather` 命令处理。
+  
+  如果有多个自然语言处理器同时处理了一条消息，则置信度最高的 `IntentCommand` 会被选择。处理器可以返回 `None`，表示不把消息当作任何命令处理。
 
 ### _decorator_ `on_notice(*events)` <Badge text="1.6.0+" />
 
@@ -1918,6 +1954,10 @@ sidebar: auto
 
 命令组，用于声明一组有相同名称前缀的命令。
 
+- **注:**
+
+  在 1.8.1 之前，此类文档与实际表现不一致 ([issue 242](https://github.com/nonebot/nonebot/issues/242))。
+
 #### `basename`
 
 - **类型:** `CommandName_T`
@@ -1926,53 +1966,32 @@ sidebar: auto
 
   命令名前缀。
 
-#### `permission`
+#### `base_kwargs`
 
-- **类型:** `Optional[int]`
-
-- **说明:**
-
-  命令组内命令的默认 `permission` 属性。
-
-#### `only_to_me`
-
-- **类型:** `Optional[bool]`
+- **类型:** `Dict[str, Any]`
 
 - **说明:**
 
-  命令组内命令的默认 `only_to_me` 属性。
+  此对象初始化时传递的 `permission`, `only_to_me`, `privileged`, `shell_like`, `expire_timeout`, `run_timeout`, `session_class`。如果没有传递，则此字典也不存在相应键值。
 
-#### `privileged`
-
-- **类型:** `Optional[bool]`
+#### `__init__(name, *, permission=..., only_to_me=..., privileged=..., shell_like=..., expire_timeout=..., run_timeout=... session_class=...)`
 
 - **说明:**
 
-  命令组内命令的默认 `privileged` 属性。
-
-#### `shell_like`
-
-- **类型:** `Optional[bool]`
-
-- **说明:**
-
-  命令组内命令的默认 `shell_like` 属性。
-
-#### `__init__(name, permission=None, *, only_to_me=None, privileged=None, shell_like=None)`
-
-- **说明:**
-
-  初始化命令组，参数即为上面的三个属性。
+  初始化命令组，参数即为上面的属性。
 
 - **参数:**
 
   - `name: Union[str, CommandName_T]`: 命令名前缀，若传入字符串，则会自动转换成元组
-  - `permission: Optional[int]`: 对应 `permission` 属性
-  - `only_to_me: Optional[bool]`: 对应 `only_to_me` 属性
-  - `privileged: Optional[bool]`: 对应 `privileged` 属性
-  - `shell_like: Optional[bool]`: 对应 `shell_like` 属性
+  - `permission: int`: 对应 `permission` 属性
+  - `only_to_me: bool`: 对应 `only_to_me` 属性
+  - `privileged: bool`: 对应 `privileged` 属性
+  - `shell_like: bool`: 对应 `shell_like` 属性
+  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 对应 `expire_timeout` 属性
+  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 对应 `run_timeout` 属性
+  - `session_class: Optional[Type[CommandSession]]` <Badge text="1.8.1+"/>：对应 `session_class` 属性
 
-#### _decorator_ `command(name, *, aliases=None, permission=None, only_to_me=None, privileged=None, shell_like=None)`
+#### _decorator_ `command(name, *, aliases=..., patterns=..., permission=..., only_to_me=..., privileged=..., shell_like=..., expire_timeout=..., run_timeout=..., session_class=...)`
 
 - **说明:**
 
@@ -1981,11 +2000,15 @@ sidebar: auto
 - **参数:**
 
   - `name: Union[str, CommandName_T]`: 命令名，注册命令处理器时会加上命令组的前缀
-  - `aliases: Optional[Iterable[str]]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值，则使用 `on_command` 装饰器的默认值
-  - `permission: Optional[int]`: 同上
-  - `only_to_me: Optional[bool]`: 同上
-  - `privileged: Optional[bool]`: 同上
-  - `shell_like: Optional[bool]`: 同上
+  - `aliases: Iterable[str], str]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值时，则使用 `on_command` 装饰器的默认值
+  - `patterns: Patterns_T` <Badge text="1.8.1+"/>：同上
+  - `permission: int`: 同上
+  - `only_to_me: bool`: 同上
+  - `privileged: bool`: 同上
+  - `shell_like: bool`: 同上
+  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 同上
+  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 同上
+  - `session_class: Optional[Type[CommandSession]]` <Badge text="1.8.1+"/>：同上
 
 - **用法:**
 
@@ -1993,7 +2016,7 @@ sidebar: auto
   sched = CommandGroup('scheduler')
 
   @sched.command('add', permission=PRIVATE)
-  async def _(session: CommandSession)
+  async def _(session: CommandSession):
       pass
   ```
 
@@ -2024,6 +2047,14 @@ sidebar: auto
 - **说明:**
 
   命令开关状态字典。
+
+#### `patterns` <Badge text="1.7.0+"/>
+
+- **类型:** `Dict[Pattern[str], Command]`
+
+- **说明:**
+
+  命令正则匹配字典。
 
 #### _class method_ `add_command(cls, cmd_name, cmd)`
 
@@ -2325,7 +2356,7 @@ sidebar: auto
 
   获取可选的时间参数。
 
-#### _coroutine_ `aget(key=..., *, prompt=None, arg_filters=None, force_update=..., **kwargs)` <Badge text="master"/>
+#### _coroutine_ `aget(key=..., *, prompt=None, arg_filters=None, force_update=..., **kwargs)` <Badge text="v1.8.0+"/>
 
 - **说明:**
 
@@ -2394,7 +2425,7 @@ sidebar: auto
 
   需要连续接收用户输入，并且过程中不需要改变 `current_key` 时，使用此函数暂停会话。
 
-#### _coroutine_ `apause(message=None, **kwargs)` <Badge text="master"/>
+#### _coroutine_ `apause(message=None, **kwargs)` <Badge text="v1.8.0+"/>
 
 - **说明:**
 
@@ -3010,7 +3041,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **说明:**
 
-  CQHTTP 上报的事件数据对象，具体请参考 [`aiocqhttp.Event`](https://aiocqhttp.cqp.moe/module/aiocqhttp/index.html#aiocqhttp.Event) 和 [事件上报](https://cqhttp.cc/docs/#/Post)。
+  CQHTTP 上报的事件数据对象，具体请参考 [`aiocqhttp.Event`](https://aiocqhttp.nonebot.dev/module/aiocqhttp/index.html#aiocqhttp.Event) 和 [事件上报](https://cqhttp.cc/docs/#/Post)。
 
 - **用法:**
 
@@ -3069,7 +3100,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **返回:**
 
-  - `Any` <Badge text="1.1.0+"/>: 返回 CQHTTP 插件发送消息接口的调用返回值，具体见 aiocqhttp 的 [API 调用](https://aiocqhttp.cqp.moe/#/what-happened#api-%E8%B0%83%E7%94%A8)
+  - `Any` <Badge text="1.1.0+"/>: 返回 CQHTTP 插件发送消息接口的调用返回值，具体见 aiocqhttp 的 [API 调用](https://aiocqhttp.nonebot.dev/#/what-happened#api-%E8%B0%83%E7%94%A8)
 
 - **异常:**
 
@@ -3196,7 +3227,7 @@ async def _(session):
 
 - **返回:**
 
-  - `Any` <Badge text="1.1.0+"/>: 返回 CQHTTP 插件发送消息接口的调用返回值，具体见 aiocqhttp 的 [API 调用](https://aiocqhttp.cqp.moe/#/what-happened#api-%E8%B0%83%E7%94%A8)
+  - `Any` <Badge text="1.1.0+"/>: 返回 CQHTTP 插件发送消息接口的调用返回值，具体见 aiocqhttp 的 [API 调用](https://aiocqhttp.nonebot.dev/#/what-happened#api-%E8%B0%83%E7%94%A8)
 
 - **异常:**
 
@@ -3337,11 +3368,11 @@ async def _(session):
 
 当 Python 环境中没有安装 APScheduler 包时，此类不存在，`Scheduler` 为 `None`。
 
-## `nonebot.experimental` 模块 <Badge text="master"/>
+## `nonebot.experimental` 模块 <Badge text="v1.8.0+"/>
 
-实验性功能模块提供了和 NoneBot 原有特性略有重合但功能更灵活的 API。此模块中的内容可能会再未来版本中随时修改，合并，甚至移除，并且可能缺失注释。在使用前，请仔细阅读文档和开发日志以避免因 API 修改带来的麻烦。
+实验性功能模块提供了和 NoneBot 原有特性略有重合但功能更灵活的 API。此模块中的内容可能会再未来版本中随时修改，合并，并且可能缺失注释。在使用前，请仔细阅读文档和开发日志以避免因 API 修改带来的麻烦。
 
-## `nonebot.experimental.permission` 模块 <Badge text="master"/>
+## `nonebot.experimental.permission` 模块 <Badge text="v1.8.0+"/>
 
 ### _class_ `SenderRoles`
 
@@ -3481,7 +3512,7 @@ async def _(session):
 
 - **参数:**
 
-  - `group_id: Union[int, Iterable[int]]`: 群号码，可以为多个群号。
+  - `group_id: Union[int, Container[int]]` <Badge text="1.8.2+"/>: 群号码，可以为多个群号。
 
 - **返回:**
 
@@ -3495,7 +3526,7 @@ async def _(session):
 
 - **参数:**
 
-  - `sender_id: Union[int, Iterable[int]]`: 发送者 QQ 号，可以是多个。
+  - `sender_id: Union[int, Container[int]]` <Badge text="1.8.2+"/>: 发送者 QQ 号，可以是多个。
 
 - **返回:**
 
@@ -3549,17 +3580,22 @@ async def _(session):
   has_perm = await check_permission(bot, event, normal_group_member)
   ```
 
-### `aggregate_policy(policies)`
+### `aggregate_policy(policies, aggregator=all)`
 
 - **说明:**
 
-  将多个权限检查策略函数使用 AND 操作符连接并返回单个权限检查策略。如果参数中所有的策略都是同步的，则返回值是同步的，否则返回值是异步的。在实现中对这几个策略使用内置 `all` 函数，会优先执行同步函数而且尽可能在同步模式的情况下短路。
+  在默认参数下，将多个权限检查策略函数使用 AND 操作符连接并返回单个权限检查策略。在实现中对这几个策略使用内置 `all` 函数，会优先执行同步函数而且尽可能在同步模式的情况下短路。
 
   在新的策略下，只有事件满足了 `policies` 中所有的原策略，才会返回 `True`。
+
+  `aggregator` 参数也可以设置为其他函数，例如 `any`：在此情况下会使用 `OR` 操作符连接。
+
+  如果参数中所有的策略都是同步的，则返回值是同步的，否则返回值是异步函数。
 
 - **参数:**
 
   - `policies: Iterable[RoleCheckPolicy]`: 要合并的权限检查策略
+  - `aggregator: Callable[[Iterable[object]], bool]`: 用于合并策略的函数
 
 - **返回:**
 
@@ -3575,7 +3611,7 @@ async def _(session):
                              lambda sender: sender.from_group(123456789))
   ```
 
-### `simple_allow_list(*, user_ids=set() , group_ids=set(), reverse=False)`
+### `simple_allow_list(*, user_ids=... , group_ids=..., reverse=False)`
 
 - **说明:**
 
@@ -3585,8 +3621,8 @@ async def _(session):
 
 - **参数:**
 
-  - `user_ids: Iterable[int]`: 要加入白名单的 QQ 号们
-  - `group_ids: Iterable[int]`: 要加入白名单的群号们
+  - `user_ids: Container[int]` <Badge text="1.8.2+"/>: 要加入白名单的 QQ 号们，默认为空
+  - `group_ids: Container[int]` <Badge text="1.8.2+"/>: 要加入白名单的群号们，默认为空
   - `reverse: bool`: 如果为真，则返回值变为黑名单
 
 - **返回:**
@@ -3599,6 +3635,8 @@ async def _(session):
   from nonebot.experimental.plugin import on_command
 
   bans_list = simple_allow_list(group_ids={ 123456789, 987654321 }, reverse=True)
+  # bans_list(987654321) -> False
+  # bans_list(987654322) -> True
   @on_command('签到', permission=bans_list)
   async def _(session: CommandSession):
       # 只有不是这两个群的时候才会执行
@@ -3622,7 +3660,7 @@ async def _(session):
 
   - `RoleCheckPolicy`: 新的权限检查策略
 
-## `nonebot.experimental.plugin` 模块 <Badge text="master"/>
+## `nonebot.experimental.plugin` 模块 <Badge text="v1.8.0+"/>
 
 ### _decorator_ `on_command(name, *, permission=lambda _: True, **kwargs)`
 
@@ -3633,7 +3671,7 @@ async def _(session):
 - **参数:**
 
   - `name: Union[str, CommandName_T]`: 命令名
-  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 组合
+  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 和其默认参数组合
   - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
 
 - **用法:**
@@ -3646,6 +3684,12 @@ async def _(session):
 
   一个仅对超级用户生效的命令。
 
+  当迁移到新装饰器时，用户可以定义与自带 API 相似的常量兼容原有代码。
+
+  ```python
+  SUPERUSERS = lambda sender: sender.is_superuser
+  ```
+
 ### _decorator_ `on_natural_language(keywords=None, *, permission=lambda _: True, **kwargs)`
 
 - **说明:**
@@ -3655,7 +3699,7 @@ async def _(session):
 - **参数:**
 
   - `keywords: Optional[Union[Iterable[str], str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
-  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 组合。不满足权限的用户将无法触发该处理器
+  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 和其默认参数组合。不满足权限的用户将无法触发该处理器
   - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
 
 - **用法:**
@@ -3667,7 +3711,9 @@ async def _(session):
       return sender.is_groupchat and sender.from_group(permit_group) \
         and not sender.sendby(banned_people)
 
-  @on_natural_language({'天气'}, only_to_me=False, permission=(foo, db_check))
+  @on_natural_language({'天气'}, only_to_me=False, permission=(foo, db_check))                       # 需要同时满足 foo 和 db_check
+                                                 # permission=aggregate_policy((foo, db_check))      # 需要同时满足 foo 和 db_check
+                                                 # permission=aggregate_policy((foo, db_check), any) # 只需满足一个
   async def _(session: NLPSession):
       return IntentCommand('weather', 100.0)
   ```

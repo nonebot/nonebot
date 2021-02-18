@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List, Union
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.bus import EventBus
@@ -8,13 +8,16 @@ from .log import logger
 from .exceptions import CQHttpError
 from .session import BaseSession
 
+from .typing import NoticeHandler_T, RequestHandler_T
+
 _bus = EventBus()
 
 
 class EventHandler:
+    """INTERNAL API"""
     __slots__ = ('events', 'func')
 
-    def __init__(self, events: List[str], func: Callable):
+    def __init__(self, events: List[str], func: Union[NoticeHandler_T, RequestHandler_T]):
         self.events = events
         self.func = func
 
@@ -68,6 +71,7 @@ class RequestSession(BaseSession):
 
 
 async def handle_notice_or_request(bot: NoneBot, event: CQEvent) -> None:
+    """INTERNAL API"""
     if event.type == 'notice':
         _log_notice(event)
         session = NoticeSession(bot, event)
@@ -90,3 +94,9 @@ def _log_notice(event: CQEvent) -> None:
 
 def _log_request(event: CQEvent) -> None:
     logger.info(f'Request: {event}')
+
+
+__all__ = [
+    'NoticeSession',
+    'RequestSession',
+]

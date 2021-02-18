@@ -47,3 +47,8 @@ class BaseSession:
                           ensure_private=ensure_private,
                           ignore_failure=ignore_failure,
                           **kwargs)
+
+
+__all__ = [
+    'BaseSession',
+]
