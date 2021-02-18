@@ -20,7 +20,7 @@ setup(
     },
     install_requires=['aiocqhttp>=1.3', 'aiocache>=0.10,<1.0'],
     extras_require={
-        'scheduler': ['apscheduler'],
+        'scheduler': ['apscheduler>=3.7.0'],
     },
     python_requires='>=3.7',
     platforms='any',
