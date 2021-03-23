@@ -1,3 +1,5 @@
+from typing import Any
+
 from aiocqhttp import Event as CQEvent
 
 from . import NoneBot
@@ -30,7 +32,7 @@ class BaseSession:
                    at_sender: bool = False,
                    ensure_private: bool = False,
                    ignore_failure: bool = True,
-                   **kwargs) -> None:
+                   **kwargs) -> Any:
         """
         Send a message ignoring failure by default.
 
