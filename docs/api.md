@@ -6,7 +6,7 @@ sidebar: auto
 
 ## 类型
 
-下面的 API 文档中，「类型」部分使用 Python 的 Type Hint 语法，见 [PEP 484](https://www.python.org/dev/peps/pep-0484/)、[PEP 526](https://www.python.org/dev/peps/pep-0526/) 和 [typing](https://docs.python.org/3/library/typing.html)。
+下面的 API 文档中，「类型」部分使用 Python 的 Type Hint 语法，见 [PEP 484](https://www.python.org/dev/peps/pep-0484/), [PEP 526](https://www.python.org/dev/peps/pep-0526/), [PEP 604](https://www.python.org/dev/peps/pep-0604/) 和 [typing](https://docs.python.org/3/library/typing.html)。
 
 除了 Python 内置的类型，下面还出现了如下 NoneBot 自定类型，实际上它们是 Python 内置类型的别名。
 
@@ -14,7 +14,7 @@ sidebar: auto
 
 ### `Context_T` <Badge text="1.5.0-" type="error"/>
 
-- **类型:** `Dict[str, Any]`
+- **类型:** `dict[str, Any]`
 
 - **说明:**
 
@@ -22,7 +22,7 @@ sidebar: auto
 
 ### `Message_T`
 
-- **类型:** `Union[str, Dict[str, Any], List[Dict[str, Any]]]`
+- **类型:** `str | dict[str, Any] | list[dict[str, Any]]`
 
 - **说明:**
 
@@ -30,7 +30,7 @@ sidebar: auto
 
 ### `Expression_T`
 
-- **类型:** `Union[str, Sequence[str], Callable[..., str]]` <Badge text="v1.8.0+"/>
+- **类型:** `str | Sequence[str] | (*Any, **Any) -> str` <Badge text="v1.8.0+"/>
 
 - **说明:**
 
@@ -38,7 +38,7 @@ sidebar: auto
 
 ### `CommandName_T`
 
-- **类型:** `Tuple[str]`
+- **类型:** `tuple[str]`
 
 - **说明:**
 
@@ -46,7 +46,7 @@ sidebar: auto
 
 ### `CommandArgs_T`
 
-- **类型:** `Dict[str, Any]`
+- **类型:** `dict[str, Any]`
 
 - **说明:**
 
@@ -54,7 +54,7 @@ sidebar: auto
 
 ### `CommandHandler_T` <Badge text="1.6.0+"/>
 
-- **类型:** `Callable[[CommandSession], Awaitable[Any]]` <Badge text="1.8.1+"/>
+- **类型:** `(CommandSession) -> Awaitable[Any]` <Badge text="1.8.1+"/>
 
 - **说明:**
 
@@ -62,7 +62,7 @@ sidebar: auto
 
 ### `Patterns_T` <Badge text="1.7.0+"/>
 
-- **类型:** `Union[Iterable[str], str, Iterable[Pattern[str]], Pattern[str]]` <Badge text="v1.8.0+"/>
+- **类型:** `Iterable[str] | str | Iterable[Pattern[str]] | Pattern[str]` <Badge text="v1.8.0+"/>
 
 - **说明:**
 
@@ -70,7 +70,7 @@ sidebar: auto
 
 ### `State_T` <Badge text="1.2.0+"/>
 
-- **类型:** `Dict[str, Any]`
+- **类型:** `dict[str, Any]`
 
 - **说明:**
 
@@ -78,7 +78,7 @@ sidebar: auto
 
 ### `Filter_T` <Badge text="1.2.0+"/>
 
-- **类型:** `Callable[[Any], Union[Any, Awaitable[Any]]]`
+- **类型:** `(Any) -> (Any | Awaitable[Any])`
 
 - **说明:**
 
@@ -95,7 +95,7 @@ sidebar: auto
 
 ### `PermChecker_T` <Badge text="v1.8.0+"/>
 
-- **类型:** `Callable[[NoneBot, CQEvent], Awaitable[bool]]`
+- **类型:** `(NoneBot, CQEvent) -> Awaitable[bool]`
 
 - **说明:**
 
@@ -103,7 +103,7 @@ sidebar: auto
 
 ### `NLPHandler_T` <Badge text="1.8.1+"/>
 
-- **类型:** `Callable[[NLPSession], Awaitable[Optional[IntentCommand]]]`
+- **类型:** `(NLPSession) -> Awaitable[IntentCommand | None]`
 
 - **说明:**
 
@@ -111,7 +111,7 @@ sidebar: auto
 
 ### `NoticeHandler_T` <Badge text="1.8.1+"/>
 
-- **类型:** `Callable[[NoticeSession], Awaitable[Any]]`
+- **类型:** `(NoticeSession) -> Awaitable[Any]`
 
 - **说明:**
 
@@ -119,7 +119,7 @@ sidebar: auto
 
 ### `RequestHandler_T` <Badge text="1.8.1+"/>
 
-- **类型:** `Callable[[RequestSession], Awaitable[Any]]`
+- **类型:** `(RequestSession) -> Awaitable[Any]`
 
 - **说明:**
 
@@ -127,7 +127,7 @@ sidebar: auto
 
 ### `MessagePreprocessor_T` <Badge text="1.8.1+"/>
 
-- **类型:** `Callable[[NoneBot, CQEvent, PluginManager], Awaitable[Any]]`
+- **类型:** `(NoneBot, CQEvent, PluginManager) -> Awaitable[Any]`
 
 - **说明:**
 
@@ -247,7 +247,7 @@ sidebar: auto
 
 ### `NICKNAME`
 
-- **类型:** `Union[str, Iterable[str]]`
+- **类型:** `str | Iterable[str]`
 
 - **默认值:** `''`
 
@@ -265,7 +265,7 @@ sidebar: auto
 
 ### `COMMAND_START`
 
-- **类型:** `Iterable[Union[str, Pattern]]`
+- **类型:** `Iterable[str | Pattern]`
 
 - **默认值:** `{'/', '!', '／', '！'}`
 
@@ -283,7 +283,7 @@ sidebar: auto
 
 ### `COMMAND_SEP`
 
-- **类型:** `Iterable[Union[str, Pattern]]`
+- **类型:** `Iterable[str | Pattern]`
 
 - **默认值:** `{'/', '.'}`
 
@@ -301,7 +301,7 @@ sidebar: auto
 
 ### `SESSION_EXPIRE_TIMEOUT`
 
-- **类型:** `Optional[datetime.timedelta]`
+- **类型:** `datetime.timedelta | None`
 
 - **默认值:** `datetime.timedelta(minutes=5)`
 
@@ -320,7 +320,7 @@ sidebar: auto
 
 ### `SESSION_RUN_TIMEOUT`
 
-- **类型:** `Optional[datetime.timedelta]`
+- **类型:** `datetime.timedelta | None`
 
 - **默认值:** `None`
 
@@ -445,7 +445,7 @@ sidebar: auto
 
 ### `APSCHEDULER_CONFIG`
 
-- **类型:** `Dict[str, Any]`
+- **类型:** `dict[str, Any]`
 
 - **默认值:** `{'apscheduler.timezone': 'Asia/Shanghai'}`
 
@@ -525,7 +525,7 @@ sidebar: auto
 
 - **参数:**
 
-  - `config_object: Optional[Any]`: 配置对象，类型不限，只要能够通过 `__getattr__` 和 `__dict__` 分别访问到单个和所有配置项即可，若没有传入，则使用默认配置
+  - `config_object: Any | None`: 配置对象，类型不限，只要能够通过 `__getattr__` 和 `__dict__` 分别访问到单个和所有配置项即可，若没有传入，则使用默认配置
 
 #### `__getattr__(item)`
 
@@ -541,7 +541,7 @@ sidebar: auto
 
 - **返回:**
 
-  - `Callable`: 用于 API 调用的 `Callable` 对象
+  - `(*Any, **Any) -> Any`: 用于 API 调用的 `Callable` 对象
 
 - **用法:**
 
@@ -563,8 +563,8 @@ sidebar: auto
 
 - **参数:**
 
-  - `host: Optional[str]`: 主机名／IP
-  - `port: Optional[int]`: 端口
+  - `host: str | None`: 主机名／IP
+  - `port: int | None`: 端口
   - `*args: Any`: 其它传入 `CQHttp.run()` 的位置参数
   - `**kwargs: Any`: 其它传入 `CQHttp.run()` 的命名参数
 
@@ -672,7 +672,7 @@ sidebar: auto
 
 - **参数:**
 
-  - `config_object: Optional[Any]`: 配置对象，类型不限，只要能够通过 `__getattr__` 和 `__dict__` 分别访问到单个和所有配置项即可，若没有传入，则使用默认配置
+  - `config_object: Any | None`: 配置对象，类型不限，只要能够通过 `__getattr__` 和 `__dict__` 分别访问到单个和所有配置项即可，若没有传入，则使用默认配置
   - `start_scheduler: bool` <Badge text="1.7.0+"/>: 是否要启动 `nonebot.scheduler`
 
 - **返回:**
@@ -716,8 +716,8 @@ sidebar: auto
 
 - **参数:**
 
-  - `host: Optional[str]`: 主机名／IP，若不传入则使用配置文件中指定的值
-  - `port: Optional[int]`: 端口，若不传入则使用配置文件中指定的值
+  - `host: str | None`: 主机名／IP，若不传入则使用配置文件中指定的值
+  - `port: int | None`: 端口，若不传入则使用配置文件中指定的值
   - `*args: Any`: 其它传入 `CQHttp.run()` 的位置参数
   - `**kwargs: Any`: 其它传入 `CQHttp.run()` 的命名参数
 
@@ -790,7 +790,7 @@ sidebar: auto
 
 #### `name`
 
-- **类型:** `Optional[str]`
+- **类型:** `str | None`
 
 - **说明:**
 
@@ -798,7 +798,7 @@ sidebar: auto
 
 #### `usage`
 
-- **类型:** `Optional[Any]`
+- **类型:** `Any | None`
 
 - **说明:**
 
@@ -806,7 +806,7 @@ sidebar: auto
 
 #### `commands` <Badge text="1.6.0+"/>
 
-- **类型:** `Set[Command]`
+- **类型:** `set[Command]`
 
 - **说明:**
 
@@ -814,7 +814,7 @@ sidebar: auto
 
 #### `nl_processors` <Badge text="1.6.0+"/>
 
-- **类型:** `Set[NLProcessor]`
+- **类型:** `set[NLProcessor]`
 
 - **说明:**
 
@@ -822,7 +822,7 @@ sidebar: auto
 
 #### `event_handlers` <Badge text="1.6.0+"/>
 
-- **类型:** `Set[EventHandler]`
+- **类型:** `set[EventHandler]`
 
 - **说明:**
 
@@ -882,7 +882,7 @@ sidebar: auto
 
 - **返回:**
 
-  - `Optional[Plugin]`: Plugin 对象
+  - `Plugin | None`: Plugin 对象
 
 - **用法:**
 
@@ -923,7 +923,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
-  - `state: Optional[bool]`:
+  - `state: bool | None`:
     - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
     - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
 
@@ -953,7 +953,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
-  - `state: Optional[bool]`:
+  - `state: bool | None`:
     - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
     - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
 
@@ -983,7 +983,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
-  - `state: Optional[bool]`:
+  - `state: bool | None`:
     - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
     - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
 
@@ -1013,7 +1013,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
-  - `state: Optional[bool]`:
+  - `state: bool | None`:
     - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
     - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
 
@@ -1043,7 +1043,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
-  - `state: Optional[bool]`:
+  - `state: bool | None`:
     - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
     - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
 
@@ -1071,7 +1071,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
-  - `state: Optional[bool]`:
+  - `state: bool | None`:
     - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
     - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
 
@@ -1099,7 +1099,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
-  - `state: Optional[bool]`:
+  - `state: bool | None`:
     - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
     - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
 
@@ -1130,7 +1130,7 @@ sidebar: auto
 
 - **返回:** <Badge text="1.6.0+" />
 
-  - `Optional[Plugin]`: 加载后生成的 Plugin 对象
+  - `Plugin | None`: 加载后生成的 Plugin 对象
 
 - **用法:**
 
@@ -1156,7 +1156,7 @@ sidebar: auto
 
 - **返回:**
 
-  - `Optional[Plugin]`: 重载后生成的 Plugin 对象
+  - `Plugin | None`: 重载后生成的 Plugin 对象
 
 - **用法:**
 
@@ -1179,7 +1179,7 @@ sidebar: auto
 
 - **返回:** <Badge text="1.6.0+" />
 
-  - `Set[Plugin]`: 加载成功的 Plugin 对象
+  - `set[Plugin]`: 加载成功的 Plugin 对象
 
 - **用法:**
 
@@ -1197,7 +1197,7 @@ sidebar: auto
 
 - **返回:** <Badge text="1.6.0+" />
 
-  - `Set[Plugin]:`: 加载成功的 Plugin 对象
+  - `set[Plugin]:`: 加载成功的 Plugin 对象
 
 - **用法:**
 
@@ -1213,7 +1213,7 @@ sidebar: auto
 
 - **返回:**
 
-  - `Set[Plugin]:` 已加载的插件集合
+  - `set[Plugin]:` 已加载的插件集合
 
 - **用法:**
 
@@ -1233,8 +1233,8 @@ sidebar: auto
 
 - **参数:**
 
-  - `name: Union[str, CommandName_T]`: 命令名，如果传入的是字符串则会自动转为元组
-  - `aliases: Union[Iterable[str], str]`: 命令别名
+  - `name: str | CommandName_T`: 命令名，如果传入的是字符串则会自动转为元组
+  - `aliases: Iterable[str] | str`: 命令别名
   - `patterns: Patterns_T` <Badge text="1.7.0+"/>: 正则匹配，可以传入正则表达式或正则表达式组，来对整条命令进行匹配
     :::warning 注意
     滥用正则表达式可能会引发性能问题，请优先使用普通命令。另外一点需要注意的是，由正则表达式匹配到的匹配到的命令，`session` 中的 `current_arg` 会是整个命令，而不会删除匹配到的内容，以满足一些特殊需求。
@@ -1243,9 +1243,9 @@ sidebar: auto
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
   - `shell_like: bool`: 是否使用类 shell 语法，若是，则会自动使用 `shlex` 模块进行分割（无需手动编写参数解析器），分割后的参数列表放入 `session.args['argv']`
-  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 命令过期时间。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_EXPIRE_TIMEOUT`，如果提供则使用提供的值。
-  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 命令会话的运行超时时长。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_RUN_TIMEOUT`，如果提供则使用提供的值。
-  - `session_class: Optional[Type[CommandSession]]` <Badge text="1.7.0+"/>: 自定义 `CommandSession` 子类，若传入此参数，则命令处理函数的参数 `session` 类型为 `session_class`
+  - `expire_timeout: (datetime.timedelta | None) | EllipsisType` <Badge text="1.8.2+"/>: 命令过期时间。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_EXPIRE_TIMEOUT`，如果提供则使用提供的值。
+  - `run_timeout: (datetime.timedelta | None) | EllipsisType` <Badge text="1.8.2+"/>: 命令会话的运行超时时长。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_RUN_TIMEOUT`，如果提供则使用提供的值。
+  - `session_class: Type[CommandSession] | None` <Badge text="1.7.0+"/>: 自定义 `CommandSession` 子类，若传入此参数，则命令处理函数的参数 `session` 类型为 `session_class`
 
 - **要求:**
 
@@ -1301,7 +1301,7 @@ sidebar: auto
 
 - **参数:**
 
-  - `keywords: Optional[Union[Iterable[str], str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
+  - `keywords: (Iterable[str] | str) | None`: 要响应的关键词，若传入 `None`，则响应所有消息
   - `permission: int`: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的消息（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `only_short_message: bool`: 是否只响应短消息
@@ -1458,7 +1458,7 @@ sidebar: auto
 
 #### `data`
 
-- **类型:** `Dict[str, Any]`
+- **类型:** `dict[str, Any]`
 
 - **说明:**
 
@@ -1472,9 +1472,9 @@ sidebar: auto
 
 - **参数:**
 
-  - `d: Dict[str, Any]`: 当有此参数且此参数中有 `type` 字段时，由此参数构造消息段
+  - `d: dict[str, Any]`: 当有此参数且此参数中有 `type` 字段时，由此参数构造消息段
   - `type_: str`: 当没有传入 `d` 参数或 `d` 参数无法识别时，此参数必填，对应消息段的 `type` 字段
-  - `data: Dict[str, str]`: 对应消息段的 `data` 字段，若不传入则初始化为 `{}`
+  - `data: dict[str, str]`: 对应消息段的 `data` 字段，若不传入则初始化为 `{}`
 
 - **异常:**
 
@@ -1759,7 +1759,7 @@ sidebar: auto
 
 - **参数:**
 
-  - `msg: Optional[Message_T]`: 消息内容，若不传入则构造空消息
+  - `msg: Message_T | None`: 消息内容，若不传入则构造空消息
 
 - **异常:**
 
@@ -1924,8 +1924,8 @@ sidebar: auto
 
 - **参数:**
 
-  - `name: Union[str, CommandName_T]`: 命令名，如果传入的是字符串则会自动转为元组
-  - `aliases: Union[Iterable[str], str]`: 命令别名
+  - `name: str | CommandName_T`: 命令名，如果传入的是字符串则会自动转为元组
+  - `aliases: Iterable[str] | str`: 命令别名
   - `permission: int`: 命令所需要的权限，不满足权限的用户将无法触发该命令
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
@@ -1968,7 +1968,7 @@ sidebar: auto
 
 #### `base_kwargs`
 
-- **类型:** `Dict[str, Any]`
+- **类型:** `dict[str, Any]`
 
 - **说明:**
 
@@ -1982,14 +1982,14 @@ sidebar: auto
 
 - **参数:**
 
-  - `name: Union[str, CommandName_T]`: 命令名前缀，若传入字符串，则会自动转换成元组
+  - `name: str | CommandName_T`: 命令名前缀，若传入字符串，则会自动转换成元组
   - `permission: int`: 对应 `permission` 属性
   - `only_to_me: bool`: 对应 `only_to_me` 属性
   - `privileged: bool`: 对应 `privileged` 属性
   - `shell_like: bool`: 对应 `shell_like` 属性
-  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 对应 `expire_timeout` 属性
-  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 对应 `run_timeout` 属性
-  - `session_class: Optional[Type[CommandSession]]` <Badge text="1.8.1+"/>：对应 `session_class` 属性
+  - `expire_timeout: (datetime.timedelta | None) | EllipsisType` <Badge text="1.8.2+"/>: 对应 `expire_timeout` 属性
+  - `run_timeout: (datetime.timedelta | None) | EllipsisType` <Badge text="1.8.2+"/>: 对应 `run_timeout` 属性
+  - `session_class: Type[CommandSession] | None` <Badge text="1.8.1+"/>：对应 `session_class` 属性
 
 #### _decorator_ `command(name, *, aliases=..., patterns=..., permission=..., only_to_me=..., privileged=..., shell_like=..., expire_timeout=..., run_timeout=..., session_class=...)`
 
@@ -1999,16 +1999,16 @@ sidebar: auto
 
 - **参数:**
 
-  - `name: Union[str, CommandName_T]`: 命令名，注册命令处理器时会加上命令组的前缀
+  - `name: str | CommandName_T`: 命令名，注册命令处理器时会加上命令组的前缀
   - `aliases: Iterable[str], str]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值时，则使用 `on_command` 装饰器的默认值
   - `patterns: Patterns_T` <Badge text="1.8.1+"/>：同上
   - `permission: int`: 同上
   - `only_to_me: bool`: 同上
   - `privileged: bool`: 同上
   - `shell_like: bool`: 同上
-  - `expire_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 同上
-  - `run_timeout: Union[Optional[datetime.timedelta], EllipsisType]` <Badge text="1.8.2+"/>: 同上
-  - `session_class: Optional[Type[CommandSession]]` <Badge text="1.8.1+"/>：同上
+  - `expire_timeout: (datetime.timedelta | None) | EllipsisType` <Badge text="1.8.2+"/>: 同上
+  - `run_timeout: (datetime.timedelta | None) | EllipsisType` <Badge text="1.8.2+"/>: 同上
+  - `session_class: Type[CommandSession] | None` <Badge text="1.8.1+"/>：同上
 
 - **用法:**
 
@@ -2026,7 +2026,7 @@ sidebar: auto
 
 #### `commands`
 
-- **类型:** `Dict[CommandName_T, Command]`
+- **类型:** `dict[CommandName_T, Command]`
 
 - **说明:**
 
@@ -2034,7 +2034,7 @@ sidebar: auto
 
 #### `aliases`
 
-- **类型:** `Dict[str, Command]`
+- **类型:** `dict[str, Command]`
 
 - **说明:**
 
@@ -2042,7 +2042,7 @@ sidebar: auto
 
 #### `switches`
 
-- **类型:** `Dict[CommandName_T, bool]`
+- **类型:** `dict[CommandName_T, bool]`
 
 - **说明:**
 
@@ -2050,7 +2050,7 @@ sidebar: auto
 
 #### `patterns` <Badge text="1.7.0+"/>
 
-- **类型:** `Dict[Pattern[str], Command]`
+- **类型:** `dict[Pattern[str], Command]`
 
 - **说明:**
 
@@ -2086,7 +2086,7 @@ sidebar: auto
 
 - **参数:**
 
-  - `aliases: Union[Iterable[str], str]`: 命令别名列表
+  - `aliases: Iterable[str] | str`: 命令别名列表
 
 - **返回:**
 
@@ -2150,7 +2150,7 @@ sidebar: auto
 - **参数:**
 
   - `cmd_name: CommandName_T`: 命令名称
-  - `state: Optional[bool]`:
+  - `state: bool | None`:
     - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
     - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
 
@@ -2180,7 +2180,7 @@ sidebar: auto
 - **参数:**
 
   - `cmd_name: CommandName_T`: 命令名称
-  - `state: Optional[bool]`:
+  - `state: bool | None`:
     - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
     - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
 
@@ -2241,7 +2241,7 @@ sidebar: auto
 
 #### `current_key`
 
-- **类型:** `Optional[str]`
+- **类型:** `str | None`
 
 - **说明:**
 
@@ -2265,7 +2265,7 @@ sidebar: auto
 
 #### _readonly property_ `current_arg_images`
 
-- **类型:** `List[str]`
+- **类型:** `list[str]`
 
 - **说明:**
 
@@ -2273,7 +2273,7 @@ sidebar: auto
 
 #### _readonly property_ `argv`
 
-- **类型:** `List[str]`
+- **类型:** `list[str]`
 
 - **说明:**
 
@@ -2300,8 +2300,8 @@ sidebar: auto
 - **参数:**
 
   - `key: Any`: 参数的键
-  - `prompt: Optional[Message_T]`: 提示的消息内容
-  - `arg_filters: Optional[List[Filter_T]]` <Badge text="1.2.0+"/>: 用于处理和验证用户输入的参数的过滤器
+  - `prompt: Message_T | None`: 提示的消息内容
+  - `arg_filters: list[Filter_T] | None` <Badge text="1.2.0+"/>: 用于处理和验证用户输入的参数的过滤器
   - `**kwargs: Any`: 其它传入 `BaseSession.send()` 的命名参数
 
 - **返回:**
@@ -2342,7 +2342,7 @@ sidebar: auto
 - **参数:**
 
   - `key: Any`: 参数的键
-  - `default: Optional[Any]`: 默认值
+  - `default: Any | None`: 默认值
 
 - **返回:**
 
@@ -2369,8 +2369,8 @@ sidebar: auto
 - **参数:**
 
   - `key: Any`: 参数的键，若不传入则使用默认键值
-  - `prompt: Optional[Message_T]`: 提示的消息内容
-  - `arg_filters: Optional[List[Filter_T]]`: 用于处理和验证用户输入的参数的过滤器
+  - `prompt: Message_T | None`: 提示的消息内容
+  - `arg_filters: list[Filter_T] | None`: 用于处理和验证用户输入的参数的过滤器
   - `force_update: bool`: 是否强制获取用户新的输入，若是，则会忽略已有的当前参数，若 `key` 不传入则为真，否则默认为假
   - `**kwargs: Any`: 其它传入 `BaseSession.send()` 的命名参数
 
@@ -2414,7 +2414,7 @@ sidebar: auto
 
 - **参数:**
 
-  - `message: Optional[Message_T]`: 要发送的消息，若不传入则不发送
+  - `message: Message_T | None`: 要发送的消息，若不传入则不发送
   - `**kwargs: Any`: 其它传入 `BaseSession.send()` 的命名参数
 
 - **用法:**
@@ -2435,7 +2435,7 @@ sidebar: auto
 
 - **参数:**
 
-  - `message: Optional[Message_T]`: 要发送的消息，若不传入则不发送
+  - `message: Message_T | None`: 要发送的消息，若不传入则不发送
   - `**kwargs: Any`: 其它传入 `BaseSession.send()` 的命名参数
 
 - **用法:**
@@ -2460,7 +2460,7 @@ sidebar: auto
 
 - **参数:**
 
-  - `message: Optional[Message_T]`: 要发送的消息，若不传入则不发送
+  - `message: Message_T | None`: 要发送的消息，若不传入则不发送
   - `**kwargs: Any`: 其它传入 `BaseSession.send()` 的命名参数
 
 - **用法:**
@@ -2511,9 +2511,9 @@ sidebar: auto
 
   - `bot: NoneBot`: NoneBot 对象
   - `event: aiocqhttp.Event`: 事件对象
-  - `name: Union[str, CommandName_T]`: 要调用的命令名
+  - `name: str | CommandName_T`: 要调用的命令名
   - `current_arg: str`: 命令会话的当前输入参数
-  - `args: Optional[CommandArgs_T]`: 命令会话的（初始）参数（将会被并入命令会话的 `state` 属性）
+  - `args: CommandArgs_T | None`: 命令会话的（初始）参数（将会被并入命令会话的 `state` 属性）
   - `check_perm: bool`: 是否检查命令的权限，若否，则即使当前事件上下文并没有权限调用这里指定的命令，也仍然会调用成功
   - `disable_interaction: bool`: 是否禁用交互功能，若是，则该命令的会话不会覆盖任何当前已存在的命令会话，新创建的会话也不会保留
 
@@ -2571,7 +2571,7 @@ sidebar: auto
 
 #### `message`
 
-- **类型:** `Optional[Message_T]`
+- **类型:** `Message_T | None`
 
 - **说明:**
 
@@ -2599,7 +2599,7 @@ sidebar: auto
 
 - **输入类型:** `Message_T`
 
-- **输出类型:** `List[str]`
+- **输出类型:** `list[str]`
 
 ### `extract_numbers`
 
@@ -2609,13 +2609,13 @@ sidebar: auto
 
 - **输入类型:** `Message_T`
 
-- **输出类型:** `List[float]`
+- **输出类型:** `list[float]`
 
 ## `nonebot.command.argfilter.validators` 模块 <Badge text="1.2.0+"/>
 
 提供几种常用的验证器。
 
-这些验证器的工厂函数全都接受可选参数 `message: Optional[Message_T]`，用于在验证失败时向用户发送错误提示。使用这些的验证器时，必须先调用验证器的工厂函数，其返回结果才是真正的验证器，例如：
+这些验证器的工厂函数全都接受可选参数 `message: Message_T | None`，用于在验证失败时向用户发送错误提示。使用这些的验证器时，必须先调用验证器的工厂函数，其返回结果才是真正的验证器，例如：
 
 ```python
 session.get('arg1', prompt='请输入 arg1：',
@@ -2643,7 +2643,7 @@ session.get('arg1', prompt='请输入 arg1：',
 - **参数:**
 
   - `min_length: int`: 最小长度
-  - `max_length: Optional[int]`: 最大长度
+  - `max_length: int | None`: 最大长度
 
 - **输入类型:** `Sized`
 
@@ -2673,7 +2673,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **参数:**
 
-  - `bool_func: Callable[[Any], bool]`: 接受输入、返回布尔值的函数
+  - `bool_func: (Any) -> bool`: 接受输入、返回布尔值的函数
 
 - **输入类型:** `Any`
 
@@ -2706,7 +2706,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **输入类型:** `str`
 
-- **输出类型:** `Optional[bool]`
+- **输出类型:** `bool | None`
 
 ### `split_nonempty_lines`
 
@@ -2716,7 +2716,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **输入类型:** `str`
 
-- **输出类型:** `List[str]`
+- **输出类型:** `list[str]`
 
 ### `split_nonempty_stripped_lines`
 
@@ -2726,7 +2726,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **输入类型:** `str`
 
-- **输出类型:** `List[str]`
+- **输出类型:** `list[str]`
 
 ## `nonebot.command.argfilter.controllers` 模块 <Badge text="1.3.0+"/>
 
@@ -2760,7 +2760,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **参数:**
 
-  - `keywords: Optional[Union[Iterable[str], str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
+  - `keywords: (Iterable[str] | str) | None`: 要响应的关键词，若传入 `None`，则响应所有消息
   - `permission: int`: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的消息（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `only_short_message: bool`: 是否只响应短消息
@@ -2807,7 +2807,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 #### `msg_images`
 
-- **类型:** `List[str]`
+- **类型:** `list[str]`
 
 - **说明:**
 
@@ -2827,7 +2827,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 #### `name`
 
-- **类型:** `Union[str, CommandName_T]`
+- **类型:** `str | CommandName_T`
 
 - **说明:**
 
@@ -2835,7 +2835,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 #### `args`
 
-- **类型:** `Optional[CommandArgs_T]`
+- **类型:** `CommandArgs_T | None`
 
 - **说明:**
 
@@ -2843,7 +2843,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 #### `current_arg`
 
-- **类型:** `Optional[str]`
+- **类型:** `str | None`
 
 - **说明:**
 
@@ -2869,7 +2869,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 #### `cmd_name`
 
-- **类型:** `Union[str, CommandName_T]`
+- **类型:** `str | CommandName_T`
 
 - **说明:**
 
@@ -2877,7 +2877,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 #### `cmd_args`
 
-- **类型:** `Optional[CommandArgs_T]`
+- **类型:** `CommandArgs_T | None`
 
 - **说明:**
 
@@ -3273,10 +3273,10 @@ async def _(session):
 
 - **参数:**
 
-  - `expr: Expression_T`: 要渲染的 Expression，对于 Expression 的三种类型：`str`、`Sequence[str]`、`Callable[..., str]`，行为分别是：
+  - `expr: Expression_T`: 要渲染的 Expression，对于 Expression 的三种类型：`str`、`Sequence[str]`、`(*Any, **Any) -> str`，行为分别是：
     - `str`：以 `*args`、`**kwargs` 为参数，使用 `str.format()` 进行格式化
     - `Sequence[str]`：随机选择其中之一，进行上面 `str` 的操作
-    - `Callable[..., str]`：以 `*args`、`**kwargs` 为参数，调用该可调用对象/函数，对返回的字符串进行上面 `str` 的操作
+    - `(*Any, **Any) -> str`：以 `*args`、`**kwargs` 为参数，调用该可调用对象/函数，对返回的字符串进行上面 `str` 的操作
   - `escape_args: bool`: 是否对渲染参数进行转义
   - `*args: Any`: 渲染参数
   - `**kwargs: Any`: 渲染参数
@@ -3388,7 +3388,7 @@ async def _(session):
 
 #### `sender`
 
-- **类型:** `Optional[Dict[str, Any]]`
+- **类型:** `dict[str, Any] | None`
 
 - **说明:**
 
@@ -3512,7 +3512,7 @@ async def _(session):
 
 - **参数:**
 
-  - `group_id: Union[int, Container[int]]` <Badge text="1.8.2+"/>: 群号码，可以为多个群号。
+  - `group_id: int | Container[int]` <Badge text="1.8.2+"/>: 群号码，可以为多个群号。
 
 - **返回:**
 
@@ -3526,7 +3526,7 @@ async def _(session):
 
 - **参数:**
 
-  - `sender_id: Union[int, Container[int]]` <Badge text="1.8.2+"/>: 发送者 QQ 号，可以是多个。
+  - `sender_id: int | Container[int]` <Badge text="1.8.2+"/>: 发送者 QQ 号，可以是多个。
 
 - **返回:**
 
@@ -3534,7 +3534,7 @@ async def _(session):
 
 ### _type_ `RoleCheckPolicy`
 
-- **类型:** `Callable[[SenderRoles], Union[bool, Awaitable[bool]]]`
+- **类型:** `(SenderRoles) -> (bool | Awaitable[bool])`
 
 - **说明:**
 
@@ -3595,7 +3595,7 @@ async def _(session):
 - **参数:**
 
   - `policies: Iterable[RoleCheckPolicy]`: 要合并的权限检查策略
-  - `aggregator: Callable[[Iterable[object]], bool]`: 用于合并策略的函数
+  - `aggregator: (Iterable[object]) -> bool`: 用于合并策略的函数
 
 - **返回:**
 
@@ -3670,8 +3670,8 @@ async def _(session):
 
 - **参数:**
 
-  - `name: Union[str, CommandName_T]`: 命令名
-  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 和其默认参数组合
+  - `name: str | CommandName_T`: 命令名
+  - `permission: RoleCheckPolicy | Iterable[RoleCheckPolicy]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 和其默认参数组合
   - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
 
 - **用法:**
@@ -3698,8 +3698,8 @@ async def _(session):
 
 - **参数:**
 
-  - `keywords: Optional[Union[Iterable[str], str]]`: 要响应的关键词，若传入 `None`，则响应所有消息
-  - `permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 和其默认参数组合。不满足权限的用户将无法触发该处理器
+  - `keywords: (Iterable[str] | str) | None`: 要响应的关键词，若传入 `None`，则响应所有消息
+  - `permission: RoleCheckPolicy | Iterable[RoleCheckPolicy]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 和其默认参数组合。不满足权限的用户将无法触发该处理器
   - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
 
 - **用法:**
