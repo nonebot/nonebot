@@ -29,3 +29,27 @@ NoneBot 在其底层与 OneBot 实现交互的部分使用 [aiocqhttp](https://g
 如果你在使用过程中发现任何问题，可以 [提交 issue](https://github.com/nonebot/nonebot/issues/new) 或自行 fork 修改后提交 pull request。
 
 如果你要提交 pull request，请确保你的代码风格和项目已有的代码保持一致，遵循 [PEP 8](https://www.python.org/dev/peps/pep-0008/)，变量命名清晰，有适当的注释。
+
+# NoneBot
+
+## Description
+
+NoneBot is an asynchronous and [OneBot]((https://github.com/howmanybots/onebot))-compliant QQ robot framework written in Python. When NoneBot receives new messages, it parses the messages then pass them to user-defined command handlers or natural language processors accordingly using a plugin system to accomplish various tasks.
+
+Beside message processing, NoneBot presents an amount of useful built-in actions and permission handling features. The command processors provide simple but comprehensive session-ing and calling mechanisms to handle continuous interactions and the reusing of functionalities inside plugins, respectively.
+
+NoneBot communicates with OneBot implementations using [aiocqhttp](https://github.com/nonebot/aiocqhttp), a wrapper based on [Quart](https://pgjones.gitlab.io/quart/) for lower-level protocol work.
+
+Thanks to [asyncio](https://docs.python.org/3/library/asyncio.html) and WebSocket messaging method (which is recommended), NoneBot ensures maximum possible message throughput to be twice as fast as HTTP messaging, and have great performance leap compared to traditional synchronous IO.
+
+NoneBot only supports Python 3.7+.
+
+## Documentation
+
+For Guide and API manuals, check out [this page](https://docs.nonebot.dev/).
+
+## Contributing
+
+If you encounter any problems in using the project, you can [submit an issue](https://github.com/nonebot/nonebot/issues/new) or fork this project to submit an pull request.
+
+For pull requests, please be sure to have consistent style to existing modules, follow [PEP 8](https://www.python.org/dev/peps/pep-0008/), have clear identifier naming, and have proper comments.
