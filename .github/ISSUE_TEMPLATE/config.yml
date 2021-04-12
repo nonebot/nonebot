@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 提问、发布应用、经验分享
+    url: https://github.com/nonebot/discussions/discussions
+    about: 在 NoneBot 讨论版中发帖
