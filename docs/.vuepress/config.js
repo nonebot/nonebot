@@ -32,6 +32,8 @@ module.exports = {
             { text: 'API', link: '/api.md' },
             { text: '术语表', link: '/glossary.md' },
             { text: '更新日志', link: '/changelog.md' },
+            { text: '论坛', link: 'https://discussions.nonebot.dev/' },
+            { text: '赞助', link: 'https://afdian.net/@nonebot' },
         ],
         sidebar: {
             '/guide/': [
