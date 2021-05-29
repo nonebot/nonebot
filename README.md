@@ -6,6 +6,7 @@
 ![OneBot Version](https://img.shields.io/badge/OneBot-v10,v11-black.svg)
 [![QQ 群](https://img.shields.io/badge/qq%E7%BE%A4-768887710-orange.svg)](https://jq.qq.com/?_wv=1027&k=5OFifDh)
 [![Telegram 频道](https://img.shields.io/badge/telegram-botuniverse-blue.svg)](https://t.me/botuniverse)
+[![Discord Server](https://discordapp.com/api/guilds/847819937858584596/widget.png?style=shield)](https://discord.gg/VKtE6Gdc4h)
 
 ## 简介
 
