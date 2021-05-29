@@ -3,6 +3,7 @@ sidebar: auto
 ---
 
 # 更新日志
+
 ## master
 - 删除在 1.2.0 版本中弃用的 API（`NLPResult`, `CommandSession.args`, `CommandSession.get_optional`）
 
