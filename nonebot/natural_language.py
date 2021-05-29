@@ -162,21 +162,6 @@ class NLPSession(BaseSession):
         ]
 
 
-class NLPResult(NamedTuple):
-    """
-    Deprecated.
-    Use class IntentCommand instead.
-    """
-    confidence: float
-    cmd_name: Union[str, CommandName_T]
-    cmd_args: Optional[CommandArgs_T] = None
-
-    def to_intent_command(self):
-        return IntentCommand(confidence=self.confidence,
-                             name=self.cmd_name,
-                             args=self.cmd_args)
-
-
 class IntentCommand(NamedTuple):
     """
     To represent a command that we think the user may be intended to call.
@@ -228,9 +213,7 @@ async def handle_natural_language(bot: NoneBot, event: CQEvent,
         if not should_run:
             continue
         procs_empty = False
-        if isinstance(result, NLPResult):
-            intent_commands.append(result.to_intent_command())
-        elif isinstance(result, IntentCommand):
+        if isinstance(result, IntentCommand):
             intent_commands.append(result)
 
     if procs_empty:
@@ -256,6 +239,5 @@ async def handle_natural_language(bot: NoneBot, event: CQEvent,
 
 __all__ = [
     'NLPSession',
-    'NLPResult',
     'IntentCommand',
 ]
