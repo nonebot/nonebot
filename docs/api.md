@@ -474,7 +474,6 @@ sidebar: auto
 - `CommandSession` -> `nonebot.command.CommandSession`
 - `CommandGroup` -> `nonebot.command.CommandGroup`
 - `NLPSession` -> `nonebot.natural_language.NLPSession`
-- `NLPResult` -> `nonebot.natural_language.NLPResult`
 - `NoticeSession` -> `nonebot.notice_request.NoticeSession`
 - `RequestSession` -> `nonebot.notice_request.RequestSession`
 - `context_id` <Badge text="1.2.0+"/> -> `nonebot.helpers.context_id`
@@ -2223,14 +2222,6 @@ sidebar: auto
 
   在命令处理函数的开头进行**每次命令调用只应该执行一次的初始化操作**。
 
-#### _readonly property_ `args` <Badge text="1.2.0-" type="error"/>
-
-- **类型:** `CommandArgs_T`
-
-- **说明:**
-
-  命令会话已获得的所有参数。
-
 #### _readonly property_ `is_first_run`
 
 - **类型:** `bool`
@@ -2332,29 +2323,6 @@ sidebar: auto
   ```
 
   获取时间信息，如果当前还不知道，则询问用户，等待用户输入之后，会依次运行 `arg_filters` 参数中的过滤器，以确保参数内容和格式符合要求。
-
-#### `get_optional(key, default=None)` <Badge text="1.2.0-" type="error"/>
-
-- **说明:**
-
-  从 `args` 属性获取参数，如果参数不存在，则返回默认值。等价于 `args.get(key, default)`。
-
-- **参数:**
-
-  - `key: Any`: 参数的键
-  - `default: Any | None`: 默认值
-
-- **返回:**
-
-  - `Any`: 参数的值，或 `default` 参数给出的默认值
-
-- **用法:**
-
-  ```python
-  time = session.get_optional('time')
-  ```
-
-  获取可选的时间参数。
 
 #### _coroutine_ `aget(key=..., *, prompt=None, arg_filters=None, force_update=..., **kwargs)` <Badge text="v1.8.0+"/>
 
@@ -2854,40 +2822,6 @@ session.get('arg1', prompt='请输入 arg1：',
 - **说明:**
 
   初始化 `IntentCommand` 对象，参数即为上面的几个属性。
-
-### _class_ `NLPResult` <Badge text="1.2.0-" type="error"/>
-
-用于表示自然语言处理的结果，是一个 namedtuple，由自然语言处理器返回。
-
-#### `confidence`
-
-- **类型:** `float`
-
-- **说明:**
-
-  自然语言处理结果的置信度，即消息意图确实符合此 `NLPResult` 的概率。
-
-#### `cmd_name`
-
-- **类型:** `str | CommandName_T`
-
-- **说明:**
-
-  消息所对应的命令的名称。
-
-#### `cmd_args`
-
-- **类型:** `CommandArgs_T | None`
-
-- **说明:**
-
-  消息所对应的命令的参数。
-
-#### `__init__(confidence, cmd_name, cmd_args=None)`
-
-- **说明:**
-
-  初始化 `NLPResult` 对象，参数即为上面的三个属性。
 
 ## `nonebot.notice_request` 模块
 

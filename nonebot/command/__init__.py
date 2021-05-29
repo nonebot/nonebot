@@ -494,11 +494,6 @@ class CommandSession(BaseSession):
         return self._state
 
     @property
-    def args(self) -> CommandArgs_T:
-        """Deprecated. Use `session.state` instead."""
-        return self.state
-
-    @property
     def running(self) -> bool:
         """INTERNAL API"""
         return self._running
@@ -660,16 +655,6 @@ class CommandSession(BaseSession):
         await self.apause(prompt, **kwargs)
 
         return self.state.get(key, self.current_arg)
-
-    def get_optional(self,
-                     key: str,
-                     default: Optional[Any] = None) -> Optional[Any]:
-        """
-        Simply get a argument with given key.
-
-        Deprecated. Use `session.state.get()` instead.
-        """
-        return self.state.get(key, default)
 
     def pause(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
         """
@@ -836,7 +821,7 @@ async def call_command(bot: NoneBot,
     Call a command internally.
 
     This function is typically called by some other commands
-    or "handle_natural_language" when handling NLPResult object.
+    or "handle_natural_language" when handling IntentCommand object.
 
     Note: If disable_interaction is not True, after calling this function,
     any previous command session will be overridden, even if the command

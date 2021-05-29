@@ -140,7 +140,7 @@ from .plugin import (on_command, on_natural_language, on_notice, on_request,
                      load_plugin, load_plugins, load_builtin_plugins,
                      get_loaded_plugins)
 from .message import message_preprocessor, Message, MessageSegment
-from .natural_language import NLPSession, NLPResult, IntentCommand
+from .natural_language import NLPSession, IntentCommand
 from .notice_request import NoticeSession, RequestSession
 from .helpers import context_id
 
@@ -165,7 +165,6 @@ __all__ = [
     'CommandGroup',
     'on_natural_language',
     'NLPSession',
-    'NLPResult',
     'IntentCommand',
     'on_notice',
     'NoticeSession',
