@@ -4,8 +4,9 @@ sidebar: auto
 
 # 更新日志
 
-## master
+## v1.8.3
 - 删除在 1.2.0 版本中弃用的 API（`NLPResult`, `CommandSession.args`, `CommandSession.get_optional`）
+- 改正 `BaseSession.send` type hint
 
 ## v1.8.2
 - 修复 `CommandSession.apause` 方法在命令过期后泄露的问题
