@@ -386,8 +386,9 @@ def on_command_custom(
 
         if shell_like:
 
-            async def shell_like_args_parser(session):
-                session.args['argv'] = shlex.split(session.current_arg)
+            async def shell_like_args_parser(session: CommandSession):
+                session.state['argv'] = shlex.split(session.current_arg) if \
+                    session.current_arg else []
 
             cmd.args_parser_func = shell_like_args_parser
 
