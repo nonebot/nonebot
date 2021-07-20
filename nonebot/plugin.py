@@ -482,7 +482,7 @@ def on_natural_language_custom(
 
 
 @overload
-def on_natural_language(func: NLPHandler_T) -> NLPHandler_T:
+def on_natural_language(__func: NLPHandler_T) -> NLPHandler_T:
     """
     Decorator to register a function as a natural language processor with
     default kwargs.
