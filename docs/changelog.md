@@ -4,6 +4,9 @@ sidebar: auto
 
 # 更新日志
 
+## v1.8.4
+- 修复 `on_command` 中 `shell_like` 功能仍引用旧 API 造成的错误
+
 ## v1.8.3
 - 删除在 1.2.0 版本中弃用的 API（`NLPResult`, `CommandSession.args`, `CommandSession.get_optional`）
 - 改正 `BaseSession.send` type hint
