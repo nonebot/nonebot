@@ -554,7 +554,7 @@ def _make_event_deco(post_type: str):
 
 
 @overload
-def on_notice(func: NoticeHandler_T) -> NoticeHandler_T: ...
+def on_notice(__func: NoticeHandler_T) -> NoticeHandler_T: ...  # type: ignore
 
 
 @overload
@@ -565,7 +565,7 @@ on_notice = _make_event_deco('notice')  # type: ignore[override]
 
 
 @overload
-def on_request(func: RequestHandler_T) -> RequestHandler_T: ...
+def on_request(__func: RequestHandler_T) -> RequestHandler_T: ...  # type: ignore
 
 
 @overload
