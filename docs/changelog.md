@@ -4,6 +4,10 @@ sidebar: auto
 
 # 更新日志
 
+## master
+
+- 修复与 node-onebot 的 at 消息段兼容问题 [#272](https://github.com/nonebot/nonebot/issues/272)
+
 ## v1.8.4
 
 - 修复 `on_command` 中 `shell_like` 功能仍引用旧 API 造成的错误
