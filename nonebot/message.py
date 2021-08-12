@@ -80,16 +80,18 @@ async def handle_message(bot: NoneBot, event: CQEvent) -> None:
 
 
 def _check_at_me(bot: NoneBot, event: CQEvent) -> None:
+    def is_at_me(seg):
+        return seg.type == 'at' and seg.data['qq'] == event.self_id
+
     if event.detail_type == 'private':
         event['to_me'] = True
     else:
         # group or discuss
         event['to_me'] = False
-        at_me_seg = MessageSegment.at(event.self_id)
 
         # check the first segment
         first_msg_seg = event.message[0]
-        if first_msg_seg == at_me_seg:
+        if is_at_me(first_msg_seg):
             event['to_me'] = True
             del event.message[0]
 
@@ -103,7 +105,7 @@ def _check_at_me(bot: NoneBot, event: CQEvent) -> None:
                 i -= 1
                 last_msg_seg = event.message[i]
 
-            if last_msg_seg == at_me_seg:
+            if is_at_me(last_msg_seg):
                 event['to_me'] = True
                 del event.message[i:]
 
