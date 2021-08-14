@@ -2,9 +2,9 @@
 
 本章将以一个天气查询插件为例，教你如何编写自己的命令。
 
-:::tip 提示
-本章的完整代码可以在 [awesome-bot-2](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-2) 查看。
-:::
+> **提示**
+>
+> 本章的完整代码可以在 [awesome-bot-2](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-2) 查看。
 
 ## 创建插件目录
 
@@ -59,16 +59,16 @@ if __name__ == '__main__':
 
 这表示 NoneBot 已经成功加载到了 `weather` 插件。
 
-:::warning 注意
-如果你运行时没有输出成功导入插件的日志，请确保你的当前工作目录是在 `awesome-bot` 项目的主目录中。
-
-如果仍然不行，尝试先在 `awesome-bot` 主目录中执行下面的命令：
-
-```bash
-export PYTHONPATH=.  # Linux / macOS
-set PYTHONPATH=.  # Windows
-```
-:::
+> **注意**
+>
+> 如果你运行时没有输出成功导入插件的日志，请确保你的当前工作目录是在 `awesome-bot` 项目的主目录中。
+>
+> 如果仍然不行，尝试先在 `awesome-bot` 主目录中执行下面的命令：
+>
+> ```bash
+> export PYTHONPATH=.  # Linux / macOS
+> set PYTHONPATH=.  # Windows
+> ```
 
 ## 编写真正的内容
 
