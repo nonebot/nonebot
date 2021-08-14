@@ -51,7 +51,7 @@ python bot.py
 
 单纯运行 NoneBot 实例并不会产生任何效果，因为此刻 go-cqhttp 这边还不知道 NoneBot 的存在，也就无法把消息发送给它，因此现在需要对 go-cqhttp 插件做一个简单的配置来让它把消息等事件上报给 NoneBot。
 
-如果你在之前已经按照 [安装](./installation.md#-go-cqhttp-插件
+如果你在之前已经按照 [安装](./installation.md#go-cqhttp-插件
 ) 的建议使用默认配置运行了一次 go-cqhttp 插件，此时 go-cqhttp 的目录中应该已经有了一个名为 `config.yml` 的文件（`uin` 为你登录的 QQ 账号）。修改这个文件，**修改如下配置项**：
 
 ```yaml
