@@ -2,9 +2,9 @@
 
 ## NoneBot
 
-> **注意**
->
-> 请确保你的 Python 版本 >= 3.7。
+:::warning 注意
+请确保你的 Python 版本 >= 3.7。
+:::
 
 可以使用 pip 安装已发布的最新版本：
 
@@ -24,9 +24,9 @@ python setup.py install
 
 ## go-cqhttp 插件
 
-> **提示**
->
-> 可以参照 [go-cqhttp 帮助中心](https://docs.go-cqhttp.org/) 的使用教程。
+:::tip 提示
+可以参照 [go-cqhttp 帮助中心](https://docs.go-cqhttp.org/) 的使用教程。
+:::
 
 从 [release](https://github.com/Mrs4s/go-cqhttp/releases) 界面下载对应系统的 go-cqhttp 可执行文件，并解压。双击 `go-cqhttp.exe`，输入「3」，使用反向 Websocket 通信，按下回车，系统自动生成默认配置文件。
 
@@ -38,6 +38,6 @@ python setup.py install
 
 如出现需要认证的信息, 请自行认证设备。
 
-> **提示**
->
-> 请尽量下载最新版本的 go-cqhttp，通常建议插件在大版本内尽量及时升级至最新版本。
+:::warning 注意
+请尽量下载最新版本的 go-cqhttp，通常建议插件在大版本内尽量及时升级至最新版本。
+:::

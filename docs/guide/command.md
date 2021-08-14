@@ -2,9 +2,9 @@
 
 本章将以一个天气查询插件为例，教你如何编写自己的命令。
 
-> **提示**
->
-> 本章的完整代码可以在 [awesome-bot-2](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-2) 查看。
+:::tip 提示
+本章的完整代码可以在 [awesome-bot-2](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-2) 查看。
+:::
 
 ## 创建插件目录
 
@@ -59,16 +59,16 @@ if __name__ == '__main__':
 
 这表示 NoneBot 已经成功加载到了 `weather` 插件。
 
-> **注意**
->
-> 如果你运行时没有输出成功导入插件的日志，请确保你的当前工作目录是在 `awesome-bot` 项目的主目录中。
->
-> 如果仍然不行，尝试先在 `awesome-bot` 主目录中执行下面的命令：
->
-> ```bash
-> export PYTHONPATH=.  # Linux / macOS
-> set PYTHONPATH=.  # Windows
-> ```
+:::warning 注意
+如果你运行时没有输出成功导入插件的日志，请确保你的当前工作目录是在 `awesome-bot` 项目的主目录中。
+
+如果仍然不行，尝试先在 `awesome-bot` 主目录中执行下面的命令：
+
+```bash
+export PYTHONPATH=.  # Linux / macOS
+set PYTHONPATH=.  # Windows
+```
+:::
 
 ## 编写真正的内容
 
@@ -193,7 +193,6 @@ async def _(session: CommandSession):
 
 另外一点值得注意的是，`@on_command` 也可以同样把正则表达式作为参数传入pattern进行匹配。在这种情况下，整条完整的指令会被作为current_arg使用（而不会删除开头匹配到的命令），这点请注意区别。
 :::
-
 
 现在我们已经理解完了天气命令的代码，是时候运行一下看看实际效果了，启动 NoneBot 后尝试向它分别发送下面的两个带参数和不带参数的消息：
 

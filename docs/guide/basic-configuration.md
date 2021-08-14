@@ -2,9 +2,9 @@
 
 到目前为止我们还在使用 NoneBot 的默认行为，在开始编写自己的插件之前，我们先尝试在配置文件上动动手脚，让 NoneBot 表现出不同的行为。
 
-> **提示**
->
-> 本章的完整代码可以在 [awesome-bot-1](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-1) 查看。
+:::tip 提示
+本章的完整代码可以在 [awesome-bot-1](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-1) 查看。
+:::
 
 ## 项目结构
 

@@ -21,9 +21,9 @@ if __name__ == '__main__':
 2. 加载 NoneBot 内置的插件
 3. 在地址 `127.0.0.1:8080` 运行 NoneBot
 
-> **提示**
->
-> 这里 `nonebot.run()` 的参数 `host='127.0.0.1'` 表示让 NoneBot 监听本地环回地址，如果你的 go-cqhttp 运行在非本机的其它位置，例如 Docker 容器内、局域网内的另一台机器上等，则这里需要修改 `host` 参数为希望让 go-cqhttp 插件访问的 IP。如果不清楚该使用哪个 IP，或者希望本机的所有 IP 都被监听，可以使用 `0.0.0.0`。
+:::tip 提示
+这里 `nonebot.run()` 的参数 `host='127.0.0.1'` 表示让 NoneBot 监听本地环回地址，如果你的 go-cqhttp 运行在非本机的其它位置，例如 Docker 容器内、局域网内的另一台机器上等，则这里需要修改 `host` 参数为希望让 go-cqhttp 插件访问的 IP。如果不清楚该使用哪个 IP，或者希望本机的所有 IP 都被监听，可以使用 `0.0.0.0`。
+:::
 
 在命令行使用如下命令即可运行这个 NoneBot 实例：
 
@@ -61,9 +61,9 @@ python bot.py
 }
 ```
 
-> **提示**
->
-> **这里的 `127.0.0.1:8080` 对应 `nonebot.run()` 中传入的 `host` 和 `port`**，如果在 `nonebot.run()` 中传入的 `host` 是 `0.0.0.0`，则插件的配置中需使用任意一个能够访问到 NoneBot 所在环境的 IP，**不要直接填 `0.0.0.0`**。特别地，如果你的 go-cqhttp 运行在 Docker 容器中，NoneBot 运行在宿主机中，则默认情况下这里需使用 `172.17.0.1`（即宿主机在 Docker 默认网桥上的 IP，不同机器有可能不同，如果是 Linux 系统，可以使用命令 `ip addr show docker0 | grep -Po 'inet \K[\d.]+'`来获取需要填入的ip；如果是 macOS 系统或者 Windows 系统，可以考虑使用 `host.docker.internal`，具体解释详见 Docker 文档的 [Use cases and workarounds](https://docs.docker.com/docker-for-mac/networking/#use-cases-and-workarounds) 的「I WANT TO CONNECT FROM A CONTAINER TO A SERVICE ON THE HOST」小标题）。
+:::tip 提示
+**这里的 `127.0.0.1:8080` 对应 `nonebot.run()` 中传入的 `host` 和 `port`**，如果在 `nonebot.run()` 中传入的 `host` 是 `0.0.0.0`，则插件的配置中需使用任意一个能够访问到 NoneBot 所在环境的 IP，**不要直接填 `0.0.0.0`**。特别地，如果你的 go-cqhttp 运行在 Docker 容器中，NoneBot 运行在宿主机中，则默认情况下这里需使用 `172.17.0.1`（即宿主机在 Docker 默认网桥上的 IP，不同机器有可能不同，如果是 Linux 系统，可以使用命令 `ip addr show docker0 | grep -Po 'inet \K[\d.]+'`来获取需要填入的ip；如果是 macOS 系统或者 Windows 系统，可以考虑使用 `host.docker.internal`，具体解释详见 Docker 文档的 [Use cases and workarounds](https://docs.docker.com/docker-for-mac/networking/#use-cases-and-workarounds) 的「I WANT TO CONNECT FROM A CONTAINER TO A SERVICE ON THE HOST」小标题）。
+:::
 
 修改之后，重新启动 `go-cqhttp.exe`，以使新的配置文件生效。
 
@@ -77,9 +77,8 @@ python bot.py
 
 这表示 go-cqhttp 插件已经成功地连接上了 NoneBot，与此同时，go-cqhttp 的日志控制台（和日志文件）中也会输出反向 WebSocket 连接成功的日志。
 
-> **注意**
->
-> 如果到这一步你没有看到上面这样的成功日志，go-cqhttp 的日志中在不断地重连或无反应，请注意检查配置中的 IP 和端口是否确实可以访问。比较常见的出错点包括：
+:::warning 注意
+如果到这一步你没有看到上面这样的成功日志，go-cqhttp 的日志中在不断地重连或无反应，请注意检查配置中的 IP 和端口是否确实可以访问。比较常见的出错点包括：
 
 - NoneBot 监听 `0.0.0.0`，然后在 go-cqhttp 配置中填了 `ws://0.0.0.0:8080/ws/`
 - 在 Docker 容器内运行 go-cqhttp，并通过 `127.0.0.1` 访问宿主机上的 NoneBot
@@ -90,6 +89,7 @@ python bot.py
 - go-cqhttp 插件启动时遭到外星武器干扰
 
 请尝试重启 go-cqhttp、重启 NoneBot、更换端口、修改防火墙、重启系统、仔细阅读前面的文档及提示、更新 go-cqhttp 和 NoneBot 到最新版本等方式来解决。
+:::
 
 现在，尝试向你的 QQ 机器人账号发送如下内容：
 
