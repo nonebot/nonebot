@@ -609,7 +609,7 @@ sidebar: auto
   bot = nonebot.get_bot()
 
   @bot.on_notice('group_increase')
-  async def handle_group_increase(event: aiocqhttp.Event)
+  async def handle_group_increase(event: aiocqhttp.Event):
       pass
   ```
 
@@ -633,7 +633,7 @@ sidebar: auto
   bot = nonebot.get_bot()
 
   @bot.on_request('friend', 'group.invite')
-  async def handle_request(event: aiocqhttp.Event)
+  async def handle_request(event: aiocqhttp.Event):
       pass
   ```
 
@@ -657,7 +657,7 @@ sidebar: auto
   bot = nonebot.get_bot()
 
   @bot.on_meta_event('heartbeat')
-  async def handle_heartbeat(event: aiocqhttp.Event)
+  async def handle_heartbeat(event: aiocqhttp.Event):
       pass
   ```
 
