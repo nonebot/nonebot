@@ -6,6 +6,7 @@ from aiocqhttp.event import Event as CQEvent
 
 from nonebot import NoneBot
 from nonebot.exceptions import CQHttpError
+from nonebot.typing import PermissionPolicy_T
 
 
 class SenderRoles(NamedTuple):
@@ -84,7 +85,6 @@ class SenderRoles(NamedTuple):
         return self.event.user_id in sender_id
 
 
-# AS OF this commit: same as original _get_member_info()
 @cached(ttl=2 * 60)
 async def _get_member_info(bot: NoneBot,
                            self_id: int,
@@ -101,7 +101,7 @@ async def _get_member_info(bot: NoneBot,
 
 
 async def check_permission(bot: NoneBot, event: CQEvent,
-                           policy: 'RoleCheckPolicy') -> bool:
+                           policy: PermissionPolicy_T) -> bool:
     """
     Check whether the message sender has permission required defined
     by the policy
@@ -118,15 +118,10 @@ async def check_permission(bot: NoneBot, event: CQEvent,
     return res
 
 
-# Polices are the functions that triggers when events arrive. They return
-# booleans to determine whether to proceed with the commands.
-RoleCheckPolicy = Callable[[SenderRoles], Union[bool, Awaitable[bool]]]
-
-
 def aggregate_policy(
-    policies: Iterable[RoleCheckPolicy],
+    policies: Iterable[PermissionPolicy_T],
     aggregator: Callable[[Iterable[object]], bool] = all
-) -> RoleCheckPolicy:
+) -> PermissionPolicy_T:
     """
     Merge several role checkers into one using the AND operator (if `aggregator`
     is builtin function `all` - by default). if all given policies are sync,
@@ -178,7 +173,7 @@ def aggregate_policy(
 class _LegacyPermissionConstant:
     """INTERNAL API"""
 
-    def __init__(self, policy: RoleCheckPolicy):
+    def __init__(self, policy: PermissionPolicy_T):
         self._policy = policy
 
     def __call__(self, sender: SenderRoles):
@@ -209,7 +204,6 @@ EVERYBODY = _LegacyPermissionConstant(lambda _: True)
 __all__ = [
     'SenderRoles',
     'check_permission',
-    'RoleCheckPolicy',
     'aggregate_policy',
     'check_permission',
     'PRIVATE_FRIEND',

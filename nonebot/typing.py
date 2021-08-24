@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from nonebot.command import CommandSession
     from nonebot.natural_language import NLPSession, IntentCommand
     from nonebot.notice_request import NoticeSession, RequestSession
+    from nonebot.permission import SenderRoles
 
 Context_T = Dict[str, Any]
 Message_T = Union[str, Dict[str, Any], List[Dict[str, Any]]]
@@ -22,6 +23,7 @@ NLPHandler_T = Callable[["NLPSession"], Awaitable[Optional["IntentCommand"]]]
 NoticeHandler_T = Callable[["NoticeSession"], Awaitable[Any]]
 RequestHandler_T = Callable[["RequestSession"] , Awaitable[Any]]
 MessagePreprocessor_T = Callable[["NoneBot", "CQEvent", "PluginManager"], Awaitable[Any]]
+PermissionPolicy_T = Callable[["SenderRoles"], Union[bool, Awaitable[bool]]]
 
 
 __all__ = [
@@ -35,4 +37,5 @@ __all__ = [
     'State_T',
     'Filter_T',
     'PermChecker_T',
+    'PermissionPolicy_T',
 ]

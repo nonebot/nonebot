@@ -14,7 +14,7 @@ from nonebot import permission as perm
 from .command import Command, CommandManager, CommandSession
 from .notice_request import EventHandler, EventManager
 from .natural_language import NLProcessor, NLPManager
-from .typing import CommandName_T, CommandHandler_T, NLPHandler_T, NoticeHandler_T, Patterns_T, RequestHandler_T
+from .typing import CommandName_T, CommandHandler_T, NLPHandler_T, NoticeHandler_T, Patterns_T, PermissionPolicy_T, RequestHandler_T
 
 
 class Plugin:
@@ -348,7 +348,7 @@ def on_command(
     *,
     aliases: Union[Iterable[str], str] = (),
     patterns: Patterns_T = (),
-    permission: Union[perm.RoleCheckPolicy, Iterable[perm.RoleCheckPolicy]] = perm.EVERYBODY,
+    permission: Union[PermissionPolicy_T, Iterable[PermissionPolicy_T]] = perm.EVERYBODY,
     only_to_me: bool = True,
     privileged: bool = False,
     shell_like: bool = False,
@@ -430,7 +430,7 @@ def on_natural_language(__func: NLPHandler_T) -> NLPHandler_T:
 def on_natural_language(
     keywords: Optional[Union[Iterable[str], str]] = ...,
     *,
-    permission: Union[perm.RoleCheckPolicy, Iterable[perm.RoleCheckPolicy]] = ...,
+    permission: Union[PermissionPolicy_T, Iterable[PermissionPolicy_T]] = ...,
     only_to_me: bool = ...,
     only_short_message: bool = ...,
     allow_empty_message: bool = ...
@@ -449,7 +449,7 @@ def on_natural_language(
 def on_natural_language(
     keywords: Union[Optional[Iterable[str]], str, NLPHandler_T] = None,
     *,
-    permission: Union[perm.RoleCheckPolicy, Iterable[perm.RoleCheckPolicy]] = perm.EVERYBODY,
+    permission: Union[PermissionPolicy_T, Iterable[PermissionPolicy_T]] = perm.EVERYBODY,
     only_to_me: bool = True,
     only_short_message: bool = True,
     allow_empty_message: bool = False

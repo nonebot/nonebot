@@ -1,12 +1,13 @@
 from datetime import datetime, time
 from typing import Any, Container
 
-from nonebot.permission import RoleCheckPolicy, SenderRoles
+from nonebot.permission import SenderRoles
+from nonebot.typing import PermissionPolicy_T
 
 
 def simple_allow_list(*, user_ids: Container[int] = ...,
                       group_ids: Container[int] = ...,
-                      reverse: bool = False) -> RoleCheckPolicy:
+                      reverse: bool = False) -> PermissionPolicy_T:
     """
     Creates a policy that only allows senders from these users or groups.
     The returned function is stateless.
@@ -31,7 +32,7 @@ def simple_allow_list(*, user_ids: Container[int] = ...,
 
 def simple_time_range(begin_time: time, end_time: time,
                       reverse: bool = False,
-                      tz_info: Any = None) -> RoleCheckPolicy:
+                      tz_info: Any = None) -> PermissionPolicy_T:
     """
     Creates a policy that only allows commands to be activated between
     begin_time and end_time. Uses builtin datetime.datetime module.

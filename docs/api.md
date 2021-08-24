@@ -133,6 +133,14 @@ sidebar: auto
 
   消息预处理函数。
 
+### `PermissionPolicy_T` <Badge text="master"/>
+
+- **类型:** `(SenderRoles) -> (bool | Awaitable[bool])`
+
+- **说明:**
+
+  向命令或自然语言处理器传入的权限检查策略。此类型是一个（同步/异步）函数，接受 `SenderRoles` 作为唯一的参数。此函数返回布尔值，返回 `True` 则表示权限检查通过，可以进行下一步处理（触发命令），反之返回 `False`。
+
 ## 配置
 
 ### `API_ROOT`
@@ -477,6 +485,7 @@ sidebar: auto
 - `NoticeSession` -> `nonebot.notice_request.NoticeSession`
 - `RequestSession` -> `nonebot.notice_request.RequestSession`
 - `context_id` <Badge text="1.2.0+"/> -> `nonebot.helpers.context_id`
+- `SenderRoles` <Badge text="master"/> -> `nonebot.permission.SenderRoles`
 
 ### `scheduler`
 
@@ -1238,7 +1247,7 @@ sidebar: auto
     :::warning 注意
     滥用正则表达式可能会引发性能问题，请优先使用普通命令。另外一点需要注意的是，由正则表达式匹配到的匹配到的命令，`session` 中的 `current_arg` 会是整个命令，而不会删除匹配到的内容，以满足一些特殊需求。
     :::
-  - `permission: RoleCheckPolicy | Iterable[RoleCheckPolicy]` <Badge text="master"/>: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="master"/>: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
   - `shell_like: bool`: 是否使用类 shell 语法，若是，则会自动使用 `shlex` 模块进行分割（无需手动编写参数解析器），分割后的参数列表放入 `session.args['argv']`
@@ -1301,7 +1310,7 @@ sidebar: auto
 - **参数:**
 
   - `keywords: (Iterable[str] | str) | None`: 要响应的关键词，若传入 `None`，则响应所有消息
-  - `permission: RoleCheckPolicy | Iterable[RoleCheckPolicy]` <Badge text="master"/>: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="master"/>: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的消息（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `only_short_message: bool`: 是否只响应短消息
   - `allow_empty_message: bool`: 是否响应内容为空的消息（只有 @ 或机器人昵称）
@@ -1982,7 +1991,7 @@ sidebar: auto
 - **参数:**
 
   - `name: str | CommandName_T`: 命令名前缀，若传入字符串，则会自动转换成元组
-  - `permission: RoleCheckPolicy | Iterable[RoleCheckPolicy]` <Badge text="master"/>: 对应 `permission` 属性
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="master"/>: 对应 `permission` 属性
   - `only_to_me: bool`: 对应 `only_to_me` 属性
   - `privileged: bool`: 对应 `privileged` 属性
   - `shell_like: bool`: 对应 `shell_like` 属性
@@ -2001,7 +2010,7 @@ sidebar: auto
   - `name: str | CommandName_T`: 命令名，注册命令处理器时会加上命令组的前缀
   - `aliases: Iterable[str], str]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值时，则使用 `on_command` 装饰器的默认值
   - `patterns: Patterns_T` <Badge text="1.8.1+"/>：同上
-  - `permission: RoleCheckPolicy | Iterable[RoleCheckPolicy]` <Badge text="master"/>: 同上
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="master"/>: 同上
   - `only_to_me: bool`: 同上
   - `privileged: bool`: 同上
   - `shell_like: bool`: 同上
@@ -3050,9 +3059,41 @@ session.get('arg1', prompt='请输入 arg1：',
 
 ## `nonebot.permission` 模块
 
+NoneBot 支持为命令和自然语言处理器设置触发条件，此条件为一个类型为 `PermissionPolicy_T` 的可调用对象：
+
+```python
+# 同步：返回值恒为假，即表示所有消息和发送者都没有权限
+disabled: PermissionPolicy_T = lambda sender: False
+
+# 同步：当消息是群聊，且发送者既不是管理员也不是群主时给予权限
+def normal_group_member(sender: SenderRoles):
+    return sender.is_groupchat and not sender.is_admin and not sender.is_owner
+
+# 异步：在检查器中查询数据库再根据返回值决定是否给予权限
+async def db_check(sender: SenderRoles):
+    query = await db.execute('if exists (select * from list where user=?) 1 else 0', (sender.event.user_id,))
+    return query[0] != 0
+```
+
+在实际使用时应当避免挂起太久的异步操作。在定义了这些条件后，可作为 `permission` 参数传递给相关的装饰器：
+
+```python
+permit_group = { 768887710 }
+banned_people = { 10000, 10001 }
+def foo(sender: SenderRoles):
+    return sender.is_groupchat and sender.from_group(permit_group) \
+    and not sender.sendby(banned_people)
+
+@on_natural_language({'天气'}, only_to_me=False, permission=(foo, db_check))                        # 需要同时满足 foo 和 db_check
+                                                # permission=aggregate_policy((foo, db_check))      # 需要同时满足 foo 和 db_check
+                                                # permission=aggregate_policy((foo, db_check), any) # 只需满足一个
+async def _(session: NLPSession):
+    return IntentCommand('weather', 100.0)
+```
+
 ### _class_ `SenderRoles` <Badge text="master"/>
 
-封装了原生的 `CQEvent` 便于权限检查。此类的实例一般会传入权限检查策略作为参数。
+封装了原生的 `CQEvent` 便于权限检查。此类的实例一般会传入 `PermissionPolicy_T` 作为参数。
 
 #### `bot`
 
@@ -3208,46 +3249,6 @@ session.get('arg1', prompt='请输入 arg1：',
 
   `bool`
 
-### _type_ `RoleCheckPolicy` <Badge text="master"/>
-
-- **类型:** `(SenderRoles) -> (bool | Awaitable[bool])`
-
-- **说明:**
-
-  向命令或自然语言处理器传入的权限检查策略。此类型是一个（同步/异步）函数，接受 `SenderRoles` 作为唯一的参数。此函数返回布尔值，返回 `True` 则表示权限检查通过，可以进行下一步处理（触发命令），反之返回 `False`。 下面的例子都是合法的实例：
-
-  ```python
-  # 同步策略：返回值恒为假，即表示所有消息和发送者都没有权限
-  disabled: RoleCheckPolicy = lambda sender: False
-
-  # 同步策略：当消息是群聊，且发送者既不是管理员也不是群主时给予权限
-  def normal_group_member(sender: SenderRoles):
-      return sender.is_groupchat and not sender.is_admin and not sender.is_owner
-
-  # 异步策略：在检查器中查询数据库再根据返回值决定是否给予权限
-  async def db_check(sender: SenderRoles):
-      query = await db.execute('if exists (select * from list where user=?) 1 else 0', (sender.event.user_id,))
-      return query[0] != 0
-  ```
-
-  在实际使用时应当避免挂起太久的异步操作。
-
-- **用法:**
-
-  ```python
-  permit_group = { 768887710 }
-  banned_people = { 10000, 10001 }
-  def foo(sender: SenderRoles):
-      return sender.is_groupchat and sender.from_group(permit_group) \
-        and not sender.sendby(banned_people)
-
-  @on_natural_language({'天气'}, only_to_me=False, permission=(foo, db_check))                        # 需要同时满足 foo 和 db_check
-                                                 # permission=aggregate_policy((foo, db_check))      # 需要同时满足 foo 和 db_check
-                                                 # permission=aggregate_policy((foo, db_check), any) # 只需满足一个
-  async def _(session: NLPSession):
-      return IntentCommand('weather', 100.0)
-  ```
-
 ### _coroutine_ `check_permission(bot, event, policy)`
 
 - **说明:**
@@ -3260,7 +3261,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
   - `bot: NoneBot`: NoneBot 对象
   - `event: aiocqhttp.Event`: 消息事件对象
-  - `policy: RoleCheckPolicy` <Badge text="master"/>: 返回布尔值的权限检查策略
+  - `policy: PermissionPolicy_T` <Badge text="master"/>: 返回布尔值的权限检查策略
 
 - **返回:**
 
@@ -3286,12 +3287,12 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **参数:**
 
-  - `policies: Iterable[RoleCheckPolicy]`: 要合并的权限检查策略
+  - `policies: Iterable[PermissionPolicy_T]`: 要合并的权限检查策略
   - `aggregator: (Iterable[object]) -> bool`: 用于合并策略的函数
 
 - **返回:**
 
-  - `RoleCheckPolicy`: 新的权限检查策略
+  - `PermissionPolicy_T`: 新的权限检查策略
 
 - **用法:**
 
@@ -3332,7 +3333,7 @@ async def _(session):
 
 需要注意的是，当一个用户是「群管理员」时，ta 同时也是「群成员」；当 ta 是「群主」时，ta 同时也是「群管理员」和「群成员」。
 
-在 master 后，这些常量的类型从 `int` 改变为了 `RoleCheckPolicy`，所以如果你之前包含了它们的 type hints，或用了不寻常的方法来获取它们的值，则可能会导致错误。
+在 master 后，这些常量的类型从 `int` 改变为了 `PermissionPolicy_T`，所以如果你之前包含了它们的 type hints，或用了不寻常的方法来获取它们的值，则可能会导致错误。
 
 ## `nonebot.log` 模块
 
@@ -3559,7 +3560,7 @@ async def _(session):
 
 - **返回:**
 
-  - `RoleCheckPolicy`: 新的权限检查策略
+  - `PermissionPolicy_T`: 新的权限检查策略
 
 - **用法:**
 
@@ -3588,11 +3589,11 @@ async def _(session):
 
 - **返回:**
 
-  - `RoleCheckPolicy`: 新的权限检查策略
+  - `PermissionPolicy_T`: 新的权限检查策略
 
 ## `nonebot.experimental.plugin` 模块 <Badge text="v1.8.0+"/>
 
-为了保持向前的兼容，在 master 后此模块仅导出与主包完全相同的 `on_command` 和 `on_natural_language` 两个函数。
+为了保持向前的兼容，在 master 后此模块仅导出与主包完全相同的 `on_command` 和 `on_natural_language` 两个函数。会在未来版本中移除。
 
 <!-- 链接 -->
 

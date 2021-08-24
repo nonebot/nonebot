@@ -2,8 +2,7 @@ from datetime import timedelta
 from typing import Any, Dict, Tuple, Union, Callable, Iterable, Optional, Type
 
 from nonebot.command import CommandSession
-from nonebot.permission import RoleCheckPolicy
-from nonebot.typing import CommandHandler_T, CommandName_T, Patterns_T
+from nonebot.typing import CommandHandler_T, CommandName_T, Patterns_T, PermissionPolicy_T
 
 
 class CommandGroup:
@@ -11,7 +10,7 @@ class CommandGroup:
     base_kwargs: Dict[str, Any]
 
     def __init__(self, name: Union[str, CommandName_T], *,
-                 permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]] = ...,
+                 permission: Union[PermissionPolicy_T, Iterable[PermissionPolicy_T]] = ...,
                  only_to_me: bool = ...,
                  privileged: bool = ...,
                  shell_like: bool = ...,
@@ -22,7 +21,7 @@ class CommandGroup:
     def command(self, name: Union[str, CommandName_T], *,
                 aliases: Union[Iterable[str], str] = ...,
                 patterns: Patterns_T = ...,
-                permission: Union[RoleCheckPolicy, Iterable[RoleCheckPolicy]] = ...,
+                permission: Union[PermissionPolicy_T, Iterable[PermissionPolicy_T]] = ...,
                 only_to_me: bool = ...,
                 privileged: bool = ...,
                 shell_like: bool = ...,

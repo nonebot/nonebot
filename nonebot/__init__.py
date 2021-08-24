@@ -143,6 +143,7 @@ from .message import message_preprocessor, Message, MessageSegment
 from .natural_language import NLPSession, IntentCommand
 from .notice_request import NoticeSession, RequestSession
 from .helpers import context_id
+from .permission import SenderRoles
 
 __all__ = [
     'NoneBot',
@@ -171,4 +172,5 @@ __all__ = [
     'on_request',
     'RequestSession',
     'context_id',
+    'SenderRoles',
 ]
