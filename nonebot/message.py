@@ -80,37 +80,38 @@ async def handle_message(bot: NoneBot, event: CQEvent) -> None:
 
 
 def _check_at_me(bot: NoneBot, event: CQEvent) -> None:
-    def is_at_me(seg):
-        return seg.type == 'at' and seg.data['qq'] == event.self_id
-
     if event.detail_type == 'private':
         event['to_me'] = True
-    else:
-        # group or discuss
-        event['to_me'] = False
+        return
 
-        # check the first segment
-        first_msg_seg = event.message[0]
-        if is_at_me(first_msg_seg):
-            event['to_me'] = True
-            del event.message[0]
+    def is_at_me(seg):
+        return seg.type == 'at' and str(seg.data['qq']) == str(event.self_id)
 
-        if not event['to_me']:
-            # check the last segment
-            i = -1
+    # group or discuss
+    event['to_me'] = False
+
+    # check the first segment
+    first_msg_seg = event.message[0]
+    if is_at_me(first_msg_seg):
+        event['to_me'] = True
+        del event.message[0]
+
+    if not event['to_me']:
+        # check the last segment
+        i = -1
+        last_msg_seg = event.message[i]
+        if last_msg_seg.type == 'text' and \
+                not last_msg_seg.data['text'].strip() and \
+                len(event.message) >= 2:
+            i -= 1
             last_msg_seg = event.message[i]
-            if last_msg_seg.type == 'text' and \
-                    not last_msg_seg.data['text'].strip() and \
-                    len(event.message) >= 2:
-                i -= 1
-                last_msg_seg = event.message[i]
 
-            if is_at_me(last_msg_seg):
-                event['to_me'] = True
-                del event.message[i:]
+        if is_at_me(last_msg_seg):
+            event['to_me'] = True
+            del event.message[i:]
 
-        if not event.message:
-            event.message.append(MessageSegment.text(''))
+    if not event.message:
+        event.message.append(MessageSegment.text(''))
 
 
 def _check_calling_me_nickname(bot: NoneBot, event: CQEvent) -> None:
