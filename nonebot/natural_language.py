@@ -9,24 +9,25 @@ from .log import logger
 from . import NoneBot
 from .command import call_command
 from .session import BaseSession
-from .typing import CommandName_T, CommandArgs_T, PermChecker_T, NLPHandler_T
+from .typing import CommandName_T, CommandArgs_T, NLPHandler_T, PermissionPolicy_T
+from .permission import check_permission
 
 
 class NLProcessor:
     """INTERNAL API"""
     __slots__ = ('func', 'keywords', 'only_to_me', 'only_short_message',
-                 'allow_empty_message', 'perm_checker_func')
+                 'allow_empty_message', 'permission')
 
     def __init__(self, *, func: NLPHandler_T, keywords: Optional[Iterable[str]],
                  only_to_me: bool, only_short_message: bool,
                  allow_empty_message: bool,
-                 perm_checker_func: PermChecker_T):
+                 permission: PermissionPolicy_T):
         self.func = func
         self.keywords = keywords
         self.only_to_me = only_to_me
         self.only_short_message = only_short_message
         self.allow_empty_message = allow_empty_message
-        self.perm_checker_func = perm_checker_func  # returns True if can trigger
+        self.permission = permission  # includes EllipsisType
 
     async def test(self, session: 'NLPSession', 
                    msg_text_length: Optional[int] = None) -> bool:
@@ -71,7 +72,9 @@ class NLProcessor:
         :param session: NLPSession object
         :return: the event has the permission
         """
-        return await self.perm_checker_func(session.bot, session.event)
+        return await check_permission(session.bot, session.event,
+            self.permission if self.permission is not ...
+                else session.bot.config.DEFAULT_NLP_PERMISSION)
 
 
 class NLPManager:

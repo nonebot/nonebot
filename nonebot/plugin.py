@@ -5,7 +5,6 @@ import shlex
 import warnings
 import importlib
 from datetime import timedelta
-from functools import partial
 from types import ModuleType
 from typing import Any, Set, Dict, TypeVar, Union, Optional, Iterable, Callable, Type, overload
 
@@ -348,7 +347,7 @@ def on_command(
     *,
     aliases: Union[Iterable[str], str] = (),
     patterns: Patterns_T = (),
-    permission: Union[PermissionPolicy_T, Iterable[PermissionPolicy_T]] = perm.EVERYBODY,
+    permission: Union[PermissionPolicy_T, Iterable[PermissionPolicy_T]] = ...,
     only_to_me: bool = True,
     privileged: bool = False,
     shell_like: bool = False,
@@ -373,9 +372,8 @@ def on_command(
     :param run_timeout: will override SESSION_RUN_TIMEOUT if provided
     :param session_class: session class
     """
-    if isinstance(permission, Iterable):
-        permission = perm.aggregate_policy(permission)
-    perm_checker = partial(perm.check_permission, policy=permission)
+    real_permission = perm.aggregate_policy(permission) \
+        if isinstance(permission, Iterable) else permission
 
     def deco(func: CommandHandler_T) -> CommandHandler_T:
         if not isinstance(name, (str, tuple)):
@@ -393,7 +391,7 @@ def on_command(
                       func=func,
                       only_to_me=only_to_me,
                       privileged=privileged,
-                      perm_checker_func=perm_checker,
+                      permission=real_permission,
                       expire_timeout=expire_timeout,
                       run_timeout=run_timeout,
                       session_class=session_class)
@@ -449,7 +447,7 @@ def on_natural_language(
 def on_natural_language(
     keywords: Union[Optional[Iterable[str]], str, NLPHandler_T] = None,
     *,
-    permission: Union[PermissionPolicy_T, Iterable[PermissionPolicy_T]] = perm.EVERYBODY,
+    permission: Union[PermissionPolicy_T, Iterable[PermissionPolicy_T]] = ...,
     only_to_me: bool = True,
     only_short_message: bool = True,
     allow_empty_message: bool = False
@@ -457,9 +455,8 @@ def on_natural_language(
     """
     Implementation of on_natural_language overloads.
     """
-    if isinstance(permission, Iterable):
-        permission = perm.aggregate_policy(permission)
-    perm_checker = partial(perm.check_permission, policy=permission)
+    real_permission = perm.aggregate_policy(permission) \
+        if isinstance(permission, Iterable) else permission
 
     def deco(func: NLPHandler_T) -> NLPHandler_T:
         nl_processor = NLProcessor(
@@ -468,7 +465,7 @@ def on_natural_language(
             only_to_me=only_to_me,
             only_short_message=only_short_message,
             allow_empty_message=allow_empty_message,
-            perm_checker_func=perm_checker)
+            permission=real_permission)
 
         NLPManager.add_nl_processor(nl_processor)
         Plugin.GlobalTemp.nl_processors.add(nl_processor)

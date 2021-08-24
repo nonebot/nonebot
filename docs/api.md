@@ -307,6 +307,34 @@ sidebar: auto
 
   将 `note.add` 这样的命令解析为 `('note', 'add')`。
 
+### `DEFAULT_COMMAND_PERMISSION` <Badge text="master"/>
+
+- **类型:** `PermissionPolicy_T`
+
+- **默认值:** `lambda _: True`
+
+- **说明:**
+
+  命令处理器的缺省权限。默认为允许所有用户触发。
+
+- **用法:**
+
+  ```python
+  DEFAULT_COMMAND_PERMISSION = lambda s: s.is_superuser
+  ```
+
+  调用 `on_command` 而不提供 `permission` 参数时，命令仅能被超级用户触发。
+
+### `DEFAULT_NLP_PERMISSION` <Badge text="master"/>
+
+- **类型:** `PermissionPolicy_T`
+
+- **默认值:** `lambda _: True`
+
+- **说明:**
+
+  自然语言处理器的缺省权限。默认为允许所有用户触发。
+
 ### `SESSION_EXPIRE_TIMEOUT`
 
 - **类型:** `datetime.timedelta | None`
@@ -1231,7 +1259,7 @@ sidebar: auto
                      '\n'.join(map(lambda p: p.name, filter(lambda p: p.name, plugins))))
   ```
 
-### _decorator_ `on_command(name, *, aliases=(), permission=perm.EVERYBODY, only_to_me=True, privileged=False, shell_like=False, expire_timeout=..., run_timeout=..., session_class=None)` <Badge text="1.6.0+" />
+### _decorator_ `on_command(name, *, aliases=(), permission=..., only_to_me=True, privileged=False, shell_like=False, expire_timeout=..., run_timeout=..., session_class=None)` <Badge text="1.6.0+" />
 
 - **说明:**
 
@@ -1247,7 +1275,7 @@ sidebar: auto
     :::warning 注意
     滥用正则表达式可能会引发性能问题，请优先使用普通命令。另外一点需要注意的是，由正则表达式匹配到的匹配到的命令，`session` 中的 `current_arg` 会是整个命令，而不会删除匹配到的内容，以满足一些特殊需求。
     :::
-  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="master"/>: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T] | EllipsisType` <Badge text="master"/>: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_COMMAND_PERMISSION`
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
   - `shell_like: bool`: 是否使用类 shell 语法，若是，则会自动使用 `shlex` 模块进行分割（无需手动编写参数解析器），分割后的参数列表放入 `session.args['argv']`
@@ -1301,7 +1329,7 @@ sidebar: auto
 
   一个典型的命令参数解析器。
 
-### _decorator_ `on_natural_language(keywords=None, *, permission=EVERYBODY, only_to_me=True, only_short_message=True, allow_empty_message=False)` <Badge text="1.6.0+" />
+### _decorator_ `on_natural_language(keywords=None, *, permission=..., only_to_me=True, only_short_message=True, allow_empty_message=False)` <Badge text="1.6.0+" />
 
 - **说明:**
 
@@ -1310,7 +1338,7 @@ sidebar: auto
 - **参数:**
 
   - `keywords: (Iterable[str] | str) | None`: 要响应的关键词，若传入 `None`，则响应所有消息
-  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="master"/>: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T] | EllipsisType` <Badge text="master"/>: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_NLP_PERMISSION`
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的消息（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `only_short_message: bool`: 是否只响应短消息
   - `allow_empty_message: bool`: 是否响应内容为空的消息（只有 @ 或机器人昵称）
