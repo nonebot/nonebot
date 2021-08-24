@@ -7,6 +7,7 @@ sidebar: auto
 ## master
 
 - 修复与 node-onebot 的 at 消息段兼容问题 [#272](https://github.com/nonebot/nonebot/issues/272)
+- 在 1.8.0 中引入的命令权限控制系统现在已经替换了原来的权限系统 (`nonebot.permission` 模块），所有以 `int` 为类型的权限值和函数参数全部改为了 `RoleCheckPolicy`。尽管如此，原权限声明常量可继续使用
 
 ## v1.8.4
 

@@ -14,7 +14,7 @@ from nonebot import permission as perm
 from .command import Command, CommandManager, CommandSession
 from .notice_request import EventHandler, EventManager
 from .natural_language import NLProcessor, NLPManager
-from .typing import CommandName_T, CommandHandler_T, NLPHandler_T, NoticeHandler_T, Patterns_T, PermChecker_T, RequestHandler_T
+from .typing import CommandName_T, CommandHandler_T, NLPHandler_T, NoticeHandler_T, Patterns_T, RequestHandler_T
 
 
 class Plugin:
@@ -343,26 +343,40 @@ def get_loaded_plugins() -> Set[Plugin]:
     return set(PluginManager._plugins.values())
 
 
-def on_command_custom(
+def on_command(
     name: Union[str, CommandName_T],
     *,
-    aliases: Union[Iterable[str], str],
-    patterns: Patterns_T,
-    only_to_me: bool,
-    privileged: bool,
-    shell_like: bool,
-    perm_checker: PermChecker_T,
-    expire_timeout: Optional[timedelta],
-    run_timeout: Optional[timedelta],
-    session_class: Optional[Type[CommandSession]]
+    aliases: Union[Iterable[str], str] = (),
+    patterns: Patterns_T = (),
+    permission: Union[perm.RoleCheckPolicy, Iterable[perm.RoleCheckPolicy]] = perm.EVERYBODY,
+    only_to_me: bool = True,
+    privileged: bool = False,
+    shell_like: bool = False,
+    expire_timeout: Optional[timedelta] = ...,
+    run_timeout: Optional[timedelta] = ...,
+    session_class: Optional[Type[CommandSession]] = None
 ) -> Callable[[CommandHandler_T], CommandHandler_T]:
     """
-    INTERNAL API
+    Decorator to register a function as a command.
 
-    The implementation of on_command function with custom per checker function.
-    dev: This function may not last long. Kill it when this function is referenced
-    only once
+    :param name: command name (e.g. 'echo' or ('random', 'number'))
+    :param aliases: aliases of command name, for convenient access
+    :param patterns: custom regex pattern for the command.
+           Please use this carefully. Abuse may cause performance problem.
+           Also, Please notice that if a message is matched by this method,
+           it will use the full command as session current_arg.
+    :param permission: permission required by the command
+    :param only_to_me: only handle messages to me
+    :param privileged: can be run even when there is already a session
+    :param shell_like: use shell-like syntax to split arguments
+    :param expire_timeout: will override SESSION_EXPIRE_TIMEOUT if provided
+    :param run_timeout: will override SESSION_RUN_TIMEOUT if provided
+    :param session_class: session class
     """
+    if isinstance(permission, Iterable):
+        permission = perm.aggregate_policy(permission)
+    perm_checker = partial(perm.check_permission, policy=permission)
+
     def deco(func: CommandHandler_T) -> CommandHandler_T:
         if not isinstance(name, (str, tuple)):
             raise TypeError('the name of a command must be a str or tuple')
@@ -404,59 +418,48 @@ def on_command_custom(
     return deco
 
 
-def on_command(
-    name: Union[str, CommandName_T],
-    *,
-    aliases: Union[Iterable[str], str] = (),
-    patterns: Patterns_T = (),
-    permission: int = perm.EVERYBODY,
-    only_to_me: bool = True,
-    privileged: bool = False,
-    shell_like: bool = False,
-    expire_timeout: Optional[timedelta] = ...,
-    run_timeout: Optional[timedelta] = ...,
-    session_class: Optional[Type[CommandSession]] = None
-) -> Callable[[CommandHandler_T], CommandHandler_T]:
+@overload
+def on_natural_language(__func: NLPHandler_T) -> NLPHandler_T:
     """
-    Decorator to register a function as a command.
+    Decorator to register a function as a natural language processor with
+    default kwargs.
+    """
 
-    :param name: command name (e.g. 'echo' or ('random', 'number'))
-    :param aliases: aliases of command name, for convenient access
-    :param patterns: custom regex pattern for the command.
-           Please use this carefully. Abuse may cause performance problem.
-           Also, Please notice that if a message is matched by this method,
-           it will use the full command as session current_arg.
-    :param permission: permission required by the command
+
+@overload
+def on_natural_language(
+    keywords: Optional[Union[Iterable[str], str]] = ...,
+    *,
+    permission: Union[perm.RoleCheckPolicy, Iterable[perm.RoleCheckPolicy]] = ...,
+    only_to_me: bool = ...,
+    only_short_message: bool = ...,
+    allow_empty_message: bool = ...
+) -> Callable[[NLPHandler_T], NLPHandler_T]:
+    """
+    Decorator to register a function as a natural language processor.
+
+    :param keywords: keywords to respond to, if None, respond to all messages
+    :param permission: permission required by the processor
     :param only_to_me: only handle messages to me
-    :param privileged: can be run even when there is already a session
-    :param shell_like: use shell-like syntax to split arguments
-    :param expire_timeout: will override SESSION_EXPIRE_TIMEOUT if provided
-    :param run_timeout: will override SESSION_RUN_TIMEOUT if provided
-    :param session_class: session class
+    :param only_short_message: only handle short messages
+    :param allow_empty_message: handle empty messages
     """
-    perm_checker = partial(perm.check_permission, permission_required=permission)
-    return on_command_custom(name, aliases=aliases, patterns=patterns,
-                             only_to_me=only_to_me, privileged=privileged,
-                             shell_like=shell_like, perm_checker=perm_checker,
-                             expire_timeout=expire_timeout, run_timeout=run_timeout,
-                             session_class=session_class)
 
 
-def on_natural_language_custom(
-    keywords: Union[Optional[Iterable[str]], str, NLPHandler_T],
+def on_natural_language(
+    keywords: Union[Optional[Iterable[str]], str, NLPHandler_T] = None,
     *,
-    only_to_me: bool,
-    only_short_message: bool,
-    allow_empty_message: bool,
-    perm_checker: PermChecker_T
-) -> Union[Callable[[NLPHandler_T], NLPHandler_T], NLPHandler_T]:
+    permission: Union[perm.RoleCheckPolicy, Iterable[perm.RoleCheckPolicy]] = perm.EVERYBODY,
+    only_to_me: bool = True,
+    only_short_message: bool = True,
+    allow_empty_message: bool = False
+):
     """
-    INTERNAL API
-
-    The implementation of on_natural_language function with custom per checker function.
-    dev: This function may not last long. Kill it when this function is referenced
-    only once
+    Implementation of on_natural_language overloads.
     """
+    if isinstance(permission, Iterable):
+        permission = perm.aggregate_policy(permission)
+    perm_checker = partial(perm.check_permission, policy=permission)
 
     def deco(func: NLPHandler_T) -> NLPHandler_T:
         nl_processor = NLProcessor(
@@ -479,52 +482,6 @@ def on_natural_language_custom(
         if isinstance(keywords, str):
             keywords = (keywords,)
         return deco
-
-
-@overload
-def on_natural_language(__func: NLPHandler_T) -> NLPHandler_T:
-    """
-    Decorator to register a function as a natural language processor with
-    default kwargs.
-    """
-
-
-@overload
-def on_natural_language(
-    keywords: Optional[Union[Iterable[str], str]] = ...,
-    *,
-    permission: int = ...,
-    only_to_me: bool = ...,
-    only_short_message: bool = ...,
-    allow_empty_message: bool = ...
-) -> Callable[[NLPHandler_T], NLPHandler_T]:
-    """
-    Decorator to register a function as a natural language processor.
-
-    :param keywords: keywords to respond to, if None, respond to all messages
-    :param permission: permission required by the processor
-    :param only_to_me: only handle messages to me
-    :param only_short_message: only handle short messages
-    :param allow_empty_message: handle empty messages
-    """
-
-
-def on_natural_language(
-    keywords: Union[Optional[Iterable[str]], str, NLPHandler_T] = None,
-    *,
-    permission: int = perm.EVERYBODY,
-    only_to_me: bool = True,
-    only_short_message: bool = True,
-    allow_empty_message: bool = False
-):
-    """
-    Implementation of on_natural_language overloads.
-    """
-    perm_checker = partial(perm.check_permission, permission_required=permission)
-    return on_natural_language_custom(keywords, only_to_me=only_to_me,
-                                      only_short_message=only_short_message,
-                                      allow_empty_message=allow_empty_message,
-                                      perm_checker=perm_checker)
 
 
 _Teh = TypeVar('_Teh', NoticeHandler_T, RequestHandler_T)
