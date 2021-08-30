@@ -7,7 +7,6 @@ SUPERUSERS = {12345678}
 COMMAND_START = {'', '/', '!', '／', '！'}
 NICKNAME = {'小明', '明明'}
 
-# TULING_API_KEY = ''
-SecretId = "AKIDxlNjpeCTUFkyvb080cx1oLXS7VcS1JK4"
+SecretId = ""
 
-SecretKey = "UheKjqhHbdPvA8oEMDn69vQejY6NN6Yi"
+SecretKey = ""
