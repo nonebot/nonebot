@@ -39,7 +39,6 @@ async def _(session: CommandSession):
         while True:
             await session.apause('要查询的城市名称不能为空呢，请重新输入')
 
-
     # 如果当前正在向用户询问更多信息（例如本例中的要查询的城市），且用户输入有效，则放入会话状态
     session.state[session.current_key] = stripped_arg
 
