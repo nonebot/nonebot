@@ -39,13 +39,18 @@ awesome-bot
 
 ```python
 from nonebot import on_command, CommandSession
+from nonebot.command.argfilter import extractors, controllers
 
 from .data_source import get_weather_of_city
 
 
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    city = session.get('city', prompt='你想查询哪个城市的天气呢？')
+    city = await session.aget('city', prompt='你想查询哪个城市的天气呢？', arg_filters=[
+        extractors.extract_text,  # 取纯文本部分
+        controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+        str.strip  # 去掉两边空白字符
+    ])
     weather_report = await get_weather_of_city(city)
     await session.send(weather_report)
 
@@ -60,7 +65,8 @@ async def _(session: CommandSession):
         return
 
     if not stripped_arg:
-        session.pause('要查询的城市名称不能为空呢，请重新输入')
+        while True:
+            await session.apause('要查询的城市名称不能为空呢，请重新输入')
 
     session.state[session.current_key] = stripped_arg
 ```
@@ -76,16 +82,21 @@ async def get_weather_of_city(city: str) -> str:
 
 在 `weather/__init__.py` 文件添加内容如下：
 
-```python {2,29-35}
+```python {2,35-41}
 from nonebot import on_command, CommandSession
 from nonebot import on_natural_language, NLPSession, IntentCommand
+from nonebot.command.argfilter import extractors, controllers
 
 from .data_source import get_weather_of_city
 
 
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    city = session.get('city', prompt='你想查询哪个城市的天气呢？')
+    city = await session.aget('city', prompt='你想查询哪个城市的天气呢？', arg_filters=[
+        extractors.extract_text,  # 取纯文本部分
+        controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+        str.strip  # 去掉两边空白字符
+    ])
     weather_report = await get_weather_of_city(city)
     await session.send(weather_report)
 
@@ -100,7 +111,8 @@ async def _(session: CommandSession):
         return
 
     if not stripped_arg:
-        session.pause('要查询的城市名称不能为空呢，请重新输入')
+        while True:
+            await session.apause('要查询的城市名称不能为空呢，请重新输入')
 
     session.state[session.current_key] = stripped_arg
 
@@ -160,9 +172,10 @@ pip install jieba
 
 有了结巴分词之后，扩充 `weather/__init__.py` 如下：
 
-```python {3,35-49}
+```python {4,41-56}
 from nonebot import on_command, CommandSession
 from nonebot import on_natural_language, NLPSession, IntentCommand
+from nonebot.command.argfilter import extractors, controllers
 from jieba import posseg
 
 from .data_source import get_weather_of_city
@@ -170,7 +183,11 @@ from .data_source import get_weather_of_city
 
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    city = session.get('city', prompt='你想查询哪个城市的天气呢？')
+    city = await session.aget('city', prompt='你想查询哪个城市的天气呢？', arg_filters=[
+        extractors.extract_text,  # 取纯文本部分
+        controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+        str.strip  # 去掉两边空白字符
+    ])
     weather_report = await get_weather_of_city(city)
     await session.send(weather_report)
 
@@ -185,7 +202,8 @@ async def _(session: CommandSession):
         return
 
     if not stripped_arg:
-        session.pause('要查询的城市名称不能为空呢，请重新输入')
+        while True:
+            await session.apause('要查询的城市名称不能为空呢，请重新输入')
 
     session.state[session.current_key] = stripped_arg
 
