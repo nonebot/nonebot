@@ -84,18 +84,10 @@ async def call_tencentCloud_api(session: CommandSession, text: str) -> Optional[
         try:
             # 使用 aiohttp 库发送最终的请求
             async with aiohttp.ClientSession() as sess:
-                # async with sess.post(httpProfile.endpoint, json=params) as response:
-                #     if response.status != 200:
-                #         # 如果 HTTP 响应状态码不是 200，说明调用失败
-                #         return None
-
                 response = resp.to_json_string()
                 print("response: " + response)
                 resp_payload = json.loads(response)
                 if resp_payload['Reply']:
-                    # for result in resp_payload['results']:
-                    #     if result['resultType'] == 'text':
-                    #         # 返回文本类型的回复
                     return resp_payload['Reply']
 
         except (aiohttp.ClientError, json.JSONDecodeError, KeyError):
