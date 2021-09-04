@@ -13,6 +13,13 @@ from tencentcloud.common.profile.http_profile import HttpProfile
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
 from tencentcloud.nlp.v20190408 import nlp_client, models
 
+__plugin_name__ = '智能聊天'
+__plugin_usage__ = r"""
+智能聊天
+
+直接跟我聊天即可～
+""".strip()
+
 # 定义无法获取腾讯智能机器人回复时的「表达（Expression）」
 EXPR_DONT_UNDERSTAND = (
     '我现在还不太明白你在说什么呢，但没关系，以后的我会变得更强呢！',
