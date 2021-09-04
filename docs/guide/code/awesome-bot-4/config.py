@@ -7,6 +7,5 @@ SUPERUSERS = {12345678}
 COMMAND_START = {'', '/', '!', '／', '！'}
 NICKNAME = {'小明', '明明'}
 
-SecretId = ""
-
-SecretKey = ""
+SECRET_ID = ""
+SECRET_KEY = ""

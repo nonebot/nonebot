@@ -46,11 +46,14 @@ from .data_source import get_weather_of_city
 
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    city = await session.aget('city', prompt='你想查询哪个城市的天气呢？', arg_filters=[
-        extractors.extract_text,  # 取纯文本部分
-        controllers.handle_cancellation(session),  # 处理用户可能的取消指令
-        str.strip  # 去掉两边空白字符
-    ])
+    city = await session.aget(
+        'city',
+        prompt='你想查询哪个城市的天气呢？',
+        arg_filters=[
+            extractors.extract_text,  # 取纯文本部分
+            controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+            str.strip  # 去掉两边空白字符
+        ])
     weather_report = await get_weather_of_city(city)
     await session.send(weather_report)
 
@@ -82,7 +85,7 @@ async def get_weather_of_city(city: str) -> str:
 
 在 `weather/__init__.py` 文件添加内容如下：
 
-```python {2,35-41}
+```python {2,38-44}
 from nonebot import on_command, CommandSession
 from nonebot import on_natural_language, NLPSession, IntentCommand
 from nonebot.command.argfilter import extractors, controllers
@@ -92,11 +95,14 @@ from .data_source import get_weather_of_city
 
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    city = await session.aget('city', prompt='你想查询哪个城市的天气呢？', arg_filters=[
-        extractors.extract_text,  # 取纯文本部分
-        controllers.handle_cancellation(session),  # 处理用户可能的取消指令
-        str.strip  # 去掉两边空白字符
-    ])
+    city = await session.aget(
+        'city',
+        prompt='你想查询哪个城市的天气呢？',
+        arg_filters=[
+            extractors.extract_text,  # 取纯文本部分
+            controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+            str.strip  # 去掉两边空白字符
+        ])
     weather_report = await get_weather_of_city(city)
     await session.send(weather_report)
 
@@ -172,7 +178,7 @@ pip install jieba
 
 有了结巴分词之后，扩充 `weather/__init__.py` 如下：
 
-```python {4,41-56}
+```python {4,44-59}
 from nonebot import on_command, CommandSession
 from nonebot import on_natural_language, NLPSession, IntentCommand
 from nonebot.command.argfilter import extractors, controllers
@@ -183,11 +189,14 @@ from .data_source import get_weather_of_city
 
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    city = await session.aget('city', prompt='你想查询哪个城市的天气呢？', arg_filters=[
-        extractors.extract_text,  # 取纯文本部分
-        controllers.handle_cancellation(session),  # 处理用户可能的取消指令
-        str.strip  # 去掉两边空白字符
-    ])
+    city = await session.aget(
+        'city',
+        prompt='你想查询哪个城市的天气呢？',
+        arg_filters=[
+            extractors.extract_text,  # 取纯文本部分
+            controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+            str.strip  # 去掉两边空白字符
+        ])
     weather_report = await get_weather_of_city(city)
     await session.send(weather_report)
 

@@ -8,11 +8,14 @@ from .data_source import get_weather_of_city
 
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    city = await session.aget('city', prompt='你想查询哪个城市的天气呢？', arg_filters=[
-        extractors.extract_text,  # 取纯文本部分
-        controllers.handle_cancellation(session),  # 处理用户可能的取消指令
-        str.strip  # 去掉两边空白字符
-    ])
+    city = await session.aget(
+        'city',
+        prompt='你想查询哪个城市的天气呢？',
+        arg_filters=[
+            extractors.extract_text,  # 取纯文本部分
+            controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+            str.strip  # 去掉两边空白字符
+        ])
     weather_report = await get_weather_of_city(city)
     await session.send(weather_report)
 

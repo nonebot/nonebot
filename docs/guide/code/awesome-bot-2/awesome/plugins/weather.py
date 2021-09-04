@@ -7,11 +7,14 @@ from nonebot.command.argfilter import extractors, controllers
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
     # 从会话状态（session.state）中获取城市名称（city），如果当前不存在，则询问用户
-    city = await session.aget('city', prompt='你想查询哪个城市的天气呢？', arg_filters=[
-        extractors.extract_text,  # 取纯文本部分
-        controllers.handle_cancellation(session),  # 处理用户可能的取消指令
-        str.strip  # 去掉两边空白字符
-    ])
+    city = await session.aget(
+        'city',
+        prompt='你想查询哪个城市的天气呢？',
+        arg_filters=[
+            extractors.extract_text,  # 取纯文本部分
+            controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+            str.strip  # 去掉两边空白字符
+        ])
     # 获取城市的天气预报
     weather_report = await get_weather_of_city(city)
     # 向用户发送天气预报

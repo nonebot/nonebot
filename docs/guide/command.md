@@ -85,11 +85,14 @@ from nonebot.command.argfilter import extractors, controllers
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
     # 从会话状态（session.state）中获取城市名称（city），如果当前不存在，则询问用户
-    city = await session.aget('city', prompt='你想查询哪个城市的天气呢？', arg_filters=[
-        extractors.extract_text,  # 取纯文本部分
-        controllers.handle_cancellation(session),  # 处理用户可能的取消指令
-        str.strip  # 去掉两边空白字符
-    ])
+    city = await session.aget(
+        'city',
+        prompt='你想查询哪个城市的天气呢？',
+        arg_filters=[
+            extractors.extract_text,  # 取纯文本部分
+            controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+            str.strip  # 去掉两边空白字符
+        ])
     # 获取城市的天气预报
     weather_report = await get_weather_of_city(city)
     # 向用户发送天气预报
@@ -117,7 +120,6 @@ async def _(session: CommandSession):
         while True:
             await session.apause('要查询的城市名称不能为空呢，请重新输入')
 
-
     # 如果当前正在向用户询问更多信息（例如本例中的要查询的城市），且用户输入有效，则放入会话状态
     session.state[session.current_key] = stripped_arg
 
@@ -144,11 +146,14 @@ async def get_weather_of_city(city: str) -> str:
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
     # 从会话状态（session.state）中获取城市名称（city），如果当前不存在，则询问用户
-    city = await session.aget('city', prompt='你想查询哪个城市的天气呢？', arg_filters=[
-        extractors.extract_text,  # 取纯文本部分
-        controllers.handle_cancellation(session),  # 处理用户可能的取消指令
-        str.strip  # 去掉两边空白字符
-    ])
+    city = await session.aget(
+        'city',
+        prompt='你想查询哪个城市的天气呢？',
+        arg_filters=[
+            extractors.extract_text,  # 取纯文本部分
+            controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+            str.strip  # 去掉两边空白字符
+        ])
     # 获取城市的天气预报
     weather_report = await get_weather_of_city(city)
     # 向用户发送天气预报
@@ -193,16 +198,16 @@ async def _(session: CommandSession):
 
 参数解析器的 `session` 参数和命令处理函数一样，都是当前命令的会话对象。并且，参数解析器会在命令处理函数之前执行，以确保正确解析参数以供后者使用。
 
-上面的例子中，参数解析器会判断当前是否是该会话第一次运行（用户刚发送 `/天气`，触发了天气命令）。如果是，则检查用户触发天气命令时有没有附带参数（即 `stripped_arg` 是否有内容），如果带了参数（例如用户发送了 `/天气 南京`），则把附带的参数当做要查询的城市放进会话状态 `session.state`，以 `city` 作为状态的 key——也就是说，如果用户触发命令时就给出了城市，则命令处理函数中的 `session.aget('city')` 第一次执行时就能返回结果。
+上面的例子中，参数解析器会判断当前是否是该会话第一次运行（用户刚发送 `/天气`，触发了天气命令）。如果是，则检查用户触发天气命令时有没有附带参数（即 `stripped_arg` 是否有内容），如果带了参数（例如用户发送了 `/天气 南京`），则把附带的参数当做要查询的城市放进会话状态 `session.state`，以 `city` 作为状态的 key——也就是说，如果用户触发命令时就给出了城市，则命令处理函数中的 `session.aget('city')` 就能直接返回结果，而不用提示用户输入。
 
-如果不是第一次运行，那就说明命令处理函数中向用户询问了更多信息，导致会话被中断，并等待用户回复（也就是 `session.aget()` 的效果）。这时候需要判断用户输入是不是有效，因为我们已经明确地询问了，如果用户此时发送了空白字符，显然这是没有意义的内容，需要提示用户重新发送。相反，如果有效的话，则直接以 `session.current_key` 作为 key（也就是 `session.aget()` 的第一个参数，上例中只有可能是 `city`），将输入内容存入会话状态。
+如果该会话不是第一次运行，那就说明命令处理函数中向用户询问了更多信息，导致会话被中断，并等待用户回复（也就是 `session.aget()` 的效果）。这时候需要判断用户输入是不是有效，因为我们已经明确地询问了，如果用户此时发送了空白字符，显然这是没有意义的内容，需要提示用户重新发送。相反，如果有效的话，则直接以 `session.current_key` 作为 key（也就是 `session.aget()` 的第一个参数，上例中只有可能是 `city`），将输入内容存入会话状态。
 
 :::tip 提示
 上面用了 `session.current_arg_text` 来获取用户当前输入的参数，这表示从用户输入中提取纯文本部分，也就是说不包含图片、表情、语音、卡片分享等。
 
 如果需要用户输入的原始内容，请使用 `session.current_arg`，里面可能包含 CQ 码。除此之外，还可以通过 `session.current_arg_images` 获取消息中的图片 URL 列表。
 
-另外一点值得注意的是，`@on_command` 也可以同样把正则表达式作为参数传入pattern进行匹配。在这种情况下，整条完整的指令会被作为current_arg使用（而不会删除开头匹配到的命令），这点请注意区别。
+另外一点值得注意的是，`@on_command` 也可以传入正则表达式作为参数 `patterns`，在这种情况下，整条完整的指令会被作为 `session.current_arg` 使用（而不会删除开头匹配到的命令），这点请注意区别。
 :::
 
 现在我们已经理解完了天气命令的代码，是时候运行一下看看实际效果了，启动 NoneBot 后尝试向它分别发送下面的两个带参数和不带参数的消息：
