@@ -13,7 +13,7 @@ from tencentcloud.common.profile.http_profile import HttpProfile
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
 from tencentcloud.nlp.v20190408 import nlp_client, models
 
-# 定义无法获取腾讯云回复时的「表达（Expression）」
+# 定义无法获取腾讯智能机器人回复时的「表达（Expression）」
 EXPR_DONT_UNDERSTAND = (
     '我现在还不太明白你在说什么呢，但没关系，以后的我会变得更强呢！',
     '我有点看不懂你的意思呀，可以跟我聊些简单的话题嘛',
@@ -28,14 +28,14 @@ async def tencentCloud(session: CommandSession):
     # 获取可选参数，这里如果没有 message 参数，命令不会被中断，message 变量会是 None
     message = await session.aget('message')
 
-    # 通过封装的函数获取腾讯云机器人的回复
+    # 通过封装的函数获取腾讯智能机器人机器人的回复
     reply = await call_tencentCloud_api(session, message)
     if reply:
-        # 如果调用腾讯云机器人成功，得到了回复，则转义之后发送给用户
+        # 如果调用腾讯智能机器人成功，得到了回复，则转义之后发送给用户
         # 转义会把消息中的某些特殊字符做转换，避免将它们理解为 CQ 码
         await session.send(escape(reply))
     else:
-        # 如果调用失败，或者它返回的内容我们目前处理不了，发送无法获取腾讯云回复时的「表达」
+        # 如果调用失败，或者它返回的内容我们目前处理不了，发送无法获取腾讯智能机器人回复时的「表达」
         # 这里的 render_expression() 函数会将一个「表达」渲染成一个字符串消息
         await session.send(render_expression(EXPR_DONT_UNDERSTAND))
 
@@ -48,7 +48,7 @@ async def _(session: NLPSession):
 
 
 async def call_tencentCloud_api(session: CommandSession, text: str) -> Optional[str]:
-    # 调用腾讯云机器人的 API 获取回复
+    # 调用腾讯智能机器人的 API 获取回复
 
     if not text:
         return None
