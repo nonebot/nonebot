@@ -16,13 +16,11 @@ NoneBot 在其底层交互的部分使用 [aiocqhttp](https://github.com/nonebot
 
 得益于 Python 的 [asyncio](https://docs.python.org/3/library/asyncio.html) 机制，NoneBot 处理消息的吞吐量有了很大的保障，再配合 OneBot 可选的反向 WebSocket 通信方式（也是最建议的通信方式），NoneBot 的性能可以达到 HTTP 通信方式的两倍以上，相较于传统同步 I/O 的 HTTP 通信，更是有质的飞跃。
 
-需要注意的是，NoneBot 仅支持 Python 3.7+ 及兼容 OneBot v11 标准的 OneBot 实现，在本指南后续的介绍中，将使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp)（一个 QQ 平台的 OneBot 实现）作为示例。
+需要注意的是，NoneBot 仅支持 Python 3.7+ 及兼容 OneBot v11 标准的 OneBot 实现（更多列表见 [生态](https://github.com/botuniverse/onebot/blob/master/ecosystem.md)），在本指南后续的介绍中，将使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp)（一个 QQ 平台的 OneBot 实现）作为示例。
 
 ## 它如何工作？
 
-TODO
-
-NoneBot 的运行离不开 OneBot 标准，当用户编写的程序实现了 OneBot v11 标准就可以使用 NoneBot。以 go-cqhttp 为例，它直接与 QQ 服务器通信，进行实际的消息、通知、请求的接收和发送。当 go-cqhttp 收到消息时，它将这个消息包装为一个事件（通知和请求同理），并根据其配置中的 `ws-reverse` 里的 `universal` 地址来将事件发送至 NoneBot。
+NoneBot 的运行离不开 OneBot 实现，以 go-cqhttp 为例，它直接与 QQ 服务器通信，进行实际的消息、通知、请求的接收和发送。当 go-cqhttp 收到消息时，它将这个消息包装为一个事件（通知和请求同理），并根据其配置中的 `ws-reverse` 里的 `universal` 地址来将事件发送至 NoneBot。
 
 在 NoneBot 收到事件前，它底层的 aiocqhttp 实际已经先看到了事件，aiocqhttp 根据事件的类型信息，通知到 NoneBot 的相应函数。特别地，对于消息类型的事件，还将消息内容转换成了 `aiocqhttp.message.Message` 类型，以便处理。
 
