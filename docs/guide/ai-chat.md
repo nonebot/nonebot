@@ -74,7 +74,7 @@ async def call_tencent_bot_api(session: CommandSession, text: Optional[str]) -> 
         return None
 
     try:
-        cred = credential.Credential(session.bot.config.SECRET_ID, session.bot.config.SECRET_KEY)
+        cred = credential.Credential(session.bot.config.TENCENT_BOT_SECRET_ID, session.bot.config.TENCENT_BOT_SECRET_KEY)
         httpProfile = HttpProfile()
         httpProfile.endpoint = "nlp.tencentcloudapi.com"
         clientProfile = ClientProfile()
@@ -109,11 +109,11 @@ async def call_tencent_bot_api(session: CommandSession, text: Optional[str]) -> 
 然后在 `config.py` 中添加两行：
 
 ```python
-SECRET_ID = ''
-SECRET_KEY = ''
+TENCENT_BOT_SECRET_ID = ''
+TENCENT_BOT_SECRET_KEY = ''
 ```
 
-`SECRET_ID` 和 `SECRET_KEY` 的值填腾讯云的「访问密钥」-「API密钥管理」页面提供的 `SecretId` 和 `SecretKey`。
+`TENCENT_BOT_SECRET_ID` 和 `TENCENT_BOT_SECRET_KEY` 的值填腾讯云的「访问密钥」-「API密钥管理」页面提供的 `SecretId` 和 `SecretKey`。
 
 配置完成后来运行 NoneBot，尝试给机器人随便发送一条消息，看看它是不是正确地获取了腾讯智能机器人的回复。
 
@@ -141,7 +141,7 @@ async def call_tencent_bot_api(session: CommandSession, text: Optional[str]) -> 
         return None
 
     try:
-        cred = credential.Credential(session.bot.config.SECRET_ID, session.bot.config.SECRET_KEY)
+        cred = credential.Credential(session.bot.config.TENCENT_BOT_SECRET_ID, session.bot.config.TENCENT_BOT_SECRET_KEY)
         httpProfile = HttpProfile()
         httpProfile.endpoint = "nlp.tencentcloudapi.com"
         clientProfile = ClientProfile()
