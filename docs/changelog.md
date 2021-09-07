@@ -4,14 +4,21 @@ sidebar: auto
 
 # 更新日志
 
+## master
+
+- 修复与 node-onebot 的 at 消息段兼容问题 [#272](https://github.com/nonebot/nonebot/issues/272)
+
 ## v1.8.4
+
 - 修复 `on_command` 中 `shell_like` 功能仍引用旧 API 造成的错误
 
 ## v1.8.3
+
 - 删除在 1.2.0 版本中弃用的 API（`NLPResult`, `CommandSession.args`, `CommandSession.get_optional`）
 - 改正 `BaseSession.send` type hint
 
 ## v1.8.2
+
 - 修复 `CommandSession.apause` 方法在命令过期后泄露的问题
 - 不同命令 (`on_command`) 现在可以设置不同的运行和过期超时时间
 
