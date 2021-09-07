@@ -7,5 +7,5 @@ SUPERUSERS = {12345678}
 COMMAND_START = {'', '/', '!', '／', '！'}
 NICKNAME = {'小明', '明明'}
 
-SECRET_ID = ""
-SECRET_KEY = ""
+TENCENT_BOT_SECRET_ID = ""
+TENCENT_BOT_SECRET_KEY = ""

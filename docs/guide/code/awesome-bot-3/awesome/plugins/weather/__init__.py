@@ -1,6 +1,5 @@
 from nonebot import on_command, CommandSession
 from nonebot import on_natural_language, NLPSession, IntentCommand
-from nonebot.command.argfilter import extractors, controllers
 from jieba import posseg
 
 from .data_source import get_weather_of_city
@@ -23,8 +22,7 @@ async def _(session: CommandSession):
         return
 
     if not stripped_arg:
-        while True:
-            await session.pause('要查询的城市名称不能为空呢，请重新输入')
+        session.pause('要查询的城市名称不能为空呢，请重新输入')
 
     session.state[session.current_key] = stripped_arg
 

@@ -60,7 +60,7 @@ async def call_tencent_bot_api(session: CommandSession, text: Optional[str]) -> 
         return None
 
     try:
-        cred = credential.Credential(session.bot.config.SECRET_ID, session.bot.config.SECRET_KEY)
+        cred = credential.Credential(session.bot.config.TENCENT_BOT_SECRET_ID, session.bot.config.TENCENT_BOT_SECRET_KEY)
         httpProfile = HttpProfile()
         httpProfile.endpoint = "nlp.tencentcloudapi.com"
         clientProfile = ClientProfile()
