@@ -175,8 +175,7 @@ async def _(session: CommandSession):
     if not stripped_arg:
         # 用户没有发送有效的城市名称（而是发送了空白字符），则提示重新输入
         # 这里 session.pause() 将会发送消息并暂停当前会话（该行后面的代码不会被运行）
-        while True:
-            await session.pause('要查询的城市名称不能为空呢，请重新输入')
+        session.pause('要查询的城市名称不能为空呢，请重新输入')
 
     # 如果当前正在向用户询问更多信息（例如本例中的要查询的城市），且用户输入有效，则放入会话状态
     session.state[session.current_key] = stripped_arg
