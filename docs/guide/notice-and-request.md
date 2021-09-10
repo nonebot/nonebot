@@ -55,4 +55,4 @@ async def _(session: NoticeSession):
 这里最好预先判断一下是不是你想发送的群（通过 `session.event.group_id`），否则机器人所在的任何群有新成员进入它都会欢迎。
 :::
 
-总的来说这些 `on_*` 装饰器用起来都是差不多的，这里的 `group_increase` 表示群成员增加，其它的通知类型可以参考 go-cqhttp 帮助中心的 [事件](https://docs.go-cqhttp.org/event/) 的 `notice_type`。
+总的来说这些 `on_*` 装饰器用起来都是差不多的，这里的 `group_increase` 表示群成员增加，其它的通知类型可以参考 go-cqhttp 帮助中心的 [事件](https://docs.go-cqhttp.org/event/) （或 [Onebot 标准](https://github.com/botuniverse/onebot/blob/master/v11/specs/event/notice.md)）的 `notice_type`。
