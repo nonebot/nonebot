@@ -57,7 +57,7 @@ NoneBot 的内置插件只包含了两个命令，`echo` 和 `say`，两者的�
   <img alt="Echo and Say" src="./assets/echo_and_say.png" />
 </p>
 
-最后，`nonebot.run(host='127.0.0.1', port=8080)` 让 NoneBot 跑在了地址 `127.0.0.1:8080` 地址上，向 go-cqhttp 提供 `/`、`/ws/` 等入口，在我们的反向 WebSocket 配置中，插件连接了 `/ws/`。
+最后，`nonebot.run(host='127.0.0.1', port=8080)` 让 NoneBot 跑在了 `127.0.0.1:8080` 地址上，向 go-cqhttp 提供 `/`、`/ws/` 等入口，在我们的反向 WebSocket 配置中，插件连接了 `/ws/`。
 
 ### 命令处理器
 
