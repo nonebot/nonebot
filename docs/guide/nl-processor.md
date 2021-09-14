@@ -160,7 +160,7 @@ pip install jieba
 
 有了结巴分词之后，扩充 `weather/__init__.py` 如下：
 
-```python {3,35-49}
+```python {3,35-50}
 from nonebot import on_command, CommandSession
 from nonebot import on_natural_language, NLPSession, IntentCommand
 from jieba import posseg

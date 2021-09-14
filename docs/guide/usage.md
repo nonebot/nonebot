@@ -1,6 +1,6 @@
 # 编写使用帮助
 
-经过前面的部分，我们已经给机器人编写了天气查询和图灵聊天插件，当然，你可能已经另外编写了更多具有个性化功能的插件。
+经过前面的部分，我们已经给机器人编写了天气查询和腾讯智能聊天插件，当然，你可能已经另外编写了更多具有个性化功能的插件。
 
 现在，为了让用户能够更方便的使用，是时候编写一个使用帮助了。
 
@@ -10,7 +10,7 @@
 
 ## 给插件添加名称和用法
 
-这里以天气查询和图灵聊天两个插件为例，分别在 `awesome/plugins/weather/__init__.py` 和 `awesome/plugins/tuling.py` 两个文件的开头，通过 `__plugin_name__` 和 `__plugin_usage__` 两个特殊变量设置插件的名称和使用方法，如下：
+这里以天气查询和图灵聊天两个插件为例，分别在 `awesome/plugins/weather/__init__.py` 和 `awesome/plugins/ai_chat.py` 两个文件的开头，通过 `__plugin_name__` 和 `__plugin_usage__` 两个特殊变量设置插件的名称和使用方法，如下：
 
 ```python
 # awesome/plugins/weather/__init__.py
@@ -26,7 +26,7 @@ __plugin_usage__ = r"""
 ```
 
 ```python
-# awesome/plugins/tuling.py
+# awesome/plugins/ai_chat.py
 
 # ... 各种 import
 

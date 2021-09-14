@@ -1,32 +1,28 @@
 # 发生了什么？
 
-上一章中我们已经运行了一个最小的 NoneBot 实例，在看着 QQ 机器人回复了自己的消息的同时，你可能想问，这是如何实现的？具体来说，NoneBot、CQHTTP 插件、酷Q，这三者是如何协同工作的？本章将对这个问题做一个初步解答。
+上一章中我们已经运行了一个最小的 NoneBot 实例，在看着 QQ 机器人回复了自己的消息的同时，你可能想问，这是如何实现的？具体来说，NoneBot、go-cqhttp，这两者是如何协同工作的？本章将对这个问题做一个初步解答。
 
 :::tip 提示
-如果你已经有较丰富的 QQ 机器人开发经验，尤其是使用 CQHTTP 插件的经验，可以直接跳到 [NoneBot 出场](#nonebot-出场)。
+如果你已经有较丰富的 QQ 机器人开发经验，尤其是使用 go-cqhttp 或其它 OneBot 实现的经验，可以直接跳到 [NoneBot 出场](#nonebot-出场)。
 :::
 
-## 一切从 酷Q 开始
+## 一切从 go-cqhttp 开始
 
-我们在 [概览](./README.md) 中提到过，酷Q 扮演着「无头 QQ 客户端」的角色，一切的消息、通知、请求的发送和接收，最根本上都是由它来完成的，我们的最小 NoneBot 实例也不例外。
+我们在 [概览](./README.md) 中提到过，go-cqhttp 直接与 QQ 服务器通信，一切的消息、通知、请求的发送和接收，都是由它来完成的，我们的最小 NoneBot 实例也不例外。
 
-首先，我们向机器人发送的 `/echo 你好，世界` 进入腾讯的服务器，后者随后会把消息推送给 酷Q，就像推送给一个真正的 QQ 客户端一样。到这里，酷Q 就已经收到了我们发送的消息了。
+首先，我们向机器人发送的 `/echo 你好，世界` 进入腾讯的服务器，后者随后会把消息推送给 go-cqhttp，就像推送给一个真正的 QQ 客户端一样。到这里，go-cqhttp 就已经收到了我们发送的消息了。
 
-## 进入 CQHTTP 插件
+当 go-cqhttp 收到消息之后，会将其包装为一个统一的事件格式（通知和请求同理），这里的细节目前为止不需要完全明白，在需要的时候，可以去参考 go-cqhttp 的 [文档](https://docs.go-cqhttp.org/)。
 
-酷Q 在收到消息之后，按优先级依次将消息转交给已启用的各插件处理，在我们的例子中，只有一个插件，就是 CQHTTP 插件。
-
-CQHTTP 插件收到消息后，会将其包装为一个统一的事件格式，并对消息内容进行一个初步的处理，例如编码转换、数组化、CQ 码增强等，这里的细节目前为止不需要完全明白，在需要的时候，可以去参考 CQHTTP 插件的 [文档](https://cqhttp.cc/docs/)。
-
-接着，插件把包装好的事件转换成 JSON 格式，并通过「反向 WebSocket」发送给 NoneBot。这里的「反向 WebSocket」，连接的就是我们在 CQHTTP 插件的配置中指定的 `ws_reverse_url`，即 NoneBot 监听的 WebSocket 入口。
+接着，go-cqhttp 把包装好的事件转换成 JSON 格式，并通过「反向 WebSocket」发送给 NoneBot。这里的「反向 WebSocket」，连接的就是我们在 go-cqhttp 的配置中指定的 `ws-reverse` URL，即 NoneBot 监听的 WebSocket 入口。
 
 :::tip 提示
-「反向 WebSocket」是 CQHTTP 插件的一种通信方式，表示插件作为客户端，主动去连接配置文件中指定的 `ws_reverse_url`。除此之外还有 HTTP、（正向）WebSocket 等方式。除了反向 WebSocket，NoneBot 也支持通过 HTTP 与 CQHTTP 通信。
+「反向 WebSocket」是 go-cqhttp 的一种通信方式，表示 go-cqhttp 作为客户端，主动去连接配置文件中指定的 URL。除此之外还有 HTTP、HTTP POST 和（正向）WebSocket 等方式。除了反向 WebSocket，NoneBot 也支持通过 HTTP 和 HTTP POST 与 go-cqhttp 通信。
 :::
 
 ## NoneBot 出场
 
-CQHTTP 插件通过反向 WebSocket 将消息事件发送到 NoneBot 后，NoneBot 就开始了它的处理流程。
+go-cqhttp 通过反向 WebSocket 将消息事件发送到 NoneBot 后，NoneBot 就开始了它的处理流程。
 
 ### 初步处理
 
@@ -61,7 +57,7 @@ NoneBot 的内置插件只包含了两个命令，`echo` 和 `say`，两者的�
   <img alt="Echo and Say" src="./assets/echo_and_say.png" />
 </p>
 
-最后，`nonebot.run(host='127.0.0.1', port=8080)` 让 NoneBot 跑在了地址 `127.0.0.1:8080` 地址上，向 CQHTTP 插件提供 `/`、`/ws/` 等入口，在我们的反向 WebSocket 配置中，插件连接了 `/ws/`。
+最后，`nonebot.run(host='127.0.0.1', port=8080)` 让 NoneBot 跑在了 `127.0.0.1:8080` 地址上，向 go-cqhttp 提供 `/`、`/ws/` 等入口，在我们的反向 WebSocket 配置中，插件连接了 `/ws/`。
 
 ### 命令处理器
 
@@ -77,12 +73,8 @@ async def echo(session: CommandSession):
 
 你现在不用关心它是如何从 Session 中拿到参数的，只需看到，命令处理器中实际内容只有一行 `session.send()` 函数调用，这个调用会直接把参数中的消息内容原样发送。
 
-## 再次进入 CQHTTP 插件
+## 一切又在 go-cqhttp 结束
 
-命令处理器在调用 `session.send()` 之后，NoneBot 把消息内容发送给了 CQHTTP 插件那边已连接的反向 WebSocket 客户端，同时告诉它要把消息发送到和收到消息相同的地方（即接收到消息所在的群组、讨论组或私聊）。CQHTTP 插件明白了 NoneBot 的要求之后，会对消息做一些必要的处理，然后按照指示调用 酷Q 提供的相应接口。
-
-## 一切又在 酷Q 结束
-
-酷Q 收到 CQHTTP 插件的接口调用之后，将消息内容发送给腾讯的服务器，就像一个真正的 QQ 客户端一样，于是你就收到了 QQ 机器人发来的消息了。
+命令处理器在调用 `session.send()` 之后，NoneBot 把消息内容发送给了 go-cqhttp 那边已连接的反向 WebSocket 客户端，同时告诉它要把消息发送到和收到消息相同的地方（即接收到消息所在的群或私聊）。go-cqhttp 明白了 NoneBot 的要求之后，会对消息做一些必要的处理，然后按照指示调用相应接口，将消息内容发送给腾讯的服务器，就像一个真正的 QQ 客户端一样，于是你就收到了 QQ 机器人发来的消息了。
 
 至此，我们已经理清楚了第一次对话中每一步到底都发生了些什么，以及 NoneBot 如何解析消息并调用到相应的命令处理器来进行回复。下面的几章中我们将一步一步地对最小 NoneBot 实例进行扩充，以实现一些非常棒的功能！

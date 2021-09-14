@@ -7,7 +7,6 @@ from .data_source import get_weather_of_city
 __plugin_name__ = '天气'
 __plugin_usage__ = r"""
 天气查询
-
 天气  [城市名称]
 """
 
