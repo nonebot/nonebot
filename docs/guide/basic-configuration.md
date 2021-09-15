@@ -25,7 +25,7 @@ awesome-bot
 上一章中我们知道 NoneBot 内置了 `echo` 和 `say` 命令，我们已经测试了 `echo` 命令，并且正确地收到了机器人的回复，现在来尝试向它发送一个 `say` 命令：
 
 ```
-/say [CQ:music,type=qq,id=209249583]
+/say [CQ:share,url=http://baidu.com,title=百度]
 ```
 
 可以预料，命令不会起任何效果，因为我们提到过，`say` 命令只有超级用户可以调用，而现在我们还没有将自己的 QQ 号配置为超级用户。
@@ -60,10 +60,10 @@ if __name__ == '__main__':
 重启 NoneBot 后再次尝试发送：
 
 ```
-/say [CQ:music,type=qq,id=209249583]
+/say [CQ:share,url=http://baidu.com,title=百度]
 ```
 
-可以看到这次机器人成功地给你回复了一个音乐分享消息。
+可以看到这次机器人成功地给你分享了百度链接。
 
 ## 配置命令的起始字符
 
@@ -93,7 +93,7 @@ from nonebot.default_config import *
 COMMAND_START = ['', re.compile(r'[/!]+')]
 ```
 
-现在重启 NoneBot，你就可以使用形如 `echo 你好，世界` 的消息来调用 `echo` 命令了，这么做的好处在 `echo` 命令中可能体现不出来，但对于其它实用型命令，可能会让使用更方便一些，比如天气查询命令：
+现在重启 NoneBot，你就可以使用形如 `echo 你好，世界` 的消息来调用 `echo` 命令了，这么做的好处在 `echo` 命令中可能体现不出来，但对于其它实用型命令，可能会让使用更方便一些，比如之后会编写的天气查询命令：
 
 ```
 天气 南京
