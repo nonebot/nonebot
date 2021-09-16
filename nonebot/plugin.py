@@ -4,9 +4,10 @@ import sys
 import shlex
 import warnings
 import importlib
+import contextlib
 from datetime import timedelta
 from types import ModuleType
-from typing import Any, Set, Dict, TypeVar, Union, Optional, Iterable, Callable, Type, overload
+from typing import TYPE_CHECKING, Any, Set, Dict, TypeVar, Union, Optional, Iterable, Callable, Type, overload
 
 from .log import logger
 from nonebot import permission as perm
@@ -15,10 +16,13 @@ from .notice_request import EventHandler, EventManager
 from .natural_language import NLProcessor, NLPManager
 from .typing import CommandName_T, CommandHandler_T, NLPHandler_T, NoticeHandler_T, Patterns_T, PermissionPolicy_T, RequestHandler_T
 
+if TYPE_CHECKING:
+    from .message import MessagePreprocessor
+
 
 class Plugin:
     __slots__ = ('module', 'name', 'usage', 'commands', 'nl_processors',
-                 'event_handlers')
+                 'event_handlers', 'msg_preprocessors')
 
     def __init__(self,
                  module: ModuleType,
@@ -26,7 +30,8 @@ class Plugin:
                  usage: Optional[Any] = None,
                  commands: Set[Command] = ...,
                  nl_processors: Set[NLProcessor] = ...,
-                 event_handlers: Set[EventHandler] = ...):
+                 event_handlers: Set[EventHandler] = ...,
+                 msg_preprocessors: Set['MessagePreprocessor'] = ...):
         """Creates a plugin with no name, no usage, and no handlers."""
 
         self.module = module
@@ -38,6 +43,8 @@ class Plugin:
             nl_processors if nl_processors is not ... else set()
         self.event_handlers: Set[EventHandler] = \
             event_handlers if event_handlers is not ... else set()
+        self.msg_preprocessors: Set['MessagePreprocessor'] = \
+            msg_preprocessors if msg_preprocessors is not ... else set()
 
     class GlobalTemp:
         """INTERNAL API"""
@@ -45,12 +52,25 @@ class Plugin:
         commands: Set[Command] = set()
         nl_processors: Set[NLProcessor] = set()
         event_handlers: Set[EventHandler] = set()
+        msg_preprocessors: Set['MessagePreprocessor'] = set()
+        now_within_plugin: bool = False
+
+        @classmethod
+        @contextlib.contextmanager
+        def enter_plugin(cls):
+            try:
+                cls.clear()
+                cls.now_within_plugin = True
+                yield
+            finally:
+                cls.now_within_plugin = False
 
         @classmethod
         def clear(cls):
             cls.commands.clear()
             cls.nl_processors.clear()
             cls.event_handlers.clear()
+            cls.msg_preprocessors.clear()
 
         @classmethod
         def make_plugin(cls, module: ModuleType):
@@ -59,7 +79,8 @@ class Plugin:
                           usage=getattr(module, '__plugin_usage__', None),
                           commands={*cls.commands},
                           nl_processors={*cls.nl_processors},
-                          event_handlers={*cls.event_handlers})
+                          event_handlers={*cls.event_handlers},
+                          msg_preprocessors={*cls.msg_preprocessors})
 
 
 class PluginManager:
@@ -99,7 +120,8 @@ class PluginManager:
         """Remove a plugin by plugin module path
         
         ** Warning: This function not remove plugin actually! **
-        ** Just remove command, nlprocessor and event handlers **
+        ** Just remove command, nlprocessor, event handlers **
+        ** and message preprocessors, and deletes it from PluginManager **
 
         Args:
             module_path (str): Plugin module path
@@ -117,6 +139,9 @@ class PluginManager:
             NLPManager.remove_nl_processor(nl_processor)
         for event_handler in plugin.event_handlers:
             EventManager.remove_event_handler(event_handler)
+        from .message import MessagePreprocessorManager  # avoid import cycles
+        for msg_preprocessor in plugin.msg_preprocessors:
+            MessagePreprocessorManager.remove_message_preprocessor(msg_preprocessor)
         del cls._plugins[module_path]
         return True
 
@@ -140,6 +165,9 @@ class PluginManager:
             NLPManager.switch_nlprocessor_global(nl_processor, state)
         for event_handler in plugin.event_handlers:
             EventManager.switch_event_handler_global(event_handler, state)
+        from .message import MessagePreprocessorManager  # avoid import cycles
+        for msg_preprocessor in plugin.msg_preprocessors:
+            MessagePreprocessorManager.switch_message_preprocessor_global(msg_preprocessor, state)
 
     @classmethod
     def switch_command_global(cls,
@@ -192,6 +220,25 @@ class PluginManager:
         for event_handler in plugin.event_handlers:
             EventManager.switch_event_handler_global(event_handler, state)
 
+    @classmethod
+    def switch_messagepreprocessor_global(cls,
+                                          module_path: str,
+                                          state: Optional[bool] = None) -> None:
+        """Change plugin message preprocessor state globally or simply switch it if `state`
+        is None
+        
+        Args:
+            module_path (str): Plugin module path
+            state (Optional[bool]): State to change to. Defaults to None.
+        """
+        plugin = cls.get_plugin(module_path)
+        if not plugin:
+            warnings.warn(f"Plugin {module_path} not found")
+            return
+        from .message import MessagePreprocessorManager  # avoid import cycles
+        for msg_preprocessor in plugin.msg_preprocessors:
+            MessagePreprocessorManager.switch_message_preprocessor_global(msg_preprocessor, state)
+
     def switch_plugin(self,
                       module_path: str,
                       state: Optional[bool] = None) -> None:
@@ -199,8 +246,9 @@ class PluginManager:
         
         Tips:
             This method will only change the state of the plugin's
-            commands and natural language processors since change 
-            state of the event handler for message is meaningless.
+            commands and natural language processors since changing
+            state of the event handler for message and changing other message
+            preprocessors are meaningless (needs discussion).
         
         Args:
             module_path (str): Plugin module path
@@ -257,9 +305,9 @@ def load_plugin(module_path: str) -> Optional[Plugin]:
     Returns:
         Optional[Plugin]: Plugin object loaded
     """
-    Plugin.GlobalTemp.clear()
     try:
-        module = importlib.import_module(module_path)
+        with Plugin.GlobalTemp.enter_plugin():
+            module = importlib.import_module(module_path)
         plugin = Plugin.GlobalTemp.make_plugin(module)
         PluginManager.add_plugin(module_path, plugin)
         logger.info(f'Succeeded to import "{module_path}"')
@@ -270,18 +318,35 @@ def load_plugin(module_path: str) -> Optional[Plugin]:
         return None
 
 
-def reload_plugin(module_path: str) -> Optional[Plugin]:
+def unload_plugin(module_path: str) -> bool:
+    """Unloads a plugin.
+
+    This deletes its entry in sys.modules if present. However, if the module
+    had additional side effects other than defining processors, they are not
+    undone.
+    
+    Args:
+        module_path (str): import path to module, which is already imported
+
+    Returns:
+        bool: Plugin successfully unloaded
+    """
     result = PluginManager.remove_plugin(module_path)
-    if not result:
+    if result:
+        for module in [m for m in sys.modules.keys() if m.startswith(module_path)]:
+            del sys.modules[module]
+        logger.info(f'Succeeded to unload "{module_path}"')
+    return result
+
+
+def reload_plugin(module_path: str) -> Optional[Plugin]:
+    if not unload_plugin(module_path):  # the one more mysterious log info seems valid..
         return None
 
-    for module in list(
-            filter(lambda x: x.startswith(module_path), sys.modules.keys())):
-        del sys.modules[module]
-
-    Plugin.GlobalTemp.clear()
     try:
-        module = importlib.import_module(module_path)
+        with Plugin.GlobalTemp.enter_plugin():
+            # NOTE: consider importlib.reload()
+            module = importlib.import_module(module_path)
         plugin = Plugin.GlobalTemp.make_plugin(module)
         PluginManager.add_plugin(module_path, plugin)
         logger.info(f'Succeeded to reload "{module_path}"')
@@ -533,6 +598,7 @@ __all__ = [
     'Plugin',
     'PluginManager',
     'load_plugin',
+    'unload_plugin',
     'reload_plugin',
     'load_plugins',
     'load_builtin_plugins',

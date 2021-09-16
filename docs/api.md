@@ -4,6 +4,8 @@ sidebar: auto
 
 # API
 
+在以下文档中提到的类，函数等被视为公开的 API，详情请见 [CONTRIBUTING](https://github.com/nonebot/nonebot/blob/master/CONTRIBUTING.md#%E4%BB%A3%E7%A0%81%E9%A3%8E%E6%A0%BC).
+
 ## 类型
 
 下面的 API 文档中，「类型」部分使用 Python 的 Type Hint 语法，见 [PEP 484](https://www.python.org/dev/peps/pep-0484/), [PEP 526](https://www.python.org/dev/peps/pep-0526/), [PEP 604](https://www.python.org/dev/peps/pep-0604/) 和 [typing](https://docs.python.org/3/library/typing.html)。
@@ -864,6 +866,14 @@ sidebar: auto
 
   插件包含的事件处理器（包含通知、请求），通过 `on_notice` 以及 `on_request` 装饰器注册。
 
+#### `msg_preprocessors` <Badge text="master"/>
+
+- **类型:** `set[MessagePreprocessor]`
+
+- **说明:**
+
+  插件包含的消息预处理器，通过 `message_preprocessor` 装饰器注册。
+
 ### _class_ `PluginManager` <Badge text="1.6.0+" />
 
 插件管理器：用于管理插件的加载以及插件中命令、自然语言处理器、事件处理器的开关。
@@ -930,10 +940,10 @@ sidebar: auto
 
 - **说明:**
 
-  删除 Plugin 中的所有命令、自然语言处理器、事件处理器并移除 Plugin 对象。
+  删除 Plugin 中的所有命令、自然语言处理器、事件处理器并从插件管理器移除 Plugin 对象。在 master 后，也会移除消息预处理器。
 
   :::danger
-  这个方法实际并没有完全移除 Plugin 。仅是移除 Plugin 中的所有命令、自然语言处理器以及事件处理器。
+  这个方法实际并没有完全移除定义 Plugin 的模块。仅是移除其所注册的处理器。
   :::
 
 - **参数:**
@@ -950,10 +960,10 @@ sidebar: auto
 
 - **说明:**
 
-  根据 `state` 更改 plugin 中 commands, nl_processors, event_handlers 的全局状态。
+  根据 `state` 更改 plugin 中 commands, nl_processors, event_handlers 的全局状态。在 master 后，msg_preprocessors 的状态也会被更改。
 
   :::warning
-  更改插件状态并不会影响插件内 message_preprocessor, scheduler 等状态
+  更改插件状态并不会影响插件内 scheduler 等其他全局副作用状态
   :::
 
 - **参数:**
@@ -970,14 +980,8 @@ sidebar: auto
 - **用法:**
 
   ```python
-  from nonebot import message_preprocessor
-
   # 全局关闭插件 path.to.plugin , 对所有消息生效
   PluginManager.switch_plugin_global("path.to.plugin", state=False)
-
-  @message_preprocessor
-  async def processor(bot: NoneBot, event: CQEvent, plugin_manager: PluginManager):
-      plugin_manager.switch_plugin_global("path.to.plugin", state=False)
   ```
 
 #### _class method_ `switch_command_global(cls, module_path, state=None)`
@@ -1000,14 +1004,8 @@ sidebar: auto
 - **用法:**
 
   ```python
-  from nonebot import message_preprocessor
-
   # 全局关闭插件 path.to.plugin 中所有命令, 对所有消息生效
   PluginManager.switch_command_global("path.to.plugin", state=False)
-
-  @message_preprocessor
-  async def processor(bot: NoneBot, event: CQEvent, plugin_manager: PluginManager):
-      plugin_manager.switch_command_global("path.to.plugin", state=False)
   ```
 
 #### _class method_ `switch_nlprocessor_global(cls, module_path, state=None)`
@@ -1060,21 +1058,39 @@ sidebar: auto
 - **用法:**
 
   ```python
-  from nonebot import message_preprocessor
-
   # 全局关闭插件 path.to.plugin 中所有事件处理器, 对所有消息生效
   PluginManager.switch_eventhandler_global("path.to.plugin", state=False)
+  ```
 
-  @message_preprocessor
-  async def processor(bot: NoneBot, event: CQEvent, plugin_manager: PluginManager):
-      plugin_manager.switch_eventhandler_global("path.to.plugin", state=False)
+#### _class method_ `switch_messagepreprocessor_global(cls, module_path, state=None)` <Badge text="master"/>
+
+- **说明:**
+
+  根据 `state` 更改 plugin 中 message preprocessors 的全局状态。
+
+- **参数:**
+
+  - `module_path: str`: 模块路径
+  - `state: bool | None`:
+    - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
+    - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
+
+- **返回:**
+
+  None
+
+- **用法:**
+
+  ```python
+  # 全局关闭插件 path.to.plugin 中所有消息预处理器, 对所有消息生效
+  PluginManager.switch_messagepreprocessor_global("path.to.plugin", state=False)
   ```
 
 #### `switch_plugin(cls, module_path, state=None)`
 
 - **说明:**
 
-  根据 `state` 修改 plugin 的状态。仅对当前消息有效。
+  根据 `state` 修改 plugin 中的 commands 和 nlprocessors 状态。仅对当前消息有效。
 
 - **参数:**
 
@@ -1176,6 +1192,26 @@ sidebar: auto
 
   加载 `nonebot_tuling` 插件。
 
+### `unload_plugin(module_path)` <Badge text="master" />
+
+- **说明:**
+
+  卸载插件，即移除插件的 commands, nlprocessors, event handlers 和 message preprocessors，并将已导入的模块移除。
+
+  :::danger
+  该函数为强制卸载，如果使用不当，可能导致不可预测的错误！（如引用已经被卸载的模块变量）
+
+  此函数不会回滚已导入模块中产生过的其他副作用（比如已计划的任务，aiocqhttp 中注册的处理器等）。
+  :::
+
+- **参数:**
+
+  - `module_path: str`: 模块路径
+
+- **返回:**
+
+  - `bool`: 插件是否被卸载
+
 ### `reload_plugin(module_path)` <Badge text="1.6.0+" />
 
 - **说明:**
@@ -1183,7 +1219,7 @@ sidebar: auto
   重载插件。
 
   :::danger
-  该函数为强制重载，可能导致不可预测的错误！
+  该函数为强制重载，如果使用不当，可能导致不可预测的错误！
   :::
 
 - **参数:**
