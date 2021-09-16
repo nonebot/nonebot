@@ -90,6 +90,19 @@ async def _(session):
     pass
 ```
 
+## 事件处理器
+或称为「事件处理函数」，是 NoneBot 插件中用于处理通知（notice）和请求（request）的函数。
+
+通过 `nonebot.on_notice` 和 `nonebot.on_request` 装饰器可以将一个函数注册为事件处理器，例如：
+
+```python
+from nonebot import on_notice
+
+@on_notice('group_increase')
+async def _(session):
+    pass
+```
+
 ## 会话（Session）
 
 是命令处理器、自然语言处理器等插件形式被调用时传入的一个包含有当前消息上下文的对象，它根据当前的插件形式的不同而不同，例如命令处理器拿到的 Session 是 `CommandSession` 类型，而自然语言处理器拿到的是 `NLPSession` 类型，不同类型的 Session 包含的属性不太一样，能进行的操作也有所区别。
@@ -127,7 +140,7 @@ Expression 可以是一个 `str`、元素类型是 `str` 的序列（一般为 `
 [CQ:face,id=14]
 ```
 
-具体的，NoneBot 中使用 `MessageSegment` 类来表示消息段（继承自 aiocqhttp），例如，要创建上面这个消息段，可以使用如下代码：
+具体的，NoneBot 中使用 `MessageSegment` 类来表示消息段（导入自 aiocqhttp），例如，要创建上面这个消息段，可以使用如下代码：
 
 ```python
 seg = MessageSegment(type="face", data={"id": "14"})
