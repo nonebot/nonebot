@@ -7,7 +7,7 @@ import importlib
 import contextlib
 from datetime import timedelta
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Set, Dict, TypeVar, Union, Optional, Iterable, Callable, Type, overload
+from typing import TYPE_CHECKING, Any, List, Set, Dict, Tuple, TypeVar, Union, Optional, Iterable, Callable, Type, overload
 
 from .log import logger
 from nonebot import permission as perm
@@ -49,7 +49,8 @@ class Plugin:
     class GlobalTemp:
         """INTERNAL API"""
 
-        commands: Set[Command] = set()
+        # command, aliases, pattern
+        commands: List[Tuple[Command, Union[Iterable[str], str], Patterns_T]] = []
         nl_processors: Set[NLProcessor] = set()
         event_handlers: Set[EventHandler] = set()
         msg_preprocessors: Set['MessagePreprocessor'] = set()
@@ -77,7 +78,7 @@ class Plugin:
             return Plugin(module=module,
                           name=getattr(module, '__plugin_name__', None),
                           usage=getattr(module, '__plugin_usage__', None),
-                          commands={*cls.commands},
+                          commands={cmd[0] for cmd in cls.commands},
                           nl_processors={*cls.nl_processors},
                           event_handlers={*cls.event_handlers},
                           msg_preprocessors={*cls.msg_preprocessors})
@@ -296,6 +297,21 @@ class PluginManager:
             self.nlp_manager.switch_nlprocessor(processor, state)
 
 
+def _add_handlers_to_managers():
+    for cmd, aliases, patterns in Plugin.GlobalTemp.commands:
+        CommandManager.add_command(cmd.name, cmd)
+        # TODO: skip when command exists
+        CommandManager.add_aliases(aliases, cmd)
+        CommandManager.add_patterns(patterns, cmd)
+    for processor in Plugin.GlobalTemp.nl_processors:
+        NLPManager.add_nl_processor(processor)
+    for handler in Plugin.GlobalTemp.event_handlers:
+        EventManager.add_event_handler(handler)
+    from .message import MessagePreprocessorManager  # avoid import cycles
+    for mp in Plugin.GlobalTemp.msg_preprocessors:
+        MessagePreprocessorManager.add_message_preprocessor(mp)
+
+
 def load_plugin(module_path: str) -> Optional[Plugin]:
     """Load a module as a plugin
     
@@ -309,6 +325,10 @@ def load_plugin(module_path: str) -> Optional[Plugin]:
         with Plugin.GlobalTemp.enter_plugin():
             module = importlib.import_module(module_path)
         plugin = Plugin.GlobalTemp.make_plugin(module)
+
+        # at this point, GlobalTemp and plugin object ^ have same contents
+        _add_handlers_to_managers()
+
         PluginManager.add_plugin(module_path, plugin)
         logger.info(f'Succeeded to import "{module_path}"')
         return plugin
@@ -348,6 +368,9 @@ def reload_plugin(module_path: str) -> Optional[Plugin]:
             # NOTE: consider importlib.reload()
             module = importlib.import_module(module_path)
         plugin = Plugin.GlobalTemp.make_plugin(module)
+
+        _add_handlers_to_managers()
+
         PluginManager.add_plugin(module_path, plugin)
         logger.info(f'Succeeded to reload "{module_path}"')
         return plugin
@@ -469,11 +492,15 @@ def on_command(
 
             cmd.args_parser_func = shell_like_args_parser
 
-        CommandManager.add_command(cmd_name, cmd)
-        CommandManager.add_aliases(aliases, cmd)
-        CommandManager.add_patterns(patterns, cmd)
+        if Plugin.GlobalTemp.now_within_plugin:
+            Plugin.GlobalTemp.commands.append((cmd, aliases, patterns))
+        else:
+            CommandManager.add_command(cmd_name, cmd)
+            CommandManager.add_aliases(aliases, cmd)
+            CommandManager.add_patterns(patterns, cmd)
+            warnings.warn('defining command_handler outside a plugin is deprecated '
+                          'and will not be supported in the future')
 
-        Plugin.GlobalTemp.commands.add(cmd)
         func.args_parser = cmd.args_parser
 
         return func
@@ -532,8 +559,12 @@ def on_natural_language(
             allow_empty_message=allow_empty_message,
             permission=real_permission)
 
-        NLPManager.add_nl_processor(nl_processor)
-        Plugin.GlobalTemp.nl_processors.add(nl_processor)
+        if Plugin.GlobalTemp.now_within_plugin:
+            Plugin.GlobalTemp.nl_processors.add(nl_processor)
+        else:
+            NLPManager.add_nl_processor(nl_processor)
+            warnings.warn('defining nl_processor outside a plugin is deprecated '
+                          'and will not be supported in the future')
         return func
 
     if callable(keywords):
@@ -561,8 +592,13 @@ def _make_event_deco(post_type: str):
                 handler = EventHandler(events_tmp, func)
             else:
                 handler = EventHandler([post_type], func)
-            EventManager.add_event_handler(handler)
-            Plugin.GlobalTemp.event_handlers.add(handler)
+
+            if Plugin.GlobalTemp.now_within_plugin:
+                Plugin.GlobalTemp.event_handlers.add(handler)
+            else:
+                EventManager.add_event_handler(handler)
+                warnings.warn('defining event_handler outside a plugin is deprecated '
+                              'and will not be supported in the future')
             return func
 
         if callable(arg):

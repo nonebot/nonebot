@@ -51,13 +51,13 @@ class MessagePreprocessorManager:
 # this is more consistent if it is in the plugin module, but still kept here for historical
 # reasons
 def message_preprocessor(func: MessagePreprocessor_T) -> MessagePreprocessor_T:
-    if not Plugin.GlobalTemp.now_within_plugin:
-        warnings.warn('message_preprocessor no longer works outside a plugin definition '
-                      'in this version of NoneBot. It should be used within a plugin')
-        return func
     mp = MessagePreprocessor(func)
-    MessagePreprocessorManager.add_message_preprocessor(mp)
-    Plugin.GlobalTemp.msg_preprocessors.add(mp)
+    if Plugin.GlobalTemp.now_within_plugin:
+        Plugin.GlobalTemp.msg_preprocessors.add(mp)
+    else:
+        warnings.warn('defining message_preprocessor outside a plugin is deprecated '
+                      'and will not be supported in the future')
+        MessagePreprocessorManager.add_message_preprocessor(mp)
     return func
 
 

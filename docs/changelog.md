@@ -9,9 +9,10 @@ sidebar: auto
 - 修复与 node-onebot 的 at 消息段兼容问题 [#272](https://github.com/nonebot/nonebot/issues/272)
 - 在 1.8.0 中引入的命令权限控制系统现在已经替换了原来的权限系统 (`nonebot.permission` 模块），所有以 `int` 为类型的权限值和函数参数全部改为了 `PermissionPolicy_T`。尽管如此，原权限声明常量可继续使用
 - 配置项增加 `DEFAULT_COMMAND_PERMISSION` 和 `DEFAULT_NLP_PERMISSION` 用于选定命令处理器和 NLP 的默认权限
-- **重要**：通过 `message_preprocessor` 注册的消息预处理器现在必须在插件中定义，其在 `PluginManager.remove_plugin`, `PluginManager.switch_plugin_global`, `reload_plugin` 执行后也会被一并移除
-- 新增 `nonebot.plugin.PluginManager.switch_messagepreprocessor_global`
-- 新增 `nonebot.plugin.unload_plugin`
+- 现在 `on_command`，`on_natural_language`，`on_notice/request` 和 `message_preprocessor` 必须在插件定义的模块中调用以注册相应处理器。直接在 `__main__` 中调用现在会提示警告并且在后续版本中移除对其的支持
+- **重要**：通过 `message_preprocessor` 注册的消息预处理器在 `PluginManager.remove_plugin`, `PluginManager.switch_plugin_global`, `reload_plugin` 执行后也会被一并移除
+- 新增 `nonebot.plugin.PluginManager.switch_messagepreprocessor_global` 用于切换消息预处理器开关
+- 新增 `nonebot.plugin.unload_plugin` 用于卸载插件
 
 ## v1.8.4
 
