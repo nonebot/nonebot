@@ -842,6 +842,14 @@ sidebar: auto
 
   插件使用方法，从插件模块的 `__plugin_usage__` 特殊变量获得，如果没有此变量，则为 `None`。
 
+#### `userdata` <Badge text="master"/>
+
+- **类型:** `Any | None`
+
+- **说明:**
+
+  插件作者可由此变量向外部暴露其他信息，从插件模块的 `__plugin_userdata__` 特殊变量获得，如果没有此变量，则为 `None`。
+
 #### `commands` <Badge text="1.6.0+"/>
 
 - **类型:** `set[Command]`

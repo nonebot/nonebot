@@ -21,13 +21,14 @@ if TYPE_CHECKING:
 
 
 class Plugin:
-    __slots__ = ('module', 'name', 'usage', 'commands', 'nl_processors',
+    __slots__ = ('module', 'name', 'usage', 'userdata', 'commands', 'nl_processors',
                  'event_handlers', 'msg_preprocessors')
 
     def __init__(self,
                  module: ModuleType,
                  name: Optional[str] = None,
                  usage: Optional[Any] = None,
+                 userdata: Optional[Any] = None,
                  commands: Set[Command] = ...,
                  nl_processors: Set[NLProcessor] = ...,
                  event_handlers: Set[EventHandler] = ...,
@@ -37,6 +38,7 @@ class Plugin:
         self.module = module
         self.name = name
         self.usage = usage
+        self.userdata = userdata
         self.commands: Set[Command] = \
             commands if commands is not ... else set()
         self.nl_processors: Set[NLProcessor] = \
@@ -78,6 +80,7 @@ class Plugin:
             return Plugin(module=module,
                           name=getattr(module, '__plugin_name__', None),
                           usage=getattr(module, '__plugin_usage__', None),
+                          userdata=getattr(module, '__plugin_userdata__', None),
                           commands={cmd[0] for cmd in cls.commands},
                           nl_processors={*cls.nl_processors},
                           event_handlers={*cls.event_handlers},

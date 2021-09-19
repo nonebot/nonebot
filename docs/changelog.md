@@ -13,6 +13,7 @@ sidebar: auto
 - **重要**：通过 `message_preprocessor` 注册的消息预处理器在 `PluginManager.remove_plugin`, `PluginManager.switch_plugin_global`, `reload_plugin` 执行后也会被一并移除
 - 新增 `nonebot.plugin.PluginManager.switch_messagepreprocessor_global` 用于切换消息预处理器开关
 - 新增 `nonebot.plugin.unload_plugin` 用于卸载插件
+- `Plugin` 类增加 `userdata` 属性，可在插件中由 `__plugin_userdata__` 定义
 
 ## v1.8.4
 
