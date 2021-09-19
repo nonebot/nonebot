@@ -1,7 +1,7 @@
 import asyncio
 import hashlib
 import random
-from typing import Sequence, Any
+from typing import Callable, Iterable, List, Sequence, Any, Tuple
 
 from aiocqhttp.message import escape
 from aiocqhttp import Event as CQEvent
@@ -112,6 +112,21 @@ def render_expression(expr: Expression_T,
                 for k, v in kwargs.items()
             })
     return result.format(*args, **kwargs)
+
+
+# TODO: ParamSpec
+def separate_async_funcs(funcs: Iterable[Callable]
+                         ) -> Tuple[List[Callable], List[Callable]]:
+    """INTERNAL API"""
+    syncs = []
+    asyncs = []
+    for f in funcs:
+        if asyncio.iscoroutinefunction(f) or (
+            asyncio.iscoroutinefunction(f.__call__)):
+            asyncs.append(f)
+        else:
+            syncs.append(f)
+    return syncs, asyncs
 
 
 __all__ = [

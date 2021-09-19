@@ -6,6 +6,7 @@ from aiocqhttp.event import Event as CQEvent
 
 from nonebot import NoneBot
 from nonebot.exceptions import CQHttpError
+from nonebot.helpers import separate_async_funcs
 from nonebot.typing import PermissionPolicy_T
 
 
@@ -142,15 +143,9 @@ def aggregate_policy(
                        checkers as items consumed in iterators.
     :return: new policy
     """
-    syncs = []  # type: List[Callable[[SenderRoles], bool]]
-    asyncs = []  # type: List[Callable[[SenderRoles], Awaitable[bool]]]
-    for f in policies:
-        if asyncio.iscoroutinefunction(f) or (
-            asyncio.iscoroutinefunction(f.__call__)):
-            # pyright cannot narrow down types
-            asyncs.append(f)  # type: ignore
-        else:
-            syncs.append(f)  # type: ignore
+    syncs: List[Callable[[SenderRoles], bool]]
+    asyncs: List[Callable[[SenderRoles], Awaitable[bool]]]
+    syncs, asyncs = separate_async_funcs(policies)
 
     def checker_sync(sender: SenderRoles) -> bool:
         return aggregator(f(sender) for f in syncs)

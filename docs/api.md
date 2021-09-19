@@ -4,7 +4,7 @@ sidebar: auto
 
 # API
 
-在以下文档中提到的类，函数等被视为公开的 API，详情请见 [CONTRIBUTING](https://github.com/nonebot/nonebot/blob/master/CONTRIBUTING.md#%E4%BB%A3%E7%A0%81%E9%A3%8E%E6%A0%BC).
+在以下文档中提到的类，函数等被视为公开的 API，详情请见 [CONTRIBUTING](https://github.com/nonebot/nonebot/blob/master/CONTRIBUTING.md#%E4%BB%A3%E7%A0%81%E9%A3%8E%E6%A0%BC). 你可以使用这里没有暴露的 API（"INTERNAL APIs"），但是其行为可能会在不通知用户的情况下发生变化。
 
 ## 类型
 
@@ -101,7 +101,7 @@ sidebar: auto
 
 - **说明:**
 
-  通用的权限检查函数。
+  已弃用。
 
 ### `NLPHandler_T` <Badge text="1.8.1+"/>
 
@@ -137,7 +137,7 @@ sidebar: auto
 
 ### `PermissionPolicy_T` <Badge text="master"/>
 
-- **类型:** `(SenderRoles) -> (bool | Awaitable[bool])`
+- **类型:** `(SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]`
 
 - **说明:**
 

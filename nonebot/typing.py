@@ -23,7 +23,7 @@ NLPHandler_T = Callable[["NLPSession"], Awaitable[Optional["IntentCommand"]]]
 NoticeHandler_T = Callable[["NoticeSession"], Awaitable[Any]]
 RequestHandler_T = Callable[["RequestSession"] , Awaitable[Any]]
 MessagePreprocessor_T = Callable[["NoneBot", "CQEvent", "PluginManager"], Awaitable[Any]]
-PermissionPolicy_T = Callable[["SenderRoles"], Union[bool, Awaitable[bool]]]
+PermissionPolicy_T = Union[Callable[["SenderRoles"], bool], Callable[["SenderRoles"], Awaitable[bool]]]
 
 
 __all__ = [
