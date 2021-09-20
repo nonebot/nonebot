@@ -143,6 +143,14 @@ sidebar: auto
 
   向命令或自然语言处理器传入的权限检查策略。此类型是一个（同步/异步）函数，接受 `SenderRoles` 作为唯一的参数。此函数返回布尔值，返回 `True` 则表示权限检查通过，可以进行下一步处理（触发命令），反之返回 `False`。
 
+### `PluginLifetimeHook_T` <Badge text="master"/>
+
+- **类型:** `() -> Any | () -> Awaitable[Any]`
+
+- **说明:**
+
+  插件生命周期事件回调函数。
+
 ## 配置
 
 ### `API_ROOT`
@@ -882,6 +890,24 @@ sidebar: auto
 
   插件包含的消息预处理器，通过 `message_preprocessor` 装饰器注册。
 
+#### `lifetime_hooks` <Badge text="master"/>
+
+- **类型:** `list[LifetimeHook]`
+
+- **说明:**
+
+  插件包含的生命周期事件回调，通过 `on_plugin` 装饰器注册。
+
+#### `__await__()` <Badge text="master"/>
+
+- **说明:**
+
+  当使用 `load_plugin`, `unload_plugin`, `reload_plugin` 时，其返回的 `Plugin` 对象可以（非必需）被 await 来等待其异步加载、卸载完成。详情请见这些函数的文档。
+
+- **返回:**
+
+  - `Generator[None, None, Plugin | None]`
+
 ### _class_ `PluginManager` <Badge text="1.6.0+" />
 
 插件管理器：用于管理插件的加载以及插件中命令、自然语言处理器、事件处理器的开关。
@@ -1184,27 +1210,44 @@ sidebar: auto
 
   加载插件（等价于导入模块）。
 
+  此函数会调用插件中由 `on_plugin('loading')` 装饰器注册的函数（下称 「加载回调」），之后再添加插件中注册的处理器（如命令等）。
+
 - **参数:**
 
   - `module_path: str`: 模块路径
 
 - **返回:** <Badge text="1.6.0+" />
 
-  - `Plugin | None`: 加载后生成的 Plugin 对象
+  - `Plugin | None`: 加载后生成的 `Plugin` 对象。根据插件组成不同，返回值包含如下情况：
+    - 插件没有定义加载回调，或只定义了同步的加载回调（此为 master 前的唯一情况）：此函数会执行回调，在加载完毕后返回新的插件对象，其可以被 await，行为为直接返回插件本身。如果发生异常，则返回 `None`
+    - 插件定义了异步加载回调，但 `load_plugin` 是在 NoneBot 启动前调用的：此函数会阻塞地运行异步函数，其余表现和上一致
+    - 插件定义了异步加载回调，但 `load_plugin` 是在异步的情况下调用的（比如在 NoneBot 运行的事件循环中）：此函数会先执行同步的加载回调
+      - 如果成功，返回一个插件对象。返回值可以（非必需要）被 await，行为为等待剩余的异步加载完毕然后返回插件本身，或如果在 await 中发生了错误，返回 `None`
+      - 如果失败，返回 `None`
 
 - **用法:**
 
   ```python
-  nonebot.plugin.load_plugin('nonebot_tuling')
+  nonebot.plugin.load_plugin('ai_chat')
   ```
 
-  加载 `nonebot_tuling` 插件。
+  加载 `ai_chat` 插件。
+
+  ```python
+  # 此写法是通用的，即使插件没有异步的加载回调
+  p = nonebot.plugin.load_plugin('my_own_plugin')
+  if p is not None and await p is not None:
+      # 插件成功加载完成
+  else:
+      # 插件加载失败
+  ```
+  加载 `my_own_plugin` 插件，并且等待其异步的加载回调（如果有）执行完成。
 
 ### `unload_plugin(module_path)` <Badge text="master" />
 
 - **说明:**
 
-  卸载插件，即移除插件的 commands, nlprocessors, event handlers 和 message preprocessors，并将已导入的模块移除。
+  卸载插件，即移除插件的 commands, nlprocessors, event handlers 和 message preprocessors，运行由 `on_plugin('unloaded')` 注册的函数（下称 「卸载回调」），并将已导入的模块移除。
 
   :::danger
   该函数为强制卸载，如果使用不当，可能导致不可预测的错误！（如引用已经被卸载的模块变量）
@@ -1218,13 +1261,33 @@ sidebar: auto
 
 - **返回:**
 
-  - `bool`: 插件是否被卸载
+  - `Plugin | None`: 执行卸载后遗留的 `Plugin` 对象，或 `None` 如果插件不存在。根据插件组成不同，`Plugin` 返回值包含如下情况：
+    - 插件没有定义卸载回调，或只定义了同步的卸载回调：此函数会卸载处理器并执行回调，在卸载完毕后返回遗留的插件对象，其可以被 await，行为为直接返回此插件本身。
+    - 插件定义了异步卸载回调，但 `unload_plugin` 是在 NoneBot 启动前调用的：此函数会阻塞地运行异步函数，其余表现和上一致
+    - 插件定义了异步卸载回调，但 `unload_plugin` 是在异步的情况下调用的（比如在 NoneBot 运行的事件循环中）：此函数会卸载处理器并执行同步的卸载回调，返回遗留的插件对象。此对象可以被 await，行为为等待剩余的异步卸载回调执行完毕然后返回此插件本身。
+    - 在此之后此返回值将不再有用
+
+- **用法:**
+
+  ```python
+  nonebot.plugin.unload_plugin('ai_chat')
+  ```
+
+  卸载 `ai_chat` 插件。
+
+  ```python
+  # 此写法是通用的，即使插件没有异步的卸载回调
+  p = nonebot.plugin.unload_plugin('my_own_plugin')
+  if p is not None:
+      await p
+  ```
+  卸载 `my_own_plugin` 插件，并且等待其异步的卸载回调（如果有）执行完成。
 
 ### `reload_plugin(module_path)` <Badge text="1.6.0+" />
 
 - **说明:**
 
-  重载插件。
+  重载插件，也就是先 `unload_plugin`，再 `load_plugin`。
 
   :::danger
   该函数为强制重载，如果使用不当，可能导致不可预测的错误！
@@ -1236,21 +1299,34 @@ sidebar: auto
 
 - **返回:**
 
-  - `Plugin | None`: 重载后生成的 Plugin 对象
+  - `Plugin | None`: 重载后生成的 Plugin 对象。根据插件组成不同，返回值包含如下情况：
+    - 插件没有定义或只定义了同步的加载/卸载回调（此为 master 前的唯一情况）：此函数会执行两个步骤的回调，在重载完毕后返回新的插件对象，其可以被 await，行为为直接返回插件本身。如果发生异常，则返回 `None`
+    - 插件定义了异步的回调，但 `reload_plugin` 是在 NoneBot 启动前调用的：此函数会阻塞地运行异步函数，其余表现和上一致
+    - 插件定义了异步加载回调，但 `reload_plugin` 是在异步的情况下调用的（比如在 NoneBot 运行的事件循环中）：此函数会卸载处理器并执行同步的卸载回调，返回遗留的插件对象。返回值可以被 await，行为为等待剩余的异步卸载完毕并且加载新插件完毕后然后返回新的插件对象，或如果在 await 中发生了错误，返回 `None`
 
 - **用法:**
 
   ```python
-  nonebot.plugin.reload_plugin('nonebot_tuling')
+  nonebot.plugin.reload_plugin('ai_chat')
   ```
 
-  重载 `nonebot_tuling` 插件。
+  重载 `ai_chat` 插件。
+
+  ```python
+  # 此写法是通用的，即使插件没有异步的回调
+  p = nonebot.plugin.reload_plugin('my_own_plugin')
+  if p is not None and (p := await p) is not None:
+      # 插件成功加载完成
+  else:
+      # 插件加载失败
+  ```
+  重载 `my_own_plugin` 插件，并且等待其异步的加载回调（如果有）执行完成。
 
 ### `load_plugins(plugin_dir, module_prefix)`
 
 - **说明:**
 
-  查找指定路径（相对或绝对）中的非隐藏模块（隐藏模块名字以 `_` 开头）并通过指定的模块前缀导入。
+  查找指定路径（相对或绝对）中的非隐藏模块（隐藏模块名字以 `_` 开头）并通过指定的模块前缀导入。其返回值的表现与 `load_plugin` 一致。
 
 - **参数:**
 
@@ -1302,6 +1378,43 @@ sidebar: auto
   await session.send('我现在支持以下功能：\n\n' +
                      '\n'.join(map(lambda p: p.name, filter(lambda p: p.name, plugins))))
   ```
+
+### _decorator_ `on_plugin(timing)` <Badge text="master" />
+
+- **说明:**、
+
+  将函数设置为插件生命周期的回调函数。注册的加载回调会在调用 `load_plugin` 时被调用，注册的卸载回调会在调用 `unload_plugin` 时被调用。
+
+- **参数:**
+
+  - `timing: str`: `"loading"` 表示注册加载回调，`"unloaded"` 表示注册卸载回调
+
+- **要求:**
+
+  被装饰函数可谓同步或异步（async def）函数，必须不接受参数，其返回值会被忽略:
+
+  ```python
+  def func():
+      pass
+
+  async def func():
+      pass
+  ```
+
+  被 `on_plugin('unloaded')` 装饰的函数必须不能抛出 `Exception`，否则卸载时的行为将不能保证。
+
+- **用法:**
+
+  ```python
+  messages = []
+
+  @on_plugin('loading')
+  def _():
+      logger.info('正在加载插件...')
+      messages.clear()
+  ```
+
+  注册一个加载回调为插件的加载做准备工作。
 
 ### _decorator_ `on_command(name, *, aliases=(), permission=..., only_to_me=True, privileged=False, shell_like=False, expire_timeout=..., run_timeout=..., session_class=None)` <Badge text="1.6.0+" />
 

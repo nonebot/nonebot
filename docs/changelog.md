@@ -12,7 +12,9 @@ sidebar: auto
 - 现在 `on_command`，`on_natural_language`，`on_notice/request` 和 `message_preprocessor` 必须在插件定义的模块中调用以注册相应处理器。直接在 `__main__` 中调用现在会提示警告并且在后续版本中移除对其的支持
 - **重要**：通过 `message_preprocessor` 注册的消息预处理器在 `PluginManager.remove_plugin`, `PluginManager.switch_plugin_global`, `reload_plugin` 执行后也会被一并移除
 - 新增 `nonebot.plugin.PluginManager.switch_messagepreprocessor_global` 用于切换消息预处理器开关
+- 新增 `nonebot.plugin.on_plugin` 用于注册插件加载和卸载时的回调
 - 新增 `nonebot.plugin.unload_plugin` 用于卸载插件
+- 现在 `load_plugin` 和 `reload_plugin` 也支持运行 `on_plugin` 注册的回调
 - `Plugin` 类增加 `userdata` 属性，可在插件中由 `__plugin_userdata__` 定义
 
 ## v1.8.4

@@ -24,6 +24,7 @@ NoticeHandler_T = Callable[["NoticeSession"], Awaitable[Any]]
 RequestHandler_T = Callable[["RequestSession"] , Awaitable[Any]]
 MessagePreprocessor_T = Callable[["NoneBot", "CQEvent", "PluginManager"], Awaitable[Any]]
 PermissionPolicy_T = Union[Callable[["SenderRoles"], bool], Callable[["SenderRoles"], Awaitable[bool]]]
+PluginLifetimeHook_T = Union[Callable[[], Any], Callable[[], Awaitable[Any]]]
 
 
 __all__ = [
@@ -38,4 +39,5 @@ __all__ = [
     'Filter_T',
     'PermChecker_T',
     'PermissionPolicy_T',
+    'PluginLifetimeHook_T',
 ]
