@@ -168,14 +168,14 @@ def aggregate_policy(
 class _LegacyPermissionConstant:
     """INTERNAL API"""
 
-    def __init__(self, policy: PermissionPolicy_T):
+    def __init__(self, policy: Callable[[SenderRoles], bool]):
+        # skip aggregate_policy as legacy permissions are sync checks
         self._policy = policy
 
     def __call__(self, sender: SenderRoles):
         return self._policy(sender)
 
     def __and__(self, other: '_LegacyPermissionConstant') -> '_LegacyPermissionConstant':
-        # skip aggregate_policy as legacy permissions are sync checks
         return _LegacyPermissionConstant(lambda s: self._policy(s) and other._policy(s))
 
     def __or__(self, other: '_LegacyPermissionConstant') -> '_LegacyPermissionConstant':
