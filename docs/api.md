@@ -1406,12 +1406,14 @@ sidebar: auto
 - **用法:**
 
   ```python
-  messages = []
+  necessary_info = []
 
   @on_plugin('loading')
-  def _():
+  async def _():
       logger.info('正在加载插件...')
-      messages.clear()
+      async with httpx.AsyncClient() as client:
+          r = await client.get('https://api.github.com/repos/nonebot/nonebot')
+          necessary_info.append(r.json())
   ```
 
   注册一个加载回调为插件的加载做准备工作。
