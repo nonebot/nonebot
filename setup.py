@@ -7,7 +7,7 @@ packages = find_packages(include=('nonebot', 'nonebot.*'))
 
 setup(
     name='nonebot',
-    version='v1.8.4',
+    version='v1.9.0',
     url='https://github.com/nonebot/nonebot',
     license='MIT License',
     author='NoneBot Team',

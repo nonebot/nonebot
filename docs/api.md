@@ -135,7 +135,7 @@ sidebar: auto
 
   消息预处理函数。
 
-### `PermissionPolicy_T` <Badge text="master"/>
+### `PermissionPolicy_T` <Badge text="1.9.0+"/>
 
 - **类型:** `(SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]`
 
@@ -143,7 +143,7 @@ sidebar: auto
 
   向命令或自然语言处理器传入的权限检查策略。此类型是一个（同步/异步）函数，接受 `SenderRoles` 作为唯一的参数。此函数返回布尔值，返回 `True` 则表示权限检查通过，可以进行下一步处理（触发命令），反之返回 `False`。
 
-### `PluginLifetimeHook_T` <Badge text="master"/>
+### `PluginLifetimeHook_T` <Badge text="1.9.0+"/>
 
 - **类型:** `() -> Any | () -> Awaitable[Any]`
 
@@ -317,7 +317,7 @@ sidebar: auto
 
   将 `note.add` 这样的命令解析为 `('note', 'add')`。
 
-### `DEFAULT_COMMAND_PERMISSION` <Badge text="master"/>
+### `DEFAULT_COMMAND_PERMISSION` <Badge text="1.9.0+"/>
 
 - **类型:** `PermissionPolicy_T`
 
@@ -335,7 +335,7 @@ sidebar: auto
 
   调用 `on_command` 而不提供 `permission` 参数时，命令仅能被超级用户触发。
 
-### `DEFAULT_NLP_PERMISSION` <Badge text="master"/>
+### `DEFAULT_NLP_PERMISSION` <Badge text="1.9.0+"/>
 
 - **类型:** `PermissionPolicy_T`
 
@@ -523,7 +523,7 @@ sidebar: auto
 - `NoticeSession` -> `nonebot.notice_request.NoticeSession`
 - `RequestSession` -> `nonebot.notice_request.RequestSession`
 - `context_id` <Badge text="1.2.0+"/> -> `nonebot.helpers.context_id`
-- `SenderRoles` <Badge text="master"/> -> `nonebot.permission.SenderRoles`
+- `SenderRoles` <Badge text="1.9.0+"/> -> `nonebot.permission.SenderRoles`
 
 ### `scheduler`
 
@@ -850,7 +850,7 @@ sidebar: auto
 
   插件使用方法，从插件模块的 `__plugin_usage__` 特殊变量获得，如果没有此变量，则为 `None`。
 
-#### `userdata` <Badge text="master"/>
+#### `userdata` <Badge text="1.9.0+"/>
 
 - **类型:** `Any | None`
 
@@ -882,7 +882,7 @@ sidebar: auto
 
   插件包含的事件处理器（包含通知、请求），通过 `on_notice` 以及 `on_request` 装饰器注册。
 
-#### `msg_preprocessors` <Badge text="master"/>
+#### `msg_preprocessors` <Badge text="1.9.0+"/>
 
 - **类型:** `set[MessagePreprocessor]`
 
@@ -890,7 +890,7 @@ sidebar: auto
 
   插件包含的消息预处理器，通过 `message_preprocessor` 装饰器注册。
 
-#### `lifetime_hooks` <Badge text="master"/>
+#### `lifetime_hooks` <Badge text="1.9.0+"/>
 
 - **类型:** `list[LifetimeHook]`
 
@@ -898,7 +898,7 @@ sidebar: auto
 
   插件包含的生命周期事件回调，通过 `on_plugin` 装饰器注册。
 
-#### `__await__()` <Badge text="master"/>
+#### `__await__()` <Badge text="1.9.0+"/>
 
 - **说明:**
 
@@ -974,7 +974,7 @@ sidebar: auto
 
 - **说明:**
 
-  删除 Plugin 中的所有命令、自然语言处理器、事件处理器并从插件管理器移除 Plugin 对象。在 master 后，也会移除消息预处理器。
+  删除 Plugin 中的所有命令、自然语言处理器、事件处理器并从插件管理器移除 Plugin 对象。在 1.9.0 后，也会移除消息预处理器。
 
   :::danger
   这个方法实际并没有完全移除定义 Plugin 的模块。仅是移除其所注册的处理器。
@@ -994,7 +994,7 @@ sidebar: auto
 
 - **说明:**
 
-  根据 `state` 更改 plugin 中 commands, nl_processors, event_handlers 的全局状态。在 master 后，msg_preprocessors 的状态也会被更改。
+  根据 `state` 更改 plugin 中 commands, nl_processors, event_handlers 的全局状态。在 1.9.0 后，msg_preprocessors 的状态也会被更改。
 
   :::warning
   更改插件状态并不会影响插件内 scheduler 等其他全局副作用状态
@@ -1096,7 +1096,7 @@ sidebar: auto
   PluginManager.switch_eventhandler_global("path.to.plugin", state=False)
   ```
 
-#### _class method_ `switch_messagepreprocessor_global(cls, module_path, state=None)` <Badge text="master"/>
+#### _class method_ `switch_messagepreprocessor_global(cls, module_path, state=None)` <Badge text="1.9.0+"/>
 
 - **说明:**
 
@@ -1219,7 +1219,7 @@ sidebar: auto
 - **返回:** <Badge text="1.6.0+" />
 
   - `Plugin | None`: 加载后生成的 `Plugin` 对象。根据插件组成不同，返回值包含如下情况：
-    - 插件没有定义加载回调，或只定义了同步的加载回调（此为 master 前的唯一情况）：此函数会执行回调，在加载完毕后返回新的插件对象，其可以被 await，行为为直接返回插件本身。如果发生异常，则返回 `None`
+    - 插件没有定义加载回调，或只定义了同步的加载回调（此为 1.9.0 前的唯一情况）：此函数会执行回调，在加载完毕后返回新的插件对象，其可以被 await，行为为直接返回插件本身。如果发生异常，则返回 `None`
     - 插件定义了异步加载回调，但 `load_plugin` 是在 NoneBot 启动前调用的：此函数会阻塞地运行异步函数，其余表现和上一致
     - 插件定义了异步加载回调，但 `load_plugin` 是在异步的情况下调用的（比如在 NoneBot 运行的事件循环中）：此函数会先执行部分同步的加载回调
       - 如果成功，返回一个插件对象。返回值可以被 await，行为为等待剩余的异步加载完毕然后返回插件本身，或如果在 await 中发生了错误，返回 `None`
@@ -1243,7 +1243,7 @@ sidebar: auto
   ```
   加载 `my_own_plugin` 插件，并且等待其异步的加载回调（如果有）执行完成。
 
-### `unload_plugin(module_path)` <Badge text="master" />
+### `unload_plugin(module_path)` <Badge text="1.9.0+" />
 
 - **说明:**
 
@@ -1300,7 +1300,7 @@ sidebar: auto
 - **返回:**
 
   - `Plugin | None`: 重载后生成的 Plugin 对象。根据插件组成不同，返回值包含如下情况：
-    - 插件没有定义或只定义了同步的加载/卸载回调（此为 master 前的唯一情况）：此函数会执行两个步骤的回调，在重载完毕后返回新的插件对象，其可以被 await，行为为直接返回插件本身。如果发生异常，则返回 `None`
+    - 插件没有定义或只定义了同步的加载/卸载回调（此为 1.9.0 前的唯一情况）：此函数会执行两个步骤的回调，在重载完毕后返回新的插件对象，其可以被 await，行为为直接返回插件本身。如果发生异常，则返回 `None`
     - 插件定义了异步的回调，但 `reload_plugin` 是在 NoneBot 启动前调用的：此函数会阻塞地运行异步函数，其余表现和上一致
     - 插件定义了异步的回调，但 `reload_plugin` 是在异步的情况下调用的（比如在 NoneBot 运行的事件循环中）：此函数会卸载处理器并执行部分同步的卸载回调，返回遗留的插件对象。返回值可以被 await，行为为等待剩余的异步卸载完毕并且加载新插件完毕后然后返回新的插件对象，或如果在 await 中发生了错误，返回 `None`
 
@@ -1379,7 +1379,7 @@ sidebar: auto
                      '\n'.join(map(lambda p: p.name, filter(lambda p: p.name, plugins))))
   ```
 
-### _decorator_ `on_plugin(timing)` <Badge text="master" />
+### _decorator_ `on_plugin(timing)` <Badge text="1.9.0+" />
 
 - **说明:**、
 
@@ -1432,7 +1432,7 @@ sidebar: auto
     :::warning 注意
     滥用正则表达式可能会引发性能问题，请优先使用普通命令。另外一点需要注意的是，由正则表达式匹配到的匹配到的命令，`session` 中的 `current_arg` 会是整个命令，而不会删除匹配到的内容，以满足一些特殊需求。
     :::
-  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T] | EllipsisType` <Badge text="master"/>: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_COMMAND_PERMISSION`
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T] | EllipsisType` <Badge text="1.9.0+"/>: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_COMMAND_PERMISSION`
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
   - `shell_like: bool`: 是否使用类 shell 语法，若是，则会自动使用 `shlex` 模块进行分割（无需手动编写参数解析器），分割后的参数列表放入 `session.args['argv']`
@@ -1495,7 +1495,7 @@ sidebar: auto
 - **参数:**
 
   - `keywords: (Iterable[str] | str) | None`: 要响应的关键词，若传入 `None`，则响应所有消息
-  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T] | EllipsisType` <Badge text="master"/>: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_NLP_PERMISSION`
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T] | EllipsisType` <Badge text="1.9.0+"/>: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_NLP_PERMISSION`
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的消息（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `only_short_message: bool`: 是否只响应短消息
   - `allow_empty_message: bool`: 是否响应内容为空的消息（只有 @ 或机器人昵称）
@@ -1749,7 +1749,7 @@ sidebar: auto
 - **参数:**
 
   - `name: str | CommandName_T`: 命令名前缀，若传入字符串，则会自动转换成元组
-  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="master"/>: 对应 `permission` 属性
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="1.9.0+"/>: 对应 `permission` 属性
   - `only_to_me: bool`: 对应 `only_to_me` 属性
   - `privileged: bool`: 对应 `privileged` 属性
   - `shell_like: bool`: 对应 `shell_like` 属性
@@ -1768,7 +1768,7 @@ sidebar: auto
   - `name: str | CommandName_T`: 命令名，注册命令处理器时会加上命令组的前缀
   - `aliases: Iterable[str], str]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值时，则使用 `on_command` 装饰器的默认值
   - `patterns: Patterns_T` <Badge text="1.8.1+"/>：同上
-  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="master"/>: 同上
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="1.9.0+"/>: 同上
   - `only_to_me: bool`: 同上
   - `privileged: bool`: 同上
   - `shell_like: bool`: 同上
@@ -2849,7 +2849,7 @@ async def _(session: NLPSession):
     return IntentCommand('weather', 100.0)
 ```
 
-### _class_ `SenderRoles` <Badge text="master"/>
+### _class_ `SenderRoles` <Badge text="1.9.0+"/>
 
 封装了原生的 `CQEvent` 便于权限检查。此类的实例一般会传入 `PermissionPolicy_T` 作为参数。
 
@@ -3019,7 +3019,7 @@ async def _(session: NLPSession):
 
   - `bot: NoneBot`: NoneBot 对象
   - `event: aiocqhttp.Event`: 消息事件对象
-  - `policy: PermissionPolicy_T` <Badge text="master"/>: 返回布尔值的权限检查策略
+  - `policy: PermissionPolicy_T` <Badge text="1.9.0+"/>: 返回布尔值的权限检查策略
 
 - **返回:**
 
@@ -3031,7 +3031,7 @@ async def _(session: NLPSession):
   has_perm = await check_permission(bot, event, normal_group_member)
   ```
 
-### `aggregate_policy(policies, aggregator=all)` <Badge text="master"/>
+### `aggregate_policy(policies, aggregator=all)` <Badge text="1.9.0+"/>
 
 - **说明:**
 
@@ -3064,7 +3064,7 @@ async def _(session: NLPSession):
 
 ### 权限声明常量
 
-NoneBot 在 master 后改变了声明权限的风格。为了保持向前兼容，尽管不建议使用，如果你的代码仍包含以下常量，则无需改动它们仍将工作：
+NoneBot 在 1.9.0 后改变了声明权限的风格。为了保持向前兼容，尽管不建议使用，如果你的代码仍包含以下常量，则无需改动它们仍将工作：
 
 - `PRIVATE_FRIEND`: 好友私聊
 - `PRIVATE_GROUP`: 群临时私聊
@@ -3091,7 +3091,7 @@ async def _(session):
 
 需要注意的是，当一个用户是「群管理员」时，ta 同时也是「群成员」；当 ta 是「群主」时，ta 同时也是「群管理员」和「群成员」。
 
-在 master 后，这些常量的类型从 `int` 改变为了 `PermissionPolicy_T`，所以如果你之前包含了它们的 type hints，或用了不寻常的方法来获取它们的值，则可能会导致错误。
+在 1.9.0 后，这些常量的类型从 `int` 改变为了 `PermissionPolicy_T`，所以如果你之前包含了它们的 type hints，或用了不寻常的方法来获取它们的值，则可能会导致错误。
 
 ## `nonebot.log` 模块
 
@@ -3351,7 +3351,7 @@ async def _(session):
 
 ## `nonebot.experimental.plugin` 模块 <Badge text="v1.8.0+"/>
 
-为了保持向前的兼容，在 master 后此模块仅导出与主包完全相同的 `on_command` 和 `on_natural_language` 两个函数。会在未来版本中移除。
+为了保持向前的兼容，在 1.9.0 后此模块仅导出与主包完全相同的 `on_command` 和 `on_natural_language` 两个函数。会在未来版本中移除。
 
 <!-- 链接 -->
 
