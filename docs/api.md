@@ -4,6 +4,8 @@ sidebar: auto
 
 # API
 
+在以下文档中提到的类，函数等被视为公开的 API，详情请见 [CONTRIBUTING](https://github.com/nonebot/nonebot/blob/master/CONTRIBUTING.md#%E4%BB%A3%E7%A0%81%E9%A3%8E%E6%A0%BC). 你可以使用这里没有暴露的 API（"INTERNAL APIs"），但是其行为可能会在不通知用户的情况下发生变化。
+
 ## 类型
 
 下面的 API 文档中，「类型」部分使用 Python 的 Type Hint 语法，见 [PEP 484](https://www.python.org/dev/peps/pep-0484/), [PEP 526](https://www.python.org/dev/peps/pep-0526/), [PEP 604](https://www.python.org/dev/peps/pep-0604/) 和 [typing](https://docs.python.org/3/library/typing.html)。
@@ -99,7 +101,7 @@ sidebar: auto
 
 - **说明:**
 
-  通用的权限检查函数。
+  已弃用。
 
 ### `NLPHandler_T` <Badge text="1.8.1+"/>
 
@@ -132,6 +134,22 @@ sidebar: auto
 - **说明:**
 
   消息预处理函数。
+
+### `PermissionPolicy_T` <Badge text="master"/>
+
+- **类型:** `(SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]`
+
+- **说明:**
+
+  向命令或自然语言处理器传入的权限检查策略。此类型是一个（同步/异步）函数，接受 `SenderRoles` 作为唯一的参数。此函数返回布尔值，返回 `True` 则表示权限检查通过，可以进行下一步处理（触发命令），反之返回 `False`。
+
+### `PluginLifetimeHook_T` <Badge text="master"/>
+
+- **类型:** `() -> Any | () -> Awaitable[Any]`
+
+- **说明:**
+
+  插件生命周期事件回调函数。
 
 ## 配置
 
@@ -298,6 +316,34 @@ sidebar: auto
   ```
 
   将 `note.add` 这样的命令解析为 `('note', 'add')`。
+
+### `DEFAULT_COMMAND_PERMISSION` <Badge text="master"/>
+
+- **类型:** `PermissionPolicy_T`
+
+- **默认值:** `lambda _: True`
+
+- **说明:**
+
+  命令处理器的缺省权限。默认为允许所有用户触发。
+
+- **用法:**
+
+  ```python
+  DEFAULT_COMMAND_PERMISSION = lambda s: s.is_superuser
+  ```
+
+  调用 `on_command` 而不提供 `permission` 参数时，命令仅能被超级用户触发。
+
+### `DEFAULT_NLP_PERMISSION` <Badge text="master"/>
+
+- **类型:** `PermissionPolicy_T`
+
+- **默认值:** `lambda _: True`
+
+- **说明:**
+
+  自然语言处理器的缺省权限。默认为允许所有用户触发。
 
 ### `SESSION_EXPIRE_TIMEOUT`
 
@@ -477,6 +523,7 @@ sidebar: auto
 - `NoticeSession` -> `nonebot.notice_request.NoticeSession`
 - `RequestSession` -> `nonebot.notice_request.RequestSession`
 - `context_id` <Badge text="1.2.0+"/> -> `nonebot.helpers.context_id`
+- `SenderRoles` <Badge text="master"/> -> `nonebot.permission.SenderRoles`
 
 ### `scheduler`
 
@@ -803,6 +850,14 @@ sidebar: auto
 
   插件使用方法，从插件模块的 `__plugin_usage__` 特殊变量获得，如果没有此变量，则为 `None`。
 
+#### `userdata` <Badge text="master"/>
+
+- **类型:** `Any | None`
+
+- **说明:**
+
+  插件作者可由此变量向外部暴露其他信息，从插件模块的 `__plugin_userdata__` 特殊变量获得，如果没有此变量，则为 `None`。
+
 #### `commands` <Badge text="1.6.0+"/>
 
 - **类型:** `set[Command]`
@@ -826,6 +881,32 @@ sidebar: auto
 - **说明:**
 
   插件包含的事件处理器（包含通知、请求），通过 `on_notice` 以及 `on_request` 装饰器注册。
+
+#### `msg_preprocessors` <Badge text="master"/>
+
+- **类型:** `set[MessagePreprocessor]`
+
+- **说明:**
+
+  插件包含的消息预处理器，通过 `message_preprocessor` 装饰器注册。
+
+#### `lifetime_hooks` <Badge text="master"/>
+
+- **类型:** `list[LifetimeHook]`
+
+- **说明:**
+
+  插件包含的生命周期事件回调，通过 `on_plugin` 装饰器注册。
+
+#### `__await__()` <Badge text="master"/>
+
+- **说明:**
+
+  当使用 `load_plugin`, `unload_plugin`, `reload_plugin` 时，其返回的 `Plugin` 对象可以（非必需）被 await 来等待其异步加载、卸载完成。详情请见这些函数的文档。
+
+- **返回:**
+
+  - `Generator[None, None, Plugin | None]`
 
 ### _class_ `PluginManager` <Badge text="1.6.0+" />
 
@@ -893,10 +974,10 @@ sidebar: auto
 
 - **说明:**
 
-  删除 Plugin 中的所有命令、自然语言处理器、事件处理器并移除 Plugin 对象。
+  删除 Plugin 中的所有命令、自然语言处理器、事件处理器并从插件管理器移除 Plugin 对象。在 master 后，也会移除消息预处理器。
 
   :::danger
-  这个方法实际并没有完全移除 Plugin 。仅是移除 Plugin 中的所有命令、自然语言处理器以及事件处理器。
+  这个方法实际并没有完全移除定义 Plugin 的模块。仅是移除其所注册的处理器。
   :::
 
 - **参数:**
@@ -913,10 +994,10 @@ sidebar: auto
 
 - **说明:**
 
-  根据 `state` 更改 plugin 中 commands, nl_processors, event_handlers 的全局状态。
+  根据 `state` 更改 plugin 中 commands, nl_processors, event_handlers 的全局状态。在 master 后，msg_preprocessors 的状态也会被更改。
 
   :::warning
-  更改插件状态并不会影响插件内 message_preprocessor, scheduler 等状态
+  更改插件状态并不会影响插件内 scheduler 等其他全局副作用状态
   :::
 
 - **参数:**
@@ -933,14 +1014,8 @@ sidebar: auto
 - **用法:**
 
   ```python
-  from nonebot import message_preprocessor
-
   # 全局关闭插件 path.to.plugin , 对所有消息生效
   PluginManager.switch_plugin_global("path.to.plugin", state=False)
-
-  @message_preprocessor
-  async def processor(bot: NoneBot, event: CQEvent, plugin_manager: PluginManager):
-      plugin_manager.switch_plugin_global("path.to.plugin", state=False)
   ```
 
 #### _class method_ `switch_command_global(cls, module_path, state=None)`
@@ -963,14 +1038,8 @@ sidebar: auto
 - **用法:**
 
   ```python
-  from nonebot import message_preprocessor
-
   # 全局关闭插件 path.to.plugin 中所有命令, 对所有消息生效
   PluginManager.switch_command_global("path.to.plugin", state=False)
-
-  @message_preprocessor
-  async def processor(bot: NoneBot, event: CQEvent, plugin_manager: PluginManager):
-      plugin_manager.switch_command_global("path.to.plugin", state=False)
   ```
 
 #### _class method_ `switch_nlprocessor_global(cls, module_path, state=None)`
@@ -1023,21 +1092,39 @@ sidebar: auto
 - **用法:**
 
   ```python
-  from nonebot import message_preprocessor
-
   # 全局关闭插件 path.to.plugin 中所有事件处理器, 对所有消息生效
   PluginManager.switch_eventhandler_global("path.to.plugin", state=False)
+  ```
 
-  @message_preprocessor
-  async def processor(bot: NoneBot, event: CQEvent, plugin_manager: PluginManager):
-      plugin_manager.switch_eventhandler_global("path.to.plugin", state=False)
+#### _class method_ `switch_messagepreprocessor_global(cls, module_path, state=None)` <Badge text="master"/>
+
+- **说明:**
+
+  根据 `state` 更改 plugin 中 message preprocessors 的全局状态。
+
+- **参数:**
+
+  - `module_path: str`: 模块路径
+  - `state: bool | None`:
+    - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
+    - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
+
+- **返回:**
+
+  None
+
+- **用法:**
+
+  ```python
+  # 全局关闭插件 path.to.plugin 中所有消息预处理器, 对所有消息生效
+  PluginManager.switch_messagepreprocessor_global("path.to.plugin", state=False)
   ```
 
 #### `switch_plugin(cls, module_path, state=None)`
 
 - **说明:**
 
-  根据 `state` 修改 plugin 的状态。仅对当前消息有效。
+  根据 `state` 修改 plugin 中的 commands 和 nlprocessors 状态。仅对当前消息有效。
 
 - **参数:**
 
@@ -1123,30 +1210,49 @@ sidebar: auto
 
   加载插件（等价于导入模块）。
 
+  此函数会调用插件中由 `on_plugin('loading')` 装饰器注册的函数（下称 「加载回调」），之后再添加插件中注册的处理器（如命令等）。
+
 - **参数:**
 
   - `module_path: str`: 模块路径
 
 - **返回:** <Badge text="1.6.0+" />
 
-  - `Plugin | None`: 加载后生成的 Plugin 对象
+  - `Plugin | None`: 加载后生成的 `Plugin` 对象。根据插件组成不同，返回值包含如下情况：
+    - 插件没有定义加载回调，或只定义了同步的加载回调（此为 master 前的唯一情况）：此函数会执行回调，在加载完毕后返回新的插件对象，其可以被 await，行为为直接返回插件本身。如果发生异常，则返回 `None`
+    - 插件定义了异步加载回调，但 `load_plugin` 是在 NoneBot 启动前调用的：此函数会阻塞地运行异步函数，其余表现和上一致
+    - 插件定义了异步加载回调，但 `load_plugin` 是在异步的情况下调用的（比如在 NoneBot 运行的事件循环中）：此函数会先执行部分同步的加载回调
+      - 如果成功，返回一个插件对象。返回值可以被 await，行为为等待剩余的异步加载完毕然后返回插件本身，或如果在 await 中发生了错误，返回 `None`
+      - 如果失败，返回 `None`
 
 - **用法:**
 
   ```python
-  nonebot.plugin.load_plugin('nonebot_tuling')
+  nonebot.plugin.load_plugin('ai_chat')
   ```
 
-  加载 `nonebot_tuling` 插件。
+  加载 `ai_chat` 插件。
 
-### `reload_plugin(module_path)` <Badge text="1.6.0+" />
+  ```python
+  # 此写法是通用的，即使插件没有异步的加载回调
+  p = nonebot.plugin.load_plugin('my_own_plugin')
+  if p is not None and await p is not None:
+      # 插件成功加载完成
+  else:
+      # 插件加载失败
+  ```
+  加载 `my_own_plugin` 插件，并且等待其异步的加载回调（如果有）执行完成。
+
+### `unload_plugin(module_path)` <Badge text="master" />
 
 - **说明:**
 
-  重载插件。
+  卸载插件，即移除插件的 commands, nlprocessors, event handlers 和 message preprocessors，运行由 `on_plugin('unloaded')` 注册的函数（下称 「卸载回调」），并将已导入的模块移除。
 
   :::danger
-  该函数为强制重载，可能导致不可预测的错误！
+  该函数为强制卸载，如果使用不当，可能导致不可预测的错误！（如引用已经被卸载的模块变量）
+
+  此函数不会回滚已导入模块中产生过的其他副作用（比如已计划的任务，aiocqhttp 中注册的处理器等）。
   :::
 
 - **参数:**
@@ -1155,21 +1261,72 @@ sidebar: auto
 
 - **返回:**
 
-  - `Plugin | None`: 重载后生成的 Plugin 对象
+  - `Plugin | None`: 执行卸载后遗留的 `Plugin` 对象，或 `None` 如果插件不存在。根据插件组成不同，`Plugin` 返回值包含如下情况：
+    - 插件没有定义卸载回调，或只定义了同步的卸载回调：此函数会卸载处理器并执行回调，在卸载完毕后返回遗留的插件对象，其可以被 await，行为为直接返回此插件本身。
+    - 插件定义了异步卸载回调，但 `unload_plugin` 是在 NoneBot 启动前调用的：此函数会阻塞地运行异步函数，其余表现和上一致
+    - 插件定义了异步卸载回调，但 `unload_plugin` 是在异步的情况下调用的（比如在 NoneBot 运行的事件循环中）：此函数会卸载处理器并执行部分同步的卸载回调，返回遗留的插件对象。此对象可以被 await，行为为等待剩余的异步卸载回调执行完毕然后返回此插件本身。
+    - 在此之后此返回值将不再有用
 
 - **用法:**
 
   ```python
-  nonebot.plugin.reload_plugin('nonebot_tuling')
+  nonebot.plugin.unload_plugin('ai_chat')
   ```
 
-  重载 `nonebot_tuling` 插件。
+  卸载 `ai_chat` 插件。
+
+  ```python
+  # 此写法是通用的，即使插件没有异步的卸载回调
+  p = nonebot.plugin.unload_plugin('my_own_plugin')
+  if p is not None:
+      await p
+  ```
+  卸载 `my_own_plugin` 插件，并且等待其异步的卸载回调（如果有）执行完成。
+
+### `reload_plugin(module_path)` <Badge text="1.6.0+" />
+
+- **说明:**
+
+  重载插件，也就是先 `unload_plugin`，再 `load_plugin`。
+
+  :::danger
+  该函数为强制重载，如果使用不当，可能导致不可预测的错误！
+  :::
+
+- **参数:**
+
+  - `module_path: str`: 模块路径
+
+- **返回:**
+
+  - `Plugin | None`: 重载后生成的 Plugin 对象。根据插件组成不同，返回值包含如下情况：
+    - 插件没有定义或只定义了同步的加载/卸载回调（此为 master 前的唯一情况）：此函数会执行两个步骤的回调，在重载完毕后返回新的插件对象，其可以被 await，行为为直接返回插件本身。如果发生异常，则返回 `None`
+    - 插件定义了异步的回调，但 `reload_plugin` 是在 NoneBot 启动前调用的：此函数会阻塞地运行异步函数，其余表现和上一致
+    - 插件定义了异步的回调，但 `reload_plugin` 是在异步的情况下调用的（比如在 NoneBot 运行的事件循环中）：此函数会卸载处理器并执行部分同步的卸载回调，返回遗留的插件对象。返回值可以被 await，行为为等待剩余的异步卸载完毕并且加载新插件完毕后然后返回新的插件对象，或如果在 await 中发生了错误，返回 `None`
+
+- **用法:**
+
+  ```python
+  nonebot.plugin.reload_plugin('ai_chat')
+  ```
+
+  重载 `ai_chat` 插件。
+
+  ```python
+  # 此写法是通用的，即使插件没有异步的回调
+  p = nonebot.plugin.reload_plugin('my_own_plugin')
+  if p is not None and (p := await p) is not None:
+      # 插件成功加载完成
+  else:
+      # 插件加载失败
+  ```
+  重载 `my_own_plugin` 插件，并且等待其异步的加载回调（如果有）执行完成。
 
 ### `load_plugins(plugin_dir, module_prefix)`
 
 - **说明:**
 
-  查找指定路径（相对或绝对）中的非隐藏模块（隐藏模块名字以 `_` 开头）并通过指定的模块前缀导入。
+  查找指定路径（相对或绝对）中的非隐藏模块（隐藏模块名字以 `_` 开头）并通过指定的模块前缀导入。其返回值的表现与 `load_plugin` 一致。
 
 - **参数:**
 
@@ -1222,7 +1379,44 @@ sidebar: auto
                      '\n'.join(map(lambda p: p.name, filter(lambda p: p.name, plugins))))
   ```
 
-### _decorator_ `on_command(name, *, aliases=(), permission=perm.EVERYBODY, only_to_me=True, privileged=False, shell_like=False, expire_timeout=..., run_timeout=..., session_class=None)` <Badge text="1.6.0+" />
+### _decorator_ `on_plugin(timing)` <Badge text="master" />
+
+- **说明:**、
+
+  将函数设置为插件生命周期的回调函数。注册的加载回调会在调用 `load_plugin` 时被调用，注册的卸载回调会在调用 `unload_plugin` 时被调用。
+
+- **参数:**
+
+  - `timing: str`: `"loading"` 表示注册加载回调，`"unloaded"` 表示注册卸载回调
+
+- **要求:**
+
+  被装饰函数可谓同步或异步（async def）函数，必须不接受参数，其返回值会被忽略:
+
+  ```python
+  def func():
+      pass
+
+  async def func():
+      pass
+  ```
+
+  被 `on_plugin('unloaded')` 装饰的函数必须不能抛出 `Exception`，否则卸载时的行为将不能保证。
+
+- **用法:**
+
+  ```python
+  messages = []
+
+  @on_plugin('loading')
+  def _():
+      logger.info('正在加载插件...')
+      messages.clear()
+  ```
+
+  注册一个加载回调为插件的加载做准备工作。
+
+### _decorator_ `on_command(name, *, aliases=(), permission=..., only_to_me=True, privileged=False, shell_like=False, expire_timeout=..., run_timeout=..., session_class=None)` <Badge text="1.6.0+" />
 
 - **说明:**
 
@@ -1238,7 +1432,7 @@ sidebar: auto
     :::warning 注意
     滥用正则表达式可能会引发性能问题，请优先使用普通命令。另外一点需要注意的是，由正则表达式匹配到的匹配到的命令，`session` 中的 `current_arg` 会是整个命令，而不会删除匹配到的内容，以满足一些特殊需求。
     :::
-  - `permission: int`: 命令所需要的权限，不满足权限的用户将无法触发该命令
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T] | EllipsisType` <Badge text="master"/>: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_COMMAND_PERMISSION`
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `privileged: bool`: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
   - `shell_like: bool`: 是否使用类 shell 语法，若是，则会自动使用 `shlex` 模块进行分割（无需手动编写参数解析器），分割后的参数列表放入 `session.args['argv']`
@@ -1258,12 +1452,12 @@ sidebar: auto
 - **用法:**
 
   ```python
-  @on_command('echo', aliases=('复读',))
+  @on_command('echo', aliases=('复读',), permission=lambda sender: sender.is_superuser)
   async def _(session: CommandSession):
       await session.send(session.current_arg)
   ```
 
-  一个简单的复读命令。
+  一个仅对超级用户生效的复读命令。
 
 ### _decorator_ _command_func._`args_parser`
 
@@ -1292,7 +1486,7 @@ sidebar: auto
 
   一个典型的命令参数解析器。
 
-### _decorator_ `on_natural_language(keywords=None, *, permission=EVERYBODY, only_to_me=True, only_short_message=True, allow_empty_message=False)` <Badge text="1.6.0+" />
+### _decorator_ `on_natural_language(keywords=None, *, permission=..., only_to_me=True, only_short_message=True, allow_empty_message=False)` <Badge text="1.6.0+" />
 
 - **说明:**
 
@@ -1301,7 +1495,7 @@ sidebar: auto
 - **参数:**
 
   - `keywords: (Iterable[str] | str) | None`: 要响应的关键词，若传入 `None`，则响应所有消息
-  - `permission: int`: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T] | EllipsisType` <Badge text="master"/>: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_NLP_PERMISSION`
   - `only_to_me: bool`: 是否只响应确定是在和「我」（机器人）说话的消息（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
   - `only_short_message: bool`: 是否只响应短消息
   - `allow_empty_message: bool`: 是否响应内容为空的消息（只有 @ 或机器人昵称）
@@ -1555,7 +1749,7 @@ sidebar: auto
 - **参数:**
 
   - `name: str | CommandName_T`: 命令名前缀，若传入字符串，则会自动转换成元组
-  - `permission: int`: 对应 `permission` 属性
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="master"/>: 对应 `permission` 属性
   - `only_to_me: bool`: 对应 `only_to_me` 属性
   - `privileged: bool`: 对应 `privileged` 属性
   - `shell_like: bool`: 对应 `shell_like` 属性
@@ -1574,7 +1768,7 @@ sidebar: auto
   - `name: str | CommandName_T`: 命令名，注册命令处理器时会加上命令组的前缀
   - `aliases: Iterable[str], str]`: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值时，则使用 `on_command` 装饰器的默认值
   - `patterns: Patterns_T` <Badge text="1.8.1+"/>：同上
-  - `permission: int`: 同上
+  - `permission: PermissionPolicy_T | Iterable[PermissionPolicy_T]` <Badge text="master"/>: 同上
   - `only_to_me: bool`: 同上
   - `privileged: bool`: 同上
   - `shell_like: bool`: 同上
@@ -2623,7 +2817,254 @@ session.get('arg1', prompt='请输入 arg1：',
 
 ## `nonebot.permission` 模块
 
+NoneBot 支持为命令和自然语言处理器设置触发条件，此条件为一个类型为 `PermissionPolicy_T` 的可调用对象：
+
+```python
+# 同步：返回值恒为假，即表示所有消息和发送者都没有权限
+disabled: PermissionPolicy_T = lambda sender: False
+
+# 同步：当消息是群聊，且发送者既不是管理员也不是群主时给予权限
+def normal_group_member(sender: SenderRoles):
+    return sender.is_groupchat and not sender.is_admin and not sender.is_owner
+
+# 异步：在检查器中查询数据库再根据返回值决定是否给予权限
+async def db_check(sender: SenderRoles):
+    query = await db.execute('if exists (select * from list where user=?) 1 else 0', (sender.event.user_id,))
+    return query[0] != 0
+```
+
+在实际使用时应当避免挂起太久的异步操作。在定义了这些条件后，可作为 `permission` 参数传递给相关的装饰器：
+
+```python
+permit_group = { 768887710 }
+banned_people = { 10000, 10001 }
+def foo(sender: SenderRoles):
+    return sender.is_groupchat and sender.from_group(permit_group) \
+    and not sender.sendby(banned_people)
+
+@on_natural_language({'天气'}, only_to_me=False, permission=(foo, db_check))                        # 需要同时满足 foo 和 db_check
+                                                # permission=aggregate_policy((foo, db_check))      # 需要同时满足 foo 和 db_check
+                                                # permission=aggregate_policy((foo, db_check), any) # 只需满足一个
+async def _(session: NLPSession):
+    return IntentCommand('weather', 100.0)
+```
+
+### _class_ `SenderRoles` <Badge text="master"/>
+
+封装了原生的 `CQEvent` 便于权限检查。此类的实例一般会传入 `PermissionPolicy_T` 作为参数。
+
+#### `bot`
+
+- **类型:** `NoneBot`
+
+#### `event`
+
+- **类型:** `CQEvent`
+
+#### `sender`
+
+- **类型:** `dict[str, Any] | None`
+
+- **说明:**
+
+  只有消息是群消息的时候才会有这个属性，其内容是 `/get_group_member_info` API 调用的返回值。
+
+#### _staticmethod_ _coroutine_ `create(bot, event)`
+
+- **说明:**
+
+  构造 `SenderRoles`。
+
+- **参数:**
+
+  - `bot: NoneBot`: 接收事件的 NoneBot 对象
+  - `event: CQEvent`: 上报事件
+
+- **返回:**
+
+  - `SenderRoles`
+
+- **用法:**
+
+  ```python
+  sender = await SenderRoles.create(session.bot, session.event)
+  if sender.is_groupchat:
+    if sender.is_owner:
+        await process_owner(session)
+    elif sender.is_admin:
+        await process_admin(session)
+    else:
+        await process_member(session)
+  ```
+
+  根据发送者的身份决定相应命令处理方式。
+
+#### _readonly property_ `is_superuser`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  发送者是配置文件中设置的超级用户。
+
+#### _readonly property_ `is_groupchat`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是群聊消息。
+
+#### _readonly property_ `is_anonymous`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是匿名消息。
+
+#### _readonly property_ `is_admin`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  发送者是群管理员。
+
+#### _readonly property_ `is_owner`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  发送者是群主。
+
+#### _readonly property_ `is_privatechat`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是私聊消息。
+
+#### _readonly property_ `is_private_friend`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是好友私聊消息。
+
+#### _readonly property_ `is_private_group`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是群私聊消息。
+
+#### _readonly property_ `is_private_discuss`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是讨论组私聊消息。
+
+#### _readonly property_ `is_discusschat`
+
+- **类型:** `bool`
+
+- **说明:**
+
+  消息是讨论组消息。
+
+#### `from_group(self, group_id)`
+
+- **说明:**
+
+  表示发送者是否来自于群 `group_id`。
+
+- **参数:**
+
+  - `group_id: int | Container[int]`: 群号码，可以为多个群号。
+
+- **返回:**
+
+  `bool`
+
+#### `sent_by(self, sender_id)`
+
+- **说明:**
+
+  表示发送者 QQ 号是否是 `sender_id`。
+
+- **参数:**
+
+  - `sender_id: int | Container[int]`: 发送者 QQ 号，可以是多个。
+
+- **返回:**
+
+  `bool`
+
+### _coroutine_ `check_permission(bot, event, policy)`
+
+- **说明:**
+
+  检查用户是否具有所要求的权限。
+
+  一般用户应该没有必要使用该函数。
+
+- **参数:**
+
+  - `bot: NoneBot`: NoneBot 对象
+  - `event: aiocqhttp.Event`: 消息事件对象
+  - `policy: PermissionPolicy_T` <Badge text="master"/>: 返回布尔值的权限检查策略
+
+- **返回:**
+
+  - `bool`: 消息事件所对应的上下文是否具有所要求的权限
+
+- **用法:**
+
+  ```python
+  has_perm = await check_permission(bot, event, normal_group_member)
+  ```
+
+### `aggregate_policy(policies, aggregator=all)` <Badge text="master"/>
+
+- **说明:**
+
+  在默认参数下，将多个权限检查策略函数使用 AND 操作符连接并返回单个权限检查策略。在实现中对这几个策略使用内置 `all` 函数，会优先执行同步函数而且尽可能在同步模式的情况下短路。
+
+  在新的策略下，只有事件满足了 `policies` 中所有的原策略，才会返回 `True`。
+
+  `aggregator` 参数也可以设置为其他函数，例如 `any`：在此情况下会使用 `OR` 操作符连接。
+
+  如果参数中所有的策略都是同步的，则返回值是同步的，否则返回值是异步函数。
+
+- **参数:**
+
+  - `policies: Iterable[PermissionPolicy_T]`: 要合并的权限检查策略
+  - `aggregator: (Iterable[object]) -> bool`: 用于合并策略的函数
+
+- **返回:**
+
+  - `PermissionPolicy_T`: 新的权限检查策略
+
+- **用法:**
+
+  ```python
+  # 以下两种方式在效果上等同
+  policy1 = lambda sender: sender.is_groupchat and sender.from_group(123456789)
+
+  policy2 = aggregate_policy(lambda sender: sender.is_groupchat,
+                             lambda sender: sender.from_group(123456789))
+  ```
+
 ### 权限声明常量
+
+NoneBot 在 master 后改变了声明权限的风格。为了保持向前兼容，尽管不建议使用，如果你的代码仍包含以下常量，则无需改动它们仍将工作：
 
 - `PRIVATE_FRIEND`: 好友私聊
 - `PRIVATE_GROUP`: 群临时私聊
@@ -2650,27 +3091,7 @@ async def _(session):
 
 需要注意的是，当一个用户是「群管理员」时，ta 同时也是「群成员」；当 ta 是「群主」时，ta 同时也是「群管理员」和「群成员」。
 
-### _coroutine_ `check_permission(bot, event, permission_required)`
-
-- **说明:**
-
-  检查用户是否具有所要求的权限。
-
-- **参数:**
-
-  - `bot: NoneBot`: NoneBot 对象
-  - `event: aiocqhttp.Event`: 消息事件对象
-  - `permission_required: int`: 要求的权限值
-
-- **返回:**
-
-  - `bool`: 消息事件所对应的上下文是否具有所要求的权限
-
-- **用法:**
-
-  ```python
-  has_perm = await check_permission(bot, event, cmd.permission)
-  ```
+在 master 后，这些常量的类型从 `int` 改变为了 `PermissionPolicy_T`，所以如果你之前包含了它们的 type hints，或用了不寻常的方法来获取它们的值，则可能会导致错误。
 
 ## `nonebot.log` 模块
 
@@ -2881,243 +3302,6 @@ async def _(session):
 
 ## `nonebot.experimental.permission` 模块 <Badge text="v1.8.0+"/>
 
-### _class_ `SenderRoles`
-
-封装了原生的 `CQEvent` 便于权限检查。此类的实例一般会传入权限检查策略作为参数。
-
-#### `bot`
-
-- **类型:** `NoneBot`
-
-#### `event`
-
-- **类型:** `CQEvent`
-
-#### `sender`
-
-- **类型:** `dict[str, Any] | None`
-
-- **说明:**
-
-  只有消息是群消息的时候才会有这个属性，其内容是 `/get_group_member_info` API 调用的返回值。
-
-#### _staticmethod_ _coroutine_ `create(bot, event)`
-
-- **说明:**
-
-  构造 `SenderRoles`。
-
-- **参数:**
-
-  - `bot: NoneBot`: 接收事件的 NoneBot 对象
-  - `event: CQEvent`: 上报事件
-
-- **返回:**
-
-  - `SenderRoles`
-
-- **用法:**
-
-  ```python
-  sender = await SenderRoles.create(session.bot, session.event)
-  if sender.is_groupchat:
-    if sender.is_owner:
-        await process_owner(session)
-    elif sender.is_admin:
-        await process_admin(session)
-    else:
-        await process_member(session)
-  ```
-
-  根据发送者的身份决定相应命令处理方式。
-
-#### _readonly property_ `is_superuser`
-
-- **类型:** `bool`
-
-- **说明:**
-
-  发送者是配置文件中设置的超级用户。
-
-#### _readonly property_ `is_groupchat`
-
-- **类型:** `bool`
-
-- **说明:**
-
-  消息是群聊消息。
-
-#### _readonly property_ `is_anonymous`
-
-- **类型:** `bool`
-
-- **说明:**
-
-  消息是匿名消息。
-
-#### _readonly property_ `is_admin`
-
-- **类型:** `bool`
-
-- **说明:**
-
-  发送者是群管理员。
-
-#### _readonly property_ `is_owner`
-
-- **类型:** `bool`
-
-- **说明:**
-
-  发送者是群主。
-
-#### _readonly property_ `is_privatechat`
-
-- **类型:** `bool`
-
-- **说明:**
-
-  消息是私聊消息。
-
-#### _readonly property_ `is_private_friend`
-
-- **类型:** `bool`
-
-- **说明:**
-
-  消息是好友私聊消息。
-
-#### _readonly property_ `is_private_group`
-
-- **类型:** `bool`
-
-- **说明:**
-
-  消息是群私聊消息。
-
-#### _readonly property_ `is_private_discuss`
-
-- **类型:** `bool`
-
-- **说明:**
-
-  消息是讨论组私聊消息。
-
-#### _readonly property_ `is_discusschat`
-
-- **类型:** `bool`
-
-- **说明:**
-
-  消息是讨论组消息。
-
-#### `from_group(self, group_id)`
-
-- **说明:**
-
-  表示发送者是否来自于群 `group_id`。
-
-- **参数:**
-
-  - `group_id: int | Container[int]` <Badge text="1.8.2+"/>: 群号码，可以为多个群号。
-
-- **返回:**
-
-  `bool`
-
-#### `sent_by(self, sender_id)`
-
-- **说明:**
-
-  表示发送者 QQ 号是否是 `sender_id`。
-
-- **参数:**
-
-  - `sender_id: int | Container[int]` <Badge text="1.8.2+"/>: 发送者 QQ 号，可以是多个。
-
-- **返回:**
-
-  `bool`
-
-### _type_ `RoleCheckPolicy`
-
-- **类型:** `(SenderRoles) -> (bool | Awaitable[bool])`
-
-- **说明:**
-
-  向 `nonebot.experimental.on_command` 传入的权限检查策略。此类型是一个（同步/异步）函数，接受 `nonebot.experimental.SenderRoles` 作为唯一的参数。此函数返回布尔值，返回 `True` 则表示权限检查通过，可以进行下一步处理（触发命令），反之返回 `False`。 下面的例子都是合法的实例：
-
-  ```python
-  # 同步策略：返回值恒为假，即表示所有消息和发送者都没有权限
-  disabled: RoleCheckPolicy = lambda sender: False
-
-  # 同步策略：当消息是群聊，且发送者既不是管理员也不是群主时给予权限
-  def normal_group_member(sender: SenderRoles):
-      return sender.is_groupchat and not sender.is_admin and not sender.is_owner
-
-  # 异步策略：在检查器中查询数据库再根据返回值决定是否给予权限
-  async def db_check(sender: SenderRoles):
-      query = await db.execute('if exists (select * from list where user=?) 1 else 0', (sender.event.user_id,))
-      return query[0] != 0
-  ```
-
-  在实际使用时应当避免挂起太久的异步操作。
-
-### _coroutine_ `check_permission(bot, event, policy)`
-
-- **说明:**
-
-  检查用户是否具有所要求的权限。
-
-  一般用户应该没有必要使用该函数。
-
-- **参数:**
-
-  - `bot: NoneBot`: NoneBot 对象
-  - `event: aiocqhttp.Event`: 消息事件对象
-  - `policy: RoleCheckPolicy`: 返回布尔值的权限检查策略
-
-- **返回:**
-
-  - `bool`: 消息事件所对应的上下文是否具有所要求的权限
-
-- **用法:**
-
-  ```python
-  has_perm = await check_permission(bot, event, normal_group_member)
-  ```
-
-### `aggregate_policy(policies, aggregator=all)`
-
-- **说明:**
-
-  在默认参数下，将多个权限检查策略函数使用 AND 操作符连接并返回单个权限检查策略。在实现中对这几个策略使用内置 `all` 函数，会优先执行同步函数而且尽可能在同步模式的情况下短路。
-
-  在新的策略下，只有事件满足了 `policies` 中所有的原策略，才会返回 `True`。
-
-  `aggregator` 参数也可以设置为其他函数，例如 `any`：在此情况下会使用 `OR` 操作符连接。
-
-  如果参数中所有的策略都是同步的，则返回值是同步的，否则返回值是异步函数。
-
-- **参数:**
-
-  - `policies: Iterable[RoleCheckPolicy]`: 要合并的权限检查策略
-  - `aggregator: (Iterable[object]) -> bool`: 用于合并策略的函数
-
-- **返回:**
-
-  - `RoleCheckPolicy`: 新的权限检查策略
-
-- **用法:**
-
-  ```python
-  # 以下两种方式在效果上等同
-  policy1 = lambda sender: sender.is_groupchat and sender.from_group(123456789)
-
-  policy2 = aggregate_policy(lambda sender: sender.is_groupchat,
-                             lambda sender: sender.from_group(123456789))
-  ```
-
 ### `simple_allow_list(*, user_ids=... , group_ids=..., reverse=False)`
 
 - **说明:**
@@ -3134,17 +3318,15 @@ async def _(session):
 
 - **返回:**
 
-  - `RoleCheckPolicy`: 新的权限检查策略
+  - `PermissionPolicy_T`: 新的权限检查策略
 
 - **用法:**
 
   ```python
-  from nonebot.experimental.plugin import on_command
-
   bans_list = simple_allow_list(group_ids={ 123456789, 987654321 }, reverse=True)
   # bans_list(987654321) -> False
   # bans_list(987654322) -> True
-  @on_command('签到', permission=bans_list)
+  @nonebot.on_command('签到', permission=bans_list)
   async def _(session: CommandSession):
       # 只有不是这两个群的时候才会执行
       ...
@@ -3165,65 +3347,11 @@ async def _(session):
 
 - **返回:**
 
-  - `RoleCheckPolicy`: 新的权限检查策略
+  - `PermissionPolicy_T`: 新的权限检查策略
 
 ## `nonebot.experimental.plugin` 模块 <Badge text="v1.8.0+"/>
 
-### _decorator_ `on_command(name, *, permission=lambda _: True, **kwargs)`
-
-- **说明:**
-
-  将函数装饰为命令处理器 `CommandHandler_T` 。除 `permission` 外，其他特性和介绍和 `nonebot.plugin` 中的同名装饰器相同。
-
-- **参数:**
-
-  - `name: str | CommandName_T`: 命令名
-  - `permission: RoleCheckPolicy | Iterable[RoleCheckPolicy]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 和其默认参数组合
-  - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
-
-- **用法:**
-
-  ```python
-  @on_command('echo', aliases=('复读',), permission=lambda sender: sender.is_superuser)
-  async def _(session: CommandSession):
-      ...
-  ```
-
-  一个仅对超级用户生效的命令。
-
-  当迁移到新装饰器时，用户可以定义与自带 API 相似的常量兼容原有代码。
-
-  ```python
-  SUPERUSERS = lambda sender: sender.is_superuser
-  ```
-
-### _decorator_ `on_natural_language(keywords=None, *, permission=lambda _: True, **kwargs)`
-
-- **说明:**
-
-  将函数装饰为自然语言处理器。除 `permission` 外，其他特性和介绍和 `nonebot.plugin` 中的同名装饰器相同。
-
-- **参数:**
-
-  - `keywords: (Iterable[str] | str) | None`: 要响应的关键词，若传入 `None`，则响应所有消息
-  - `permission: RoleCheckPolicy | Iterable[RoleCheckPolicy]`: 触发此命令的权限检查策略。若是多个策略，则默认使用 `aggregate_policy` 和其默认参数组合。不满足权限的用户将无法触发该处理器
-  - `**kwargs`: 其余参数名与默认值与 `nonebot.plugin` 中的同名装饰器相同
-
-- **用法:**
-
-  ```python
-  permit_group = { 768887710 }
-  banned_people = { 10000, 10001 }
-  def foo(sender: SenderRoles):
-      return sender.is_groupchat and sender.from_group(permit_group) \
-        and not sender.sendby(banned_people)
-
-  @on_natural_language({'天气'}, only_to_me=False, permission=(foo, db_check))                       # 需要同时满足 foo 和 db_check
-                                                 # permission=aggregate_policy((foo, db_check))      # 需要同时满足 foo 和 db_check
-                                                 # permission=aggregate_policy((foo, db_check), any) # 只需满足一个
-  async def _(session: NLPSession):
-      return IntentCommand('weather', 100.0)
-  ```
+为了保持向前的兼容，在 master 后此模块仅导出与主包完全相同的 `on_command` 和 `on_natural_language` 两个函数。会在未来版本中移除。
 
 <!-- 链接 -->
 

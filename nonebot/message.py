@@ -1,6 +1,7 @@
 import re
 import asyncio
-from typing import Set, Iterable
+import warnings
+from typing import Optional, Set, Iterable
 
 from aiocqhttp import Event as CQEvent
 from aiocqhttp.message import Message, MessageSegment
@@ -10,14 +11,53 @@ from . import NoneBot
 from .log import logger
 from .natural_language import handle_natural_language
 from .command import handle_command, SwitchException
-from .plugin import PluginManager
+from .plugin import Plugin, PluginManager
 from .typing import MessagePreprocessor_T
 
-_message_preprocessors: Set[MessagePreprocessor_T] = set()
+
+class MessagePreprocessor:
+    """INTERNAL_API"""
+    __slots__ = ('func',)
+
+    def __init__(self, func: MessagePreprocessor_T):
+        self.func = func
 
 
+class MessagePreprocessorManager:
+    """INTERNAL API"""
+    preprocessors: Set[MessagePreprocessor] = set()
+
+    @classmethod
+    def add_message_preprocessor(cls, preprocessor: MessagePreprocessor) -> None:
+        if preprocessor in cls.preprocessors:
+            warnings.warn(f"Message preprocessor {preprocessor} already exists")
+            return
+        cls.preprocessors.add(preprocessor)
+
+    @classmethod
+    def remove_message_preprocessor(cls, preprocessor: MessagePreprocessor) -> None:
+        cls.preprocessors.discard(preprocessor)
+
+    @classmethod
+    def switch_message_preprocessor_global(cls,
+                                          preprocessor: MessagePreprocessor,
+                                          state: Optional[bool] = None) -> None:
+        if preprocessor in cls.preprocessors and not state:
+            cls.preprocessors.discard(preprocessor)
+        elif preprocessor not in cls.preprocessors and state is not False:
+            cls.preprocessors.add(preprocessor)
+
+
+# this is more consistent if it is in the plugin module, but still kept here for historical
+# reasons
 def message_preprocessor(func: MessagePreprocessor_T) -> MessagePreprocessor_T:
-    _message_preprocessors.add(func)
+    mp = MessagePreprocessor(func)
+    if Plugin.GlobalTemp.now_within_plugin:
+        Plugin.GlobalTemp.msg_preprocessors.add(mp)
+    else:
+        warnings.warn('defining message_preprocessor outside a plugin is deprecated '
+                      'and will not be supported in the future')
+        MessagePreprocessorManager.add_message_preprocessor(mp)
     return func
 
 
@@ -49,8 +89,8 @@ async def handle_message(bot: NoneBot, event: CQEvent) -> None:
 
     coros = []
     plugin_manager = PluginManager()
-    for preprocessor in _message_preprocessors:
-        coros.append(preprocessor(bot, event, plugin_manager))
+    for preprocessor in MessagePreprocessorManager.preprocessors:
+        coros.append(preprocessor.func(bot, event, plugin_manager))
     if coros:
         try:
             await asyncio.gather(*coros)

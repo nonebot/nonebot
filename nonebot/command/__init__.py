@@ -15,7 +15,8 @@ from nonebot.helpers import context_id, send, render_expression
 from nonebot.log import logger
 from nonebot.session import BaseSession
 from nonebot.typing import (CommandName_T, CommandArgs_T, CommandHandler_T,
-                            Message_T, PermChecker_T, State_T, Filter_T, Patterns_T)
+                            Message_T, PermissionPolicy_T, State_T, Filter_T, Patterns_T)
+from nonebot.permission import check_permission
 
 # key: context id
 # value: CommandSession object
@@ -84,11 +85,11 @@ class Command:
     However I cannot type it until Python 3.10. see bugs.python.org/issue41810.
     """
     __slots__ = ('name', 'func', 'only_to_me', 'privileged', 'args_parser_func',
-                 'perm_checker_func', 'expire_timeout', 'run_timeout', 'session_class')
+                 'permission', 'expire_timeout', 'run_timeout', 'session_class')
 
     def __init__(self, *, name: CommandName_T, func: CommandHandler_T,
                  only_to_me: bool, privileged: bool,
-                 perm_checker_func: PermChecker_T,
+                 permission: PermissionPolicy_T,
                  expire_timeout: Optional[timedelta],
                  run_timeout: Optional[timedelta],
                  session_class: Optional[Type['CommandSession']]):
@@ -97,7 +98,7 @@ class Command:
         self.only_to_me = only_to_me
         self.privileged = privileged
         self.args_parser_func: Optional[CommandHandler_T] = None
-        self.perm_checker_func = perm_checker_func  # returns True if can trigger
+        self.permission = permission  # includes EllipsisType
         self.expire_timeout = expire_timeout  # includes EllipsisType
         self.run_timeout = run_timeout  # includes EllipsisType
         self.session_class = session_class
@@ -182,7 +183,9 @@ class Command:
         :param session: CommandSession object
         :return: the session has the permission
         """
-        return await self.perm_checker_func(session.bot, session.event)
+        return await check_permission(session.bot, session.event,
+            self.permission if self.permission is not ...
+                else session.bot.config.DEFAULT_COMMAND_PERMISSION)
 
     def args_parser(self, parser_func: CommandHandler_T) -> CommandHandler_T:
         """

@@ -17,7 +17,7 @@ For example:
 from datetime import timedelta
 from typing import Collection, Union, Iterable, Pattern, Optional, Dict, Any
 
-from .typing import Expression_T
+from .typing import Expression_T, PermissionPolicy_T
 
 API_ROOT: str = ''
 ACCESS_TOKEN: str = ''
@@ -31,6 +31,9 @@ NICKNAME: Union[str, Iterable[str]] = ''
 
 COMMAND_START: Iterable[Union[str, Pattern]] = {'/', '!', '／', '！'}
 COMMAND_SEP: Iterable[Union[str, Pattern]] = {'/', '.'}
+
+DEFAULT_COMMAND_PERMISSION: PermissionPolicy_T = lambda _: True  # EVERYBODY
+DEFAULT_NLP_PERMISSION: PermissionPolicy_T = lambda _: True  # EVERYBODY
 
 SESSION_EXPIRE_TIMEOUT: Optional[timedelta] = timedelta(minutes=5)
 SESSION_RUN_TIMEOUT: Optional[timedelta] = None
@@ -59,6 +62,8 @@ __all__ = [
     'NICKNAME',
     'COMMAND_START',
     'COMMAND_SEP',
+    'DEFAULT_COMMAND_PERMISSION',
+    'DEFAULT_NLP_PERMISSION',
     'SESSION_EXPIRE_TIMEOUT',
     'SESSION_RUN_TIMEOUT',
     'SESSION_RUNNING_EXPRESSION',
