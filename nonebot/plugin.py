@@ -67,8 +67,8 @@ class Plugin:
 
         self._load_future: Optional[asyncio.Future] = None
         # backward compat without touching self.commands
-        self._command_args: Optional[Dict[
-            Command, Tuple[Union[Iterable[str], str], Patterns_T]]] = None
+        self._command_args: Dict[
+            Command, Tuple[Union[Iterable[str], str], Patterns_T]] = {}
 
     def __await__(self) -> Generator[None, None, Union['Plugin', None]]:
         """Waits for the async (un)loading of the plugin."""
@@ -138,7 +138,8 @@ class Plugin:
                        msg_preprocessors={*cls.msg_preprocessors},
                        lifetime_hooks=[*cls.lifetime_hooks])
             # backward compat
-            p._command_args = {cmd[0]: (cmd[1], cmd[2]) for cmd in cls.commands}
+            if cls.commands:
+                p._command_args = {cmd[0]: (cmd[1], cmd[2]) for cmd in cls.commands}
             return p
 
 
@@ -358,11 +359,9 @@ class PluginManager:
 def _add_handlers_to_managers(plugin: Plugin) -> None:
     for cmd in plugin.commands:
         CommandManager.add_command(cmd.name, cmd)
-        if plugin._command_args is not None:
-            args = plugin._command_args[cmd]
-            CommandManager.add_aliases(args[0], cmd)
-            CommandManager.add_patterns(args[1], cmd)
-            plugin._command_args = None
+        args = plugin._command_args[cmd]
+        CommandManager.add_aliases(args[0], cmd)
+        CommandManager.add_patterns(args[1], cmd)
     for processor in plugin.nl_processors:
         NLPManager.add_nl_processor(processor)
     for handler in plugin.event_handlers:

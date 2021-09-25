@@ -4,6 +4,10 @@ sidebar: auto
 
 # 更新日志
 
+## master
+
+- 修复上版本更新带来的 `on_command` 定义命令别名有时不生效的问题
+
 ## v1.9.0
 
 - 修复与 node-onebot 的 at 消息段兼容问题 [#272](https://github.com/nonebot/nonebot/issues/272)
