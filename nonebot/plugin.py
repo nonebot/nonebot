@@ -391,8 +391,11 @@ def _run_async_func_by_environ(func: Callable[..., Awaitable[Any]]) -> None:
 
 
 def _clean_up_module(module_path: str):
-    for module in [m for m in sys.modules.keys() if m.startswith(module_path)]:
-        del sys.modules[module]
+    to_del = [n for n in sys.modules.keys() if n.startswith(module_path)
+        and (len(n) == len(module_path)
+            or (len(n) > len(module_path) and n[len(module_path)] == '.'))]
+    for name in to_del:
+        del sys.modules[name]
 
 
 def _load_plugin(module_path: str,
