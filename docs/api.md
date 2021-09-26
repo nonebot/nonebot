@@ -1204,7 +1204,7 @@ sidebar: auto
       plugin_manager.switch_nlprocessor("path.to.plugin", state=False)
   ```
 
-### `load_plugin(module_path)`
+### `load_plugin(module_path, no_fast=False)`
 
 - **说明:**
 
@@ -1215,6 +1215,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
+  - `no_fast: bool` <Badge text="master" />: 若此参数为 `True`，则无视 `unload_plugin` 中的 `fast` 选项而强制重新导入模块
 
 - **返回:** <Badge text="1.6.0+" />
 
@@ -1250,7 +1251,7 @@ sidebar: auto
   卸载插件，即移除插件的 commands, nlprocessors, event handlers 和 message preprocessors，运行由 `on_plugin('unloaded')` 注册的函数（下称 「卸载回调」），并将已导入的模块移除。
 
   :::danger
-  该函数为强制卸载，如果使用不当，可能导致不可预测的错误！（如引用已经被卸载的模块变量）
+  该函数为强制卸载，如果使用不当，可能导致不可预测的错误！（如引用已经被移除的模块变量）
 
   此函数不会回滚已导入模块中产生过的其他副作用（比如已计划的任务，aiocqhttp 中注册的处理器等）。
   :::
@@ -1324,7 +1325,7 @@ sidebar: auto
   ```
   重载 `my_own_plugin` 插件，并且等待其异步的加载回调（如果有）执行完成。
 
-### `load_plugins(plugin_dir, module_prefix)`
+### `load_plugins(plugin_dir, module_prefix, no_fast=False)`
 
 - **说明:**
 
@@ -1334,6 +1335,7 @@ sidebar: auto
 
   - `plugin_dir: str`: 插件目录
   - `module_prefix: str`: 模块前缀
+  - `no_fast: bool` <Badge text="master" />: 若此参数为 `True`，则无视 `unload_plugin` 中的 `fast` 选项而强制重新导入模块
 
 - **返回:** <Badge text="1.6.0+" />
 

@@ -395,10 +395,17 @@ def _clean_up_module(module_path: str):
         del sys.modules[module]
 
 
-def _load_plugin(module_path: str, act: str, keep_future: bool) -> Optional[Plugin]:
+def _load_plugin(module_path: str,
+                 act: str,
+                 no_fast: bool,
+                 keep_future: bool) -> Optional[Plugin]:
     if PluginManager.get_plugin(module_path) is not None:
         warnings.warn(f"Plugin {module_path} already exists")
         return
+
+    if no_fast and module_path in PluginManager._unloaded_plugins_fast:
+        _clean_up_module(module_path)
+        del PluginManager._unloaded_plugins_fast[module_path]
 
     imported = False
     try:
@@ -456,18 +463,19 @@ def _load_plugin(module_path: str, act: str, keep_future: bool) -> Optional[Plug
         return None
 
 
-def load_plugin(module_path: str) -> Optional[Plugin]:
+def load_plugin(module_path: str, no_fast: bool = False) -> Optional[Plugin]:
     """Load a module as a plugin
     
     Args:
         module_path (str): path of module to import
+        no_fast (bool): ignore fast-unloaded plugins' fast option
     
     Returns:
         Optional[Plugin]: Plugin object loaded, which can be awaited if
                           the caller wishes to wait for async loading
                           callbacks if there is any, or None loading fails
     """
-    return _load_plugin(module_path, 'import and load', False)
+    return _load_plugin(module_path, 'import and load', no_fast, False)
 
 
 def _unload_plugin(module_path: str,
@@ -571,16 +579,19 @@ def reload_plugin(module_path: str, fast: bool = False) -> Optional[Plugin]:
     """
     # NOTE: consider importlib.reload()
     return _unload_plugin(module_path, fast,
-        lambda: _load_plugin(module_path, 'reload', fast))
+        lambda: _load_plugin(module_path, 'reload', False, fast))
 
 
-def load_plugins(plugin_dir: str, module_prefix: str) -> Set[Plugin]:
+def load_plugins(plugin_dir: str,
+                 module_prefix: str,
+                 no_fast: bool = False) -> Set[Plugin]:
     """Find all non-hidden modules or packages in a given directory,
     and import them with the given module prefix.
 
     Args:
         plugin_dir (str): Plugin directory to search
         module_prefix (str): Module prefix used while importing
+        no_fast (bool): ignore fast-unloaded plugins' fast option
 
     Returns:
         Set[Plugin]: Set of plugin objects successfully loaded
@@ -601,7 +612,7 @@ def load_plugins(plugin_dir: str, module_prefix: str) -> Set[Plugin]:
         if not m:
             continue
 
-        result = load_plugin(f'{module_prefix}.{m.group(1)}')
+        result = load_plugin(f'{module_prefix}.{m.group(1)}', no_fast)
         if result:
             count.add(result)
     return count
