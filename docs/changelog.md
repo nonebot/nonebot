@@ -7,6 +7,7 @@ sidebar: auto
 ## master
 
 - 修复上版本更新带来的 `on_command` 定义命令别名有时不生效的问题
+- `nonebot.plugin.unload_plugin` 和 `reload_plugin` 添加 `fast` 参数
 
 ## v1.9.0
 

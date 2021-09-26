@@ -1237,13 +1237,13 @@ sidebar: auto
   # 此写法是通用的，即使插件没有异步的加载回调
   p = nonebot.plugin.load_plugin('my_own_plugin')
   if p is not None and await p is not None:
-      # 插件成功加载完成
+      # 插件成功加载完成, p 为新加载的 Plugin 对象
   else:
       # 插件加载失败
   ```
   加载 `my_own_plugin` 插件，并且等待其异步的加载回调（如果有）执行完成。
 
-### `unload_plugin(module_path)` <Badge text="1.9.0+" />
+### `unload_plugin(module_path, fast=False)` <Badge text="1.9.0+" />
 
 - **说明:**
 
@@ -1258,6 +1258,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
+  - `fast: bool` <Badge text="master" />: 若此参数为 `True`，则卸载时将不会移除已导入的模块。当未来的 `load_plugin` 调用将加载相同的插件时，将不会重新导入相应模块而是复用。
 
 - **返回:**
 
@@ -1283,11 +1284,11 @@ sidebar: auto
   ```
   卸载 `my_own_plugin` 插件，并且等待其异步的卸载回调（如果有）执行完成。
 
-### `reload_plugin(module_path)` <Badge text="1.6.0+" />
+### `reload_plugin(module_path, fast=False)` <Badge text="1.6.0+" />
 
 - **说明:**
 
-  重载插件，也就是先 `unload_plugin`，再 `load_plugin`。
+  重载插件，也就是先 `unload_plugin`，再 `load_plugin`，期间等待相应回调执行完毕。
 
   :::danger
   该函数为强制重载，如果使用不当，可能导致不可预测的错误！
@@ -1296,6 +1297,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
+  - `fast: bool` <Badge text="master" />: 若此参数为 `True`，则卸载时将不会移除已导入的模块，加载时将不会重新导入相应模块而是复用。
 
 - **返回:**
 
@@ -1316,7 +1318,7 @@ sidebar: auto
   # 此写法是通用的，即使插件没有异步的回调
   p = nonebot.plugin.reload_plugin('my_own_plugin')
   if p is not None and (p := await p) is not None:
-      # 插件成功加载完成
+      # 插件成功加载完成, p 为新加载的 Plugin 对象
   else:
       # 插件加载失败
   ```

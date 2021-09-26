@@ -75,7 +75,7 @@ class Plugin:
         if self._load_future is not None:
             try:
                 result = yield from self._load_future.__await__()
-                # if we are awaiting reload, self is stale plugin
+                # if we are awaiting non-fast reload, self is stale plugin
                 # a reload call will return a new Plugin if successful
                 if result is not None:
                     return (yield from result.__await__())
@@ -144,7 +144,10 @@ class Plugin:
 
 
 class PluginManager:
+    # current loaded plugins
     _plugins: Dict[str, Plugin] = {}
+    # plugins that are unloaded with option 'fast'
+    _unloaded_plugins_fast: Dict[str, Plugin] = {}
 
     def __init__(self):
         self.cmd_manager = CommandManager()
@@ -392,40 +395,48 @@ def _clean_up_module(module_path: str):
         del sys.modules[module]
 
 
-def _load_plugin(module_path: str, act: str) -> Optional[Plugin]:
+def _load_plugin(module_path: str, act: str, keep_future: bool) -> Optional[Plugin]:
     if PluginManager.get_plugin(module_path) is not None:
         warnings.warn(f"Plugin {module_path} already exists")
         return
 
     imported = False
     try:
-        with Plugin.GlobalTemp.enter_plugin():
-            module = importlib.import_module(module_path)
-        imported = True
-        plugin = Plugin.GlobalTemp.make_plugin(module)
+        if module_path in PluginManager._unloaded_plugins_fast:
+            plugin = PluginManager._unloaded_plugins_fast[module_path]
+        else:
+            with Plugin.GlobalTemp.enter_plugin():
+                module = importlib.import_module(module_path)
+            imported = True
+            plugin = Plugin.GlobalTemp.make_plugin(module)
 
         sync_loaders, async_loaders = separate_async_funcs(
             f.func for f in plugin.lifetime_hooks if f.timing == 'loading'
         )
         for f in sync_loaders:
             f()
-        if not async_loaders:
-            # at this point, GlobalTemp and plugin object ^ have same contents
+
+        def after_cbs():
             _add_handlers_to_managers(plugin)
             PluginManager.add_plugin(module_path, plugin)
+            if module_path in PluginManager._unloaded_plugins_fast:
+                del PluginManager._unloaded_plugins_fast[module_path]
             logger.info(f'Succeeded to {act} "{module_path}"')
+
+        if not async_loaders:
+            # at this point, GlobalTemp and plugin object ^ have same contents
+            after_cbs()
             return plugin
         # continue the async loading after this functions returns
-        fut = plugin._new_load_future()
+        fut = plugin._load_future if keep_future and plugin._load_future is not None \
+            else plugin._new_load_future()
 
         async def new_loader():
             try:
                 for f in async_loaders:
                     await f()
                 # but not necessarily here
-                _add_handlers_to_managers(plugin)
-                PluginManager.add_plugin(module_path, plugin)
-                logger.info(f'Succeeded to {act} "{module_path}"')
+                after_cbs()
                 fut.set_result(None)
             except Exception as e:
                 if imported:
@@ -456,10 +467,11 @@ def load_plugin(module_path: str) -> Optional[Plugin]:
                           the caller wishes to wait for async loading
                           callbacks if there is any, or None loading fails
     """
-    return _load_plugin(module_path, 'import and load')
+    return _load_plugin(module_path, 'import and load', False)
 
 
 def _unload_plugin(module_path: str,
+                   fast: bool,
                    kont: Optional[Callable[[], Any]]) -> Optional[Plugin]:
     plugin = PluginManager.get_plugin(module_path)
     if not PluginManager.remove_plugin(module_path) or plugin is None:
@@ -484,7 +496,11 @@ def _unload_plugin(module_path: str,
         logger.exception(e)
 
     def after_cbs():
-        _clean_up_module(module_path)
+        if fast:
+            # plugin is not None
+            PluginManager._unloaded_plugins_fast[module_path] = plugin  # type: ignore
+        else:
+            _clean_up_module(module_path)
         if error:
             logger.info(f'Unloaded "{module_path}" with error')
         else:
@@ -510,13 +526,17 @@ def _unload_plugin(module_path: str,
                          'Remaining hooks are not continued.')
             logger.exception(e)
         after_cbs()
-        fut.set_result(kont() if kont is not None else None)
+        fut_result = kont() if kont is not None else None
+        # if reloading and fast, the newly loaded identical plugin will overrule the
+        # existing future, and one should not set result here
+        if kont is None or not fast:
+            fut.set_result(fut_result)
 
     _run_async_func_by_environ(new_unloader)
     return plugin
 
 
-def unload_plugin(module_path: str) -> Optional[Plugin]:
+def unload_plugin(module_path: str, fast: bool = False) -> Optional[Plugin]:
     """Unloads a plugin.
 
     This deletes its entry in sys.modules if present. However, if the module
@@ -525,6 +545,8 @@ def unload_plugin(module_path: str) -> Optional[Plugin]:
     
     Args:
         module_path (str): import path to module, which is already imported
+        fast (bool): Do not delete module's entry (un-import) if this is True
+                     and future loading of the same plugin will reuse the module
 
     Returns:
         Optional[Plugin]: Stale Plugin (which can be awaited if the caller
@@ -532,20 +554,24 @@ def unload_plugin(module_path: str) -> Optional[Plugin]:
                           is any) if it was unloaded, None if it were not
                           loaded
     """
-    return _unload_plugin(module_path, None)
+    return _unload_plugin(module_path, fast, None)
 
 
-def reload_plugin(module_path: str) -> Optional[Plugin]:
+def reload_plugin(module_path: str, fast: bool = False) -> Optional[Plugin]:
     """A combination of unload and load of a plugin.
     
     Args:
         module_path (str): import path to module, which is already imported
+        fast (bool): Do not delete module's entry (un-import) if this is True
+                     and reloading of the plugin will not actually re-importing
+                     the module
 
     Returns:
         Optional[Plugin]: The return value is special, please see the doc
     """
     # NOTE: consider importlib.reload()
-    return _unload_plugin(module_path, lambda: _load_plugin(module_path, 'reload'))
+    return _unload_plugin(module_path, fast,
+        lambda: _load_plugin(module_path, 'reload', fast))
 
 
 def load_plugins(plugin_dir: str, module_prefix: str) -> Set[Plugin]:
