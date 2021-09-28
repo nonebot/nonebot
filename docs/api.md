@@ -622,6 +622,8 @@ sidebar: auto
 
   监听所有消息事件时，可以不加括号。
 
+  此函数不是 NoneBot 自带的 API，其不遵循插件规定同时也不会在插件卸载时自动清除。如无特殊需要，建议使用 `on_command`, `on_natural_language` 或 `message_preprocessor` 代替。
+
 - **参数:**
 
   - `*events: str`: 消息事件名，例如 `private`、`group`、`private.friend`，不传入表示监听所有消息事件
@@ -645,6 +647,8 @@ sidebar: auto
   将函数装饰为通知事件的处理函数，继承自 `aiocqhttp.CQHttp`。
 
   监听所有通知事件时，可以不加括号。
+
+  此函数不是 NoneBot 自带的 API，其不遵循插件规定同时也不会在插件卸载时自动清除。如无特殊需要，建议使用 `nonebot.plugin.on_notice` 代替。
 
 - **参数:**
 
@@ -670,6 +674,8 @@ sidebar: auto
 
   监听所有请求事件时，可以不加括号。
 
+  此函数不是 NoneBot 自带的 API，其不遵循插件规定同时也不会在插件卸载时自动清除。如无特殊需要，建议使用 `nonebot.plugin.on_request` 代替。
+
 - **参数:**
 
   - `*events: str`: 消息事件名，例如 `friend`、`group`、`group.add`，不传入表示监听所有请求事件
@@ -693,6 +699,8 @@ sidebar: auto
   将函数装饰为元事件的处理函数，继承自 `aiocqhttp.CQHttp`。
 
   监听所有元事件时，可以不加括号。
+
+  此函数不是 NoneBot 自带的 API，其不遵循插件规定同时也不会在插件卸载时自动清除。
 
 - **参数:**
 
@@ -801,7 +809,7 @@ sidebar: auto
 
   将函数装饰为 CQHTTP 反向 WebSocket 连接建立时的回调函数。
 
-  该装饰器等价于 `@bot.on_meta_event('lifecycle.connect')`，只在 CQHTTP v4.14+ 有用。
+  该装饰器等价于 `@bot.on_meta_event('lifecycle.connect')`。
 
 - **用法:**
 
@@ -1215,7 +1223,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
-  - `no_fast: bool` <Badge text="master" />: 若此参数为 `True`，则无视 `unload_plugin` 中的 `fast` 选项而强制重新导入模块
+  - `no_fast: bool` <Badge text="v1.9.1" />: 若此参数为 `True`，则无视 `unload_plugin` 中的 `fast` 选项而强制重新导入模块
 
 - **返回:** <Badge text="1.6.0+" />
 
@@ -1259,7 +1267,7 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
-  - `fast: bool` <Badge text="master" />: 若此参数为 `True`，则卸载时将不会移除已导入的模块。当未来的 `load_plugin` 调用将加载相同的插件时，将不会重新导入相应模块而是复用。
+  - `fast: bool` <Badge text="v1.9.1" />: 若此参数为 `True`，则卸载时将不会移除已导入的模块。当未来的 `load_plugin` 调用将加载相同的插件时，将不会重新导入相应模块而是复用。
 
 - **返回:**
 
@@ -1298,7 +1306,10 @@ sidebar: auto
 - **参数:**
 
   - `module_path: str`: 模块路径
-  - `fast: bool` <Badge text="master" />: 若此参数为 `True`，则卸载时将不会移除已导入的模块，加载时将不会重新导入相应模块而是复用。
+  - `fast: bool` <Badge text="v1.9.1" />: 若此参数为 `True`，则卸载时将不会移除已导入的模块，加载时将不会重新导入相应模块而是复用。
+    :::tip
+    在 1.9.1 后，建议使用 `fast=True`。此参数的默认值 `False` 是由于历史原因。
+    :::
 
 - **返回:**
 
@@ -1335,7 +1346,7 @@ sidebar: auto
 
   - `plugin_dir: str`: 插件目录
   - `module_prefix: str`: 模块前缀
-  - `no_fast: bool` <Badge text="master" />: 若此参数为 `True`，则无视 `unload_plugin` 中的 `fast` 选项而强制重新导入模块
+  - `no_fast: bool` <Badge text="v1.9.1" />: 若此参数为 `True`，则无视 `unload_plugin` 中的 `fast` 选项而强制重新导入模块
 
 - **返回:** <Badge text="1.6.0+" />
 

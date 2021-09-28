@@ -1,3 +1,5 @@
+__version__ = (1, 9, 1)
+
 import asyncio
 import logging
 from typing import Any, Optional, Callable, Awaitable
