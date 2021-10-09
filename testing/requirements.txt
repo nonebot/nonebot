@@ -1,0 +1,5 @@
+# list setup.py dependency to help local testing so that running pytest
+# will import nonebot from the source and not from the installed package
+aiocqhttp>=1.3
+aiocache>=0.10,<1.0
+pytest>=6.2.5

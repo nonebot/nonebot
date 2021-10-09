@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import hashlib
 import random
 from typing import Callable, Iterable, List, Sequence, Any, Tuple
@@ -114,6 +115,8 @@ def render_expression(expr: Expression_T,
     return result.format(*args, **kwargs)
 
 
+# the usage is still limited - we only allow "async def functions" to be identified as
+# async funcs. those like "def" functions but returning coroutine objects are not supported.
 # TODO: ParamSpec
 def separate_async_funcs(funcs: Iterable[Callable]
                          ) -> Tuple[List[Callable], List[Callable]]:
@@ -121,8 +124,11 @@ def separate_async_funcs(funcs: Iterable[Callable]
     syncs = []
     asyncs = []
     for f in funcs:
-        if asyncio.iscoroutinefunction(f) or (
-            asyncio.iscoroutinefunction(f.__call__)):
+        w = f
+        while isinstance(w, functools.partial):
+            w = w.func
+        if asyncio.iscoroutinefunction(w) or (
+            asyncio.iscoroutinefunction(w.__call__)):
             asyncs.append(f)
         else:
             syncs.append(f)
