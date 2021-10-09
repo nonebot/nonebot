@@ -1,7 +1,5 @@
 # 命令参数
 
-## `session.get()` 和参数解析器
-
 ## 类 Shell 参数解析
 
 `nonebot.argparse` 模块主要继承自 Python 内置的同名模块（`argparse`），用于解析命令的参数。在需要编写类 shell 语法的命令的时候，使用此模块可以大大提高开发效率。

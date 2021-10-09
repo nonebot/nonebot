@@ -63,7 +63,7 @@ module.exports = {
                     collapsable: false,
                     children: [
                         '',
-                        'command-session',
+                        // 'command-session', may not be needed
                         'command-argument',
                         'command-group',
                         'message',
@@ -76,6 +76,7 @@ module.exports = {
                         'configuration',
                         'larger-application',
                         'deployment',
+                        'legacy_features',
                     ]
                 }
             ],
