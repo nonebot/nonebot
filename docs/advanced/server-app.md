@@ -37,3 +37,17 @@ async def init_db():
     # 这会在 NoneBot 启动后立即运行
     pass
 ```
+
+当然，此类生命周期事件也可以以插件为单位定义：
+
+```python
+from nonebot.plugin import on_plugin
+
+@on_plugin('loading')
+async def init_db():
+    pass
+
+@on_plugin('unloaded')
+async def teardown():
+    pass
+```
