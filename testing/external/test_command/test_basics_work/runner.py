@@ -1,12 +1,11 @@
 import asyncio
-import threading
-from aiocqhttp.message import Message
 
+from aiocqhttp.message import Message
 import pytest
 
 import nonebot
 import testing.external.common.default_config as dc
-from testing.external.common.client import TESTER_ID, Client
+from testing.external.common.client import TESTER_ID, Client, run_nonebot_in_thread
 from testing.external.common.port import available_port
 
 
@@ -26,7 +25,8 @@ class TestBasicsWork:
 
         cl = Client()
         cl.patch_nonebot()
-        threading.Thread(target=nonebot.run).start()
+
+        run_nonebot_in_thread()
         cl_conn = cl.connect_to_nonebot(available_port)
         await cl_conn.__anext__()
         task = asyncio.create_task(await cl_conn.__anext__())

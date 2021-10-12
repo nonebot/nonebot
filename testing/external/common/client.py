@@ -1,5 +1,7 @@
 import asyncio
+import platform
 import logging
+import threading
 import re
 import json
 import time
@@ -215,3 +217,15 @@ def merge(d1: dict, d2: Optional[dict] = None):
 
 def run_test_as_subprocess(test_name: str) -> int:
     return subprocess.run(['python', '-m', 'pytest', f'testing/external/{test_name}/runner.py', '-vv', '-s']).returncode
+
+
+def run_nonebot_in_thread(*args, **kwargs):
+    def _nonebot_run_patched():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        if platform.system() == 'Linux':
+            # avoid "set_wakeup_fd only works in main thread" exception when starting Quart server
+            loop.add_signal_handler = lambda *a, **k: None  # type: ignore
+        import nonebot
+        nonebot.run(*args, **kwargs, loop=loop)
+    threading.Thread(target=_nonebot_run_patched).start()
