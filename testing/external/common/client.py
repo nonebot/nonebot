@@ -89,6 +89,17 @@ class Client:
             yield gatherer()
         yield
 
+    async def run_client_until_test_done(self, local_port: int, load_timeout: float = MERCY_TM) -> AsyncGenerator:
+        '''Provide this wrapper because it's very difficult to understand connect_to_nonebot'''
+        cl_conn = self.connect_to_nonebot(local_port, load_timeout)
+        await cl_conn.__anext__()
+        task = asyncio.create_task(await cl_conn.__anext__())
+        await asyncio.sleep(0)
+        yield self
+        task.cancel()
+        await cl_conn.__anext__()
+        self.stop_nonebot()
+
     async def wait_for_matching_log(self, *pats: str, tm: float = MERCY_TM):
         while True:
             try:

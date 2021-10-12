@@ -6,18 +6,12 @@ import pytest
 import nonebot
 import testing.external.common.default_config as dc
 from testing.external.common.client import TESTER_ID, Client, run_nonebot_in_thread
+from testing.external.common.pytest import AsyncTestCase
 from testing.external.common.port import available_port
 
 
 @pytest.mark.asyncio
-class TestBasicsWork:
-    @pytest.fixture(scope='class')
-    def event_loop(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        yield loop
-        loop.close()
-
+class TestBasicsWork(AsyncTestCase):
     @pytest.fixture(scope='class')
     async def cl(self):
         nonebot.init(dc)
@@ -27,14 +21,8 @@ class TestBasicsWork:
         cl.patch_nonebot()
 
         run_nonebot_in_thread()
-        cl_conn = cl.connect_to_nonebot(available_port)
-        await cl_conn.__anext__()
-        task = asyncio.create_task(await cl_conn.__anext__())
-        await asyncio.sleep(0)
-        yield cl
-        task.cancel()
-        await cl_conn.__anext__()
-        cl.stop_nonebot()
+        async for p in cl.run_client_until_test_done(available_port):
+            yield p
 
     async def test_everyone_ping(self, cl: Client):
         cl.proxy.send_private_msg('/ping')
