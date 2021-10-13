@@ -2072,6 +2072,10 @@ sidebar: auto
 
   注意，一旦传入 `arg_filters` 参数（参数过滤器），则等用户再次输入时，_command_func._`args_parser` 所注册的参数解析函数将不会被运行，而会在对 `current_arg` 依次运行过滤器之后直接将其放入 `state` 属性中。
 
+  :::tip
+  推荐使用下面的 `aget` 方法。
+  :::
+
 - **参数:**
 
   - `key: Any`: 参数的键
@@ -2164,6 +2168,10 @@ sidebar: auto
 
   暂停当前命令会话，并发送消息。此函数调用之后的语句将不会被执行（除非捕获了此函数抛出的特殊异常）。
 
+  :::tip
+  推荐使用下面的 `apause` 方法。
+  :::
+
 - **参数:**
 
   - `message: Message_T | None`: 要发送的消息，若不传入则不发送
@@ -2172,6 +2180,11 @@ sidebar: auto
 - **用法:**
 
   ```python
+  if session.is_first_run:
+      session.pause('请发送要处理的图片，发送 done 结束')
+  if session.current_arg_text.strip() == 'done':
+      session.finish('处理完成')
+  process_images(session.current_arg_images)
   session.pause('请继续发送要处理的图片，发送 done 结束')
   ```
 
@@ -2193,11 +2206,12 @@ sidebar: auto
 - **用法:**
 
   ```python
+  await session.apause('请发送要处理的图片，发送 done 结束')
   while True:
-      await session.apause('请继续发送要处理的图片，发送 done 结束')
       if session.current_arg_text.strip() == 'done':
           session.finish('处理完成')
       process_images(session.current_arg_images)
+      await session.apause('请继续发送要处理的图片，发送 done 结束')
   ```
 
   需要连续接收用户输入，并且过程中不需要改变 `current_key` 时，使用此函数暂停会话。
