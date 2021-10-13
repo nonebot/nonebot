@@ -1,7 +1,10 @@
 name: Unit Test (Internal)
 on:
-  - push
-  - pull_request
+  push:
+    paths-ignore: [docs/]
+    branches: [master]
+  pull_request:
+    paths-ignore: [docs/]
 
 jobs:
   build:
