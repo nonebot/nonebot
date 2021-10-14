@@ -45,7 +45,7 @@ EXPR_DONT_UNDERSTAND = (
 # 注册一个仅内部使用的命令，不需要 aliases
 @on_command('ai_chat')
 async def ai_chat(session: CommandSession):
-    # 获取可选参数，这里如果没有 message 参数，命令不会被中断，message 变量会是 None
+    # 获取可选参数，这里如果没有 message 参数，message 变量会是 None
     message = session.state.get('message')
 
     # 通过封装的函数获取腾讯智能机器人机器人的回复

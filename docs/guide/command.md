@@ -4,6 +4,8 @@
 
 :::tip 提示
 本章的完整代码可以在 [awesome-bot-2](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-2) 查看。
+
+如果你在寻找对应 1.8.0 版本以下的教程，请参考 [这里](../advanced/legacy_features.md#session-get-和参数解析器)。
 :::
 
 ## 创建插件目录
@@ -83,36 +85,20 @@ from nonebot import on_command, CommandSession
 # 这里 weather 为命令的名字，同时允许使用别名「天气」「天气预报」「查天气」
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    # 从会话状态（session.state）中获取城市名称（city），如果当前不存在，则询问用户
-    city = session.get('city', prompt='你想查询哪个城市的天气呢？')
+    # 取得消息的内容，并且去掉首尾的空白符
+    city = session.current_arg_text.strip()
+    # 如果除了命令的名字之外用户还提供了别的内容，即用户直接将城市名跟在命令名后面，
+    # 则此时 city 不为空。例如用户可能发送了："天气 南京"，则此时 city == '南京'
+    # 否则这代表用户仅发送了："天气" 二字，机器人将会向其发送一条消息并且等待其回复
+    if not city:
+        city = (await session.aget(prompt='你想查询哪个城市的天气呢？')).strip()
+        # 如果用户只发送空白符，则继续询问
+        while not city:
+            city = (await session.aget(prompt='要查询的城市名称不能为空呢，请重新输入')).strip()
     # 获取城市的天气预报
     weather_report = await get_weather_of_city(city)
     # 向用户发送天气预报
     await session.send(weather_report)
-
-
-# weather.args_parser 装饰器将函数声明为 weather 命令的参数解析器
-# 命令解析器用于将用户输入的参数解析成命令真正需要的数据
-@weather.args_parser
-async def _(session: CommandSession):
-    # 去掉消息首尾的空白符
-    stripped_arg = session.current_arg_text.strip()
-
-    if session.is_first_run:
-        # 该命令第一次运行（第一次进入命令会话）
-        if stripped_arg:
-            # 第一次运行参数不为空，意味着用户直接将城市名跟在命令名后面，作为参数传入
-            # 例如用户可能发送了：天气 南京
-            session.state['city'] = stripped_arg
-        return
-
-    if not stripped_arg:
-        # 用户没有发送有效的城市名称（而是发送了空白字符），则提示重新输入
-        # 这里 session.pause() 将会发送消息并暂停当前会话（该行后面的代码不会被运行）
-        session.pause('要查询的城市名称不能为空呢，请重新输入')
-
-    # 如果当前正在向用户询问更多信息（例如本例中的要查询的城市），且用户输入有效，则放入会话状态
-    session.state[session.current_key] = stripped_arg
 
 
 async def get_weather_of_city(city: str) -> str:
@@ -125,67 +111,69 @@ async def get_weather_of_city(city: str) -> str:
 从这里开始，你需要对 Python 的 asyncio 编程有所了解，因为 NoneBot 是完全基于 asyncio 的，具体可以参考 [廖雪峰的 Python 教程](https://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/00143208573480558080fa77514407cb23834c78c6c7309000)。
 :::
 
-为了简单起见，我们在这里的例子中没有接入真实的天气数据，但要接入也非常简单，你可以使用中国天气网、和风天气等网站提供的 API。
+为了简单起见，我们在这里的例子中没有接入真实的天气数据，但要接入也非常简单，你可以使用中国天气网、和风天气网、OpenWeatherMap 等网站提供的 API。
 
-上面的代码中基本上每一行做了什么都在注释里写了，下面详细解释几个重要的地方。
+上面的代码中基本上每一行做了什么都在注释里写了。我们来实际启动一下 NoneBot，看看输入命令后会发生什么：
 
-要理解这段代码，我们要先单独看这个函数：
+```bash
+> /天气 南京
+南京的天气是……
+
+> /天气
+你想查询哪个城市的天气呢？
+> 南京
+南京的天气是……
+```
+
+恭喜，你已经完成了一个**可交互的**天气查询命令的雏形，只需要再接入天气 API 就可以真正投入使用了！
+
+实际上，这里的 `weather` 的函数的逻辑就相当于此代码片段：
 
 ```python
-# on_command 装饰器将函数声明为一个命令处理器
-# 这里 weather 为命令的名字，同时允许使用别名「天气」「天气预报」「查天气」
+city = user_arg.strip()
+if city == '':
+    city = input('你想查询哪个城市的天气呢？').strip()
+    while city == '':
+        city = input('要查询的城市名称不能为空呢，请重新输入').strip()
+weather_report = ...(city)
+print(weather_report)
+```
+
+可以看到如果你知道如何编写控制台对话的程序，你就知道如何编写 NoneBot 的命令处理器。再复杂的对话也不过而已。
+
+## 原理
+
+「命令」是 NoneBot 机器人核心组成部分之一。像 [之前讲过的一样](whats-happened.md#命令处理器)，每当用户对机器人发送了一条消息，NoneBot 会尝试将消息匹配到每个命令中。在分别匹配了 `/` 和 `天气` 后，就会进入到我们定义的 `weather` 函数中。
+
+```python
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    # 从会话状态（session.state）中获取城市名称（city），如果当前不存在，则询问用户
-    city = session.get('city', prompt='你想查询哪个城市的天气呢？')
-    # 获取城市的天气预报
-    weather_report = await get_weather_of_city(city)
-    # 向用户发送天气预报
-    await session.send(weather_report)
 ```
 
-首先，`session.get()` 函数调用尝试从当前会话（Session）的状态中获取 `city` 这个参数，**所有的参数和会话中需要暂存的临时数据都被存储在 `session.state` 变量（一个 `dict`）中**，如果发现存在，则直接返回，并赋值给 `city` 变量，而如果 `city` 参数不存在，`session.get()` 会**中断**这次命令处理的流程，并保存当前会话，然后向用户发送 `prompt` 参数的内容。**这里的「中断」，意味着如果当前不存在 `city` 参数，`session.get()` 之后的代码将不会被执行，这是通过抛出异常做到的。**
+如果这两步中没有匹配到相应命令，那么此消息就会被暂时地忽略掉。通过在配置项中的 `DEBUG`，你可以在运行日志中看到完整的匹配过程。
 
-向用户发送 `prompt` 中的提示之后，会话会进入等待状态，此时我们称之为「当前用户正在 weather 命令的会话中」，当用户再次发送消息时，NoneBot 会唤起这个等待中的会话，并重新执行命令，也就是**从头开始**重新执行上面的这个函数，如果用户在一定时间内（默认 5 分钟，可通过 `SESSION_EXPIRE_TIMEOUT` 配置项来更改）都没有再次跟机器人发消息，则会话因超时被关闭。
+在进入命令会话后，此时用户发送的消息仅剩了 `南京` 这一部分。这部分文本将会通过 `session.current_arg_text` 表现出来，从而进行下一步的过程直至此函数执行完毕，即命令处理完毕。
 
-你可能想问了，既然是重新执行，那执行到 `session.get()` 的时候不还是会中断吗？实际上，NoneBot 在 1.0.0 及更早版本中确实是这样的，必须手动编写下面要说的参数解析器，才能够让 `session.get()` 正确返回；而从 1.1.0 版本开始，NoneBot 会默认地把用户的完整输入作为当前询问内容的回答放进会话状态。
-
-:::tip 提示
-删掉下面这段参数解析器，天气命令也可以正常使用，可以尝试不同的输入，看看行为上有什么不同。
-:::
-
-但这里我们还是手动编写参数解析器，以应对更复杂的情况，也就是下面这个函数：
+如果我们发送的仅仅是 `/天气` 会怎样？此时 `session.current_arg_text` 将不包含任何有意义的内容，即为空串。于是我们使用了 `session.aget` 功能向用户发起提问：
 
 ```python
-# weather.args_parser 装饰器将函数声明为 weather 命令的参数解析器
-# 命令解析器用于将用户输入的参数解析成命令真正需要的数据
-@weather.args_parser
-async def _(session: CommandSession):
-    # 去掉消息首尾的空白符
-    stripped_arg = session.current_arg_text.strip()
-
-    if session.is_first_run:
-        # 该命令第一次运行（第一次进入命令会话）
-        if stripped_arg:
-            # 第一次运行参数不为空，意味着用户直接将城市名跟在命令名后面，作为参数传入
-            # 例如用户可能发送了：天气 南京
-            session.state['city'] = stripped_arg
-        return
-
-    if not stripped_arg:
-        # 用户没有发送有效的城市名称（而是发送了空白字符），则提示重新输入
-        # 这里 session.pause() 将会发送消息并暂停当前会话（该行后面的代码不会被运行）
-        session.pause('要查询的城市名称不能为空呢，请重新输入')
-
-    # 如果当前正在向用户询问更多信息（例如本例中的要查询的城市），且用户输入有效，则放入会话状态
-    session.state[session.current_key] = stripped_arg
+await session.aget(prompt='你想查询哪个城市的天气呢？')
 ```
 
-参数解析器的 `session` 参数和命令处理函数一样，都是当前命令的会话对象。并且，参数解析器会在命令处理函数之前执行，以确保正确解析参数以供后者使用。
+当我们调用此方法时，正在进行的命令会话会暂停。当用户又一次向机器人说话时，`aget` 调用将会获得用户此次发送的消息内容，比如 `南京`，**继续执行当前会话。在此期间，机器人将会不被干扰地处理其他消息。**
 
-上面的例子中，参数解析器会判断当前是否是该会话第一次运行（用户刚发送 `/天气`，触发了天气命令）。如果是，则检查用户触发天气命令时有没有附带参数（即 `stripped_arg` 是否有内容），如果带了参数（例如用户发送了 `/天气 南京`），则把附带的参数当做要查询的城市放进会话状态 `session.state`，以 `city` 作为状态的 key——也就是说，如果用户触发命令时就给出了城市，则命令处理函数中的 `session.get('city')` 就能直接返回结果，而不用提示用户输入。
+在这里，我们还对其返回值做了 `.strip()`，处理。这代表如果用户只是发送了显然没有意义的空白字符，我们将重新询问，例如：
 
-如果该会话不是第一次运行，那就说明命令处理函数中向用户询问了更多信息，导致会话被中断，并等待用户回复（也就是 `session.get()` 的效果）。这时候需要判断用户输入是不是有效，因为我们已经明确地询问了，如果用户此时发送了空白字符，显然这是没有意义的内容，需要提示用户重新发送。相反，如果有效的话，则直接以 `session.current_key` 作为 key（也就是 `session.get()` 的第一个参数，上例中只有可能是 `city`），将输入内容存入会话状态。
+```bash
+> /天气
+你想查询哪个城市的天气呢？
+>     
+要查询的城市名称不能为空呢，请重新输入
+> 南京
+南京的天气是……
+```
+
+直至成功获取到 `city` 变量并完成命令。此外，如果用户在一定时间内（默认 5 分钟，可通过 `SESSION_EXPIRE_TIMEOUT` 配置项来更改）都没有再次跟机器人发消息，则会话将会因超时被关闭。
 
 :::tip 提示
 上面用了 `session.current_arg_text` 来获取用户当前输入的参数，这表示从用户输入中提取纯文本部分，也就是说不包含图片、表情、语音、卡片分享等。
@@ -194,12 +182,3 @@ async def _(session: CommandSession):
 
 另外一点值得注意的是，`@on_command` 也可以传入正则表达式作为参数 `patterns`，在这种情况下，整条完整的指令会被作为 `session.current_arg` 使用（而不会删除开头匹配到的命令），这点请注意区别。
 :::
-
-现在我们已经理解完了天气命令的代码，是时候运行一下看看实际效果了，启动 NoneBot 后尝试向它分别发送下面的两个带参数和不带参数的消息：
-
-```
-/天气 南京
-/天气
-```
-
-观察看看有什么不同，以及它的回复是否符合我们对代码的理解。如果成功的话，此时你已经完成了一个**可交互的**天气查询命令的雏形，只需要再接入天气 API 就可以真正投入使用了！

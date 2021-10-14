@@ -1,4 +1,4 @@
-nonebot>=1.1.0
+nonebot>=1.8.2
 jieba
 aiohttp
 pytz

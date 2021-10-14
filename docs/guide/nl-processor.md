@@ -45,24 +45,13 @@ from .data_source import get_weather_of_city
 
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    city = session.get('city', prompt='你想查询哪个城市的天气呢？')
+    city = session.current_arg_text.strip()
+    if not city:
+        city = (await session.aget(prompt='你想查询哪个城市的天气呢？')).strip()
+        while not city:
+            city = (await session.aget(prompt='要查询的城市名称不能为空呢，请重新输入')).strip()
     weather_report = await get_weather_of_city(city)
     await session.send(weather_report)
-
-
-@weather.args_parser
-async def _(session: CommandSession):
-    stripped_arg = session.current_arg_text.strip()
-
-    if session.is_first_run:
-        if stripped_arg:
-            session.state['city'] = stripped_arg
-        return
-
-    if not stripped_arg:
-        session.pause('要查询的城市名称不能为空呢，请重新输入')
-
-    session.state[session.current_key] = stripped_arg
 ```
 
 `weather/data_source.py` 内容如下：
@@ -76,7 +65,7 @@ async def get_weather_of_city(city: str) -> str:
 
 在 `weather/__init__.py` 文件添加内容如下：
 
-```python {2,29-35}
+```python {2,18-24}
 from nonebot import on_command, CommandSession
 from nonebot import on_natural_language, NLPSession, IntentCommand
 
@@ -85,24 +74,13 @@ from .data_source import get_weather_of_city
 
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    city = session.get('city', prompt='你想查询哪个城市的天气呢？')
+    city = session.current_arg_text.strip()
+    if not city:
+        city = (await session.aget(prompt='你想查询哪个城市的天气呢？')).strip()
+        while not city:
+            city = (await session.aget(prompt='要查询的城市名称不能为空呢，请重新输入')).strip()
     weather_report = await get_weather_of_city(city)
     await session.send(weather_report)
-
-
-@weather.args_parser
-async def _(session: CommandSession):
-    stripped_arg = session.current_arg_text.strip()
-
-    if session.is_first_run:
-        if stripped_arg:
-            session.state['city'] = stripped_arg
-        return
-
-    if not stripped_arg:
-        session.pause('要查询的城市名称不能为空呢，请重新输入')
-
-    session.state[session.current_key] = stripped_arg
 
 
 # on_natural_language 装饰器将函数声明为一个自然语言处理器
@@ -170,24 +148,13 @@ from .data_source import get_weather_of_city
 
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))
 async def weather(session: CommandSession):
-    city = session.get('city', prompt='你想查询哪个城市的天气呢？')
+    city = session.current_arg_text.strip()
+    if not city:
+        city = (await session.aget(prompt='你想查询哪个城市的天气呢？')).strip()
+        while not city:
+            city = (await session.aget(prompt='要查询的城市名称不能为空呢，请重新输入')).strip()
     weather_report = await get_weather_of_city(city)
     await session.send(weather_report)
-
-
-@weather.args_parser
-async def _(session: CommandSession):
-    stripped_arg = session.current_arg_text.strip()
-
-    if session.is_first_run:
-        if stripped_arg:
-            session.state['city'] = stripped_arg
-        return
-
-    if not stripped_arg:
-        session.pause('要查询的城市名称不能为空呢，请重新输入')
-
-    session.state[session.current_key] = stripped_arg
 
 
 # on_natural_language 装饰器将函数声明为一个自然语言处理器
