@@ -5,7 +5,7 @@
 :::tip 提示
 本章的完整代码可以在 [awesome-bot-2](https://github.com/nonebot/nonebot/tree/master/docs/guide/code/awesome-bot-2) 查看。
 
-如果你在寻找对应 1.8.0 版本以下的教程，请参考 [这里](../advanced/legacy_features.html#session-get-和参数解析器)。
+如果你在寻找对应 1.8.0 版本以下的教程，请参考 [这里](../advanced/legacy_features.md#session-get-和参数解析器)。
 :::
 
 ## 创建插件目录
@@ -111,7 +111,7 @@ async def get_weather_of_city(city: str) -> str:
 从这里开始，你需要对 Python 的 asyncio 编程有所了解，因为 NoneBot 是完全基于 asyncio 的，具体可以参考 [廖雪峰的 Python 教程](https://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/00143208573480558080fa77514407cb23834c78c6c7309000)。
 :::
 
-为了简单起见，我们在这里的例子中没有接入真实的天气数据，但要接入也非常简单，你可以使用中国天气网、OpenWeatherMap 等网站提供的 API。
+为了简单起见，我们在这里的例子中没有接入真实的天气数据，但要接入也非常简单，你可以使用中国天气网、和风天气网、OpenWeatherMap 等网站提供的 API。
 
 上面的代码中基本上每一行做了什么都在注释里写了。我们来实际启动一下 NoneBot，看看输入命令后会发生什么：
 
@@ -143,7 +143,7 @@ print(weather_report)
 
 ## 原理
 
-「命令」是 NoneBot 机器人核心组成部分之一。像[之前讲过的一样](whats-happened.html#命令处理器)，每当用户对机器人发送了一条消息，NoneBot 会尝试将消息匹配到每个命令中。在分别匹配了 `/` 和 `天气` 后，就会进入到我们定义的 `weather` 函数中。
+「命令」是 NoneBot 机器人核心组成部分之一。像 [之前讲过的一样](whats-happened.md#命令处理器)，每当用户对机器人发送了一条消息，NoneBot 会尝试将消息匹配到每个命令中。在分别匹配了 `/` 和 `天气` 后，就会进入到我们定义的 `weather` 函数中。
 
 ```python
 @on_command('weather', aliases=('天气', '天气预报', '查天气'))

@@ -2,7 +2,7 @@
 
 ## session.get() 和参数解析器
 
-在[指南](../guide/command.html#编写真正的内容)中我们提到了我们可以使用 `CommandSession.aget` 来在命令会话中与用户交互，那么为什么它的名字前面有一个 `a` 呢？
+在[指南](../guide/command.md#编写真正的内容)中我们提到了我们可以使用 `CommandSession.aget` 来在命令会话中与用户交互，那么为什么它的名字前面有一个 `a` 呢？
 
 因为这代表着 [「异步地取得」](https://github.com/nonebot/nonebot/pull/232)。同样地，在 1.8.0 之前我们普遍使用的是同步的 `get` 方法，例如在那里所提及的天气插件，实现类似的功能我们要使用如下的代码：
 
