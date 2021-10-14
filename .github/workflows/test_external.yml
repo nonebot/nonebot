@@ -1,10 +1,9 @@
-name: Code Lint
+name: Test (External)
 on:
-  - push
-  - pull_request
-
-env:
-  FLAKE8_FORMAT: '::error file=%(path)s,line=%(row)d,col=%(col)d:: %(code)s %(text)s'
+  push:
+    paths-ignore: [docs/]
+  pull_request:
+    paths-ignore: [docs/]
 
 jobs:
   skip_dup_run:
@@ -23,25 +22,25 @@ jobs:
           paths_ignore: '[]'
           do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
 
-  lint:
+  build:
     needs: skip_dup_run
     if: ${{ needs.skip_dup_run.outputs.should_skip != 'true' }}
-    name: Lint the Code
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: [3.7, 3.8, 3.9]
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set up Python Environment
-        uses: actions/setup-python@v2
-        with:
-            python-version: 3.8
-
-      - name: Install Dependencies
-        run: |
-            python -m pip install --upgrade pip
-            pip install flake8
-
-      - name: Run Linters
-        run: |
-          flake8 --config .flake8 --format "$FLAKE8_FORMAT"
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r testing/requirements.txt
+    - name: Test with pytest
+      run: |
+        python -m pytest testing/external -s

@@ -186,3 +186,8 @@ typings/
 .idea
 .vscode
 dev
+
+# Python venv more
+Scripts/
+scripts/
+pyvenv.cfg

@@ -118,6 +118,8 @@ async def handle_message(bot: NoneBot, event: CQEvent) -> None:
                     f'as natural language')
         return
 
+    logger.debug(f'Message {event.message_id} was not handled')
+
 
 def _check_at_me(bot: NoneBot, event: CQEvent) -> None:
     if event.detail_type == 'private':
