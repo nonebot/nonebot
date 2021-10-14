@@ -7,7 +7,25 @@ env:
   FLAKE8_FORMAT: '::error file=%(path)s,line=%(row)d,col=%(col)d:: %(code)s %(text)s'
 
 jobs:
+  skip_dup_run:
+    # continue-on-error: true # Uncomment once integration is finished
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          # All of these options are optional, so you can remove them if you are happy with the defaults
+          concurrent_skipping: same_content
+          skip_after_successful_duplicate: 'true'
+          paths_ignore: '[]'
+          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
+
   lint:
+    needs: skip_dup_run
+    if: ${{ needs.skip_dup_run.outputs.should_skip != 'true' }}
     name: Lint the Code
     runs-on: ubuntu-latest
     steps:
