@@ -28,7 +28,7 @@ sidebar: auto
 
 OneBot 中的一个术语，表示其与通过 web 技术编写的 OneBot 实现之间通信的手段。
 
-目前 OneBot 规定了 HTTP (POST)、WebSocket、反向 WebSocket 几种通信方式，见 [通信方式](https://github.com/botuniverse/onebot/tree/master/v11/specs/communication)，NoneBot 支持其中的 HTTP 和反向 WebSocket。
+目前 OneBot 规定了 HTTP (POST)、WebSocket、反向 WebSocket 几种通信方式，见 [通信方式](https://github.com/botuniverse/onebot-11/tree/master/communication)，NoneBot 支持其中的 HTTP 和反向 WebSocket。
 
 ## 负载均衡
 
@@ -111,11 +111,11 @@ Expression 可以是一个 `str`、元素类型是 `str` 的序列（一般为 `
 
 ## CQ 码
 
-是 OneBot 用来表示非文本消息的一种表示方法，形如 `[CQ:image,file=ABC.jpg]`。具体的格式规则，请参考 OneBot 文档的 [CQ 码](https://github.com/botuniverse/onebot/blob/master/v11/specs/message/string.md#cq-%E7%A0%81%E6%A0%BC%E5%BC%8F)。
+是 OneBot 用来表示非文本消息的一种表示方法，形如 `[CQ:image,file=ABC.jpg]`。具体的格式规则，请参考 OneBot 文档的 [CQ 码](https://github.com/botuniverse/onebot-11/blob/master/message/string.md#cq-%E7%A0%81%E6%A0%BC%E5%BC%8F)。
 
 ## 消息段
 
-是 OneBot 定义的、和 CQ 码可以互相转换的一个消息表示格式，具体表示方式见 [消息格式](https://cqhttp.cc/docs/#/Message)。
+是 OneBot 定义的、和 CQ 码可以互相转换的一个消息表示格式，具体表示方式见 [消息格式](https://github.com/botuniverse/onebot-11/tree/master/message)。
 
 除了纯文本消息段之外，每一个消息段都和一个 CQ 码对应，例如下面这个消息段：
 

@@ -4,7 +4,7 @@
 
 ## 事件
 
-在 [发生了什么？](./whats-happened.md) 中我们提到，当 go-cqhttp 收到消息之后，会将其包装为一个统一的事件格式，并通过反向 WebSocket 给 NoneBot 发送事件数据。这些数据被 aiocqhttp 包装为 [`aiocqhttp.Event`](https://aiocqhttp.nonebot.dev/module/aiocqhttp/#aiocqhttp.Event) 对象，随后被 NoneBot 放在了 `session.event` 属性。该对象本质上是一个字典（但也提供了属性来获取其中的字段），你可以通过断点调试或打印等方式查看它的内容，其中的字段名和含义见 [OneBot 事件](https://github.com/botuniverse/onebot/tree/master/v11/specs/event) 和 [go-cqhttp 事件](https://docs.go-cqhttp.org/event/)。
+在 [发生了什么？](./whats-happened.md) 中我们提到，当 go-cqhttp 收到消息之后，会将其包装为一个统一的事件格式，并通过反向 WebSocket 给 NoneBot 发送事件数据。这些数据被 aiocqhttp 包装为 [`aiocqhttp.Event`](https://aiocqhttp.nonebot.dev/module/aiocqhttp/#aiocqhttp.Event) 对象，随后被 NoneBot 放在了 `session.event` 属性。该对象本质上是一个字典（但也提供了属性来获取其中的字段），你可以通过断点调试或打印等方式查看它的内容，其中的字段名和含义见 [OneBot 事件](https://github.com/botuniverse/onebot-11/tree/master/event) 和 [go-cqhttp 事件](https://docs.go-cqhttp.org/event/)。
 
 ## API 调用
 
@@ -33,7 +33,7 @@ Bot 对象的使用方式如下：
 await bot.send_private_msg(user_id=12345678, message='你好～')
 ```
 
-这里，`send_private_msg` 实际上对应 OneBot 的 [`/send_private_msg` API](https://github.com/botuniverse/onebot/blob/master/v11/specs/api/public.md#send_private_msg-%E5%8F%91%E9%80%81%E7%A7%81%E8%81%8A%E6%B6%88%E6%81%AF)，其它 API 同理。
+这里，`send_private_msg` 实际上对应 OneBot 的 [`/send_private_msg` API](https://github.com/botuniverse/onebot-11/blob/master/api/public.md#send_private_msg-%E5%8F%91%E9%80%81%E7%A7%81%E8%81%8A%E6%B6%88%E6%81%AF)，其它 API 同理。
 
 通过这种方式调用 API 时，需要注意下面几点：
 
@@ -69,4 +69,4 @@ self_info = await bot.get_login_info()
 group_member_info = await bot.get_group_member_info(group_id=123456, user_id=12345678, no_cache=True)
 ```
 
-其它更多接口请自行参考 OneBot 的 [API 列表](https://github.com/botuniverse/onebot/blob/master/v11/specs/api/public.md) 和 go-cqhttp 的 [API 列表](https://docs.go-cqhttp.org/api/#发送私聊消息)。
+其它更多接口请自行参考 OneBot 的 [API 列表](https://github.com/botuniverse/onebot-11/blob/master/api/public.md) 和 go-cqhttp 的 [API 列表](https://docs.go-cqhttp.org/api)。

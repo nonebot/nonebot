@@ -1658,7 +1658,7 @@ sidebar: auto
 
 请参考 [aiocqhttp 文档](https://aiocqhttp.nonebot.dev/module/aiocqhttp/message.html#aiocqhttp.message.MessageSegment) 来了解此类的使用方法。
 
-更多关于消息段的内容，见 [消息格式](https://github.com/botuniverse/onebot/tree/master/v11/specs/message)。
+更多关于消息段的内容，见 [消息格式](https://github.com/botuniverse/onebot-11/tree/master/message)。
 
 ### _class_ `Message`
 

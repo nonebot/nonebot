@@ -127,7 +127,7 @@ class Proxy:
         return self.msgid
 
     def send_private_msg(self, content: Message_T, extra: Optional[dict] = None):
-        # https://github.com/botuniverse/onebot/blob/master/v11/specs/event/message.md
+        # https://github.com/botuniverse/onebot-11/blob/master/event/message.md
         self.cl.send_payload(merge({
             'time': time.time(),
             'self_id': BOT_SELF_ID,

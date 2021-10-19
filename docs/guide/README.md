@@ -16,7 +16,7 @@ NoneBot 在其底层交互的部分使用 [aiocqhttp](https://github.com/nonebot
 
 得益于 Python 的 [asyncio](https://docs.python.org/3/library/asyncio.html) 机制，NoneBot 处理消息的吞吐量有了很大的保障，再配合 OneBot 可选的反向 WebSocket 通信方式（也是最建议的通信方式），NoneBot 的性能可以达到 HTTP 通信方式的两倍以上，相较于传统同步 I/O 的 HTTP 通信，更是有质的飞跃。
 
-需要注意的是，NoneBot 仅支持 Python 3.7+ 及兼容 OneBot v11 标准的 OneBot 实现（更多列表见 [生态](https://github.com/botuniverse/onebot/blob/master/ecosystem.md)），在本指南后续的介绍中，将使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp)（一个 QQ 平台的 OneBot 实现）作为示例。
+需要注意的是，NoneBot 仅支持 Python 3.7+ 及兼容 OneBot v11 标准的 OneBot 实现（更多列表见 [生态](https://github.com/botuniverse/onebot/blob/471015484e6361ef42bf3314ecb3261c6133266a/ecosystem.md)），在本指南后续的介绍中，将使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp)（一个 QQ 平台的 OneBot 实现）作为示例。
 
 ## 它如何工作？
 

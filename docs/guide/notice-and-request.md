@@ -30,7 +30,7 @@ async def _(session: RequestSession):
     await session.reject('请说暗号')
 ```
 
-这里首先 `on_request` 装饰器将函数注册为一个请求处理器，`group` 参数表示只处理群请求，这里各请求对应的参数值可以参考 go-cqhttp 帮助中心的 [事件](https://docs.go-cqhttp.org/event/) （或 [Onebot 标准](https://github.com/botuniverse/onebot/blob/master/v11/specs/event/request.md)）的 `request_type` 字段，目前有 `group` 和 `friend` 两种。
+这里首先 `on_request` 装饰器将函数注册为一个请求处理器，`group` 参数表示只处理群请求，这里各请求对应的参数值可以参考 go-cqhttp 帮助中心的 [事件](https://docs.go-cqhttp.org/event/) （或 [Onebot 标准](https://github.com/botuniverse/onebot-11/blob/master/event/request.md)）的 `request_type` 字段，目前有 `group` 和 `friend` 两种。
 
 接着判断 `session.event.comment` 是否是正确的暗号，这里 `session.event` 是一个 `aiocqhttp.Event` 对象，即 go-cqhttp 上报来的事件的简单包装，`comment` 属性用于获取加群或加好友事件中的验证信息。
 
@@ -55,4 +55,4 @@ async def _(session: NoticeSession):
 这里最好预先判断一下是不是你想发送的群（通过 `session.event.group_id`），否则机器人所在的任何群有新成员进入它都会欢迎。
 :::
 
-总的来说这些 `on_*` 装饰器用起来都是差不多的，这里的 `group_increase` 表示群成员增加，其它的通知类型可以参考 go-cqhttp 帮助中心的 [事件](https://docs.go-cqhttp.org/event/) （或 [Onebot 标准](https://github.com/botuniverse/onebot/blob/master/v11/specs/event/notice.md)）的 `notice_type`。
+总的来说这些 `on_*` 装饰器用起来都是差不多的，这里的 `group_increase` 表示群成员增加，其它的通知类型可以参考 go-cqhttp 帮助中心的 [事件](https://docs.go-cqhttp.org/event/) （或 [Onebot 标准](https://github.com/botuniverse/onebot-11/blob/master/event/notice.md)）的 `notice_type`。
