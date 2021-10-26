@@ -63,6 +63,7 @@ module.exports = {
                     collapsable: false,
                     children: [
                         '',
+                        'flow-diagram',
                         // 'command-session', may not be needed
                         'command-argument',
                         'command-group',
