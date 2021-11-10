@@ -26,6 +26,7 @@ class TestBasicsWork(AsyncTestCase):
         cl.proxy.send_private_msg('/weather 合肥')
         resp = await cl.proxy.wait_for_private_msg()
         assert Message(resp['message']) == Message('合肥的天气是……')
+        await cl.proxy.wait_for_handler_complete()
 
     async def test_once(self, cl: Client):
         cl.proxy.send_private_msg('/weather')
@@ -34,6 +35,7 @@ class TestBasicsWork(AsyncTestCase):
         cl.proxy.send_private_msg('合肥')
         resp = await cl.proxy.wait_for_private_msg()
         assert Message(resp['message']) == Message('合肥的天气是……')
+        await cl.proxy.wait_for_handler_complete()
 
     async def test_loop(self, cl: Client):
         cl.proxy.send_private_msg('/weather')
@@ -46,3 +48,4 @@ class TestBasicsWork(AsyncTestCase):
         cl.proxy.send_private_msg('合肥')
         resp = await cl.proxy.wait_for_private_msg()
         assert Message(resp['message']) == Message('合肥的天气是……')
+        await cl.proxy.wait_for_handler_complete()
