@@ -5,9 +5,7 @@ class TestCommand:
     def test_basics_work(self):
         assert run_test_as_subprocess('test_command/test_basics') == 0
 
-
-class TestInteraction:
-    def test_basics_work(self):
+    def test_interaction(self):
         assert run_test_as_subprocess('test_command/test_interaction') == 0
 
 
