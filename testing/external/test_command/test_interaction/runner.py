@@ -23,12 +23,12 @@ class TestBasicsWork(AsyncTestCase):
             yield p
 
     async def test_direct(self, cl: Client):
-        cl.proxy.send_private_msg('/天气 合肥')
+        cl.proxy.send_private_msg('/weather 合肥')
         resp = await cl.proxy.wait_for_private_msg()
         assert Message(resp['message']) == Message('合肥的天气是……')
 
     async def test_once(self, cl: Client):
-        cl.proxy.send_private_msg('/查天气')
+        cl.proxy.send_private_msg('/weather')
         resp = await cl.proxy.wait_for_private_msg()
         assert Message(resp['message']) == Message('你想查询哪个城市的天气呢？')
         cl.proxy.send_private_msg('合肥')
@@ -36,7 +36,7 @@ class TestBasicsWork(AsyncTestCase):
         assert Message(resp['message']) == Message('合肥的天气是……')
 
     async def test_loop(self, cl: Client):
-        cl.proxy.send_private_msg('/天气预报')
+        cl.proxy.send_private_msg('/weather')
         resp = await cl.proxy.wait_for_private_msg()
         assert Message(resp['message']) == Message('你想查询哪个城市的天气呢？')
         for _ in range(5):
