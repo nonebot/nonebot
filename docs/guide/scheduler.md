@@ -24,26 +24,24 @@ pip install "nonebot[scheduler]"
 
 新建文件 `awesome/plugins/scheduler.py`，编写代码如下：
 
-```python {8}
+```python {7}
 from datetime import datetime
-
+from zoneinfo import ZoneInfo
 import nonebot
-import pytz
 from aiocqhttp.exceptions import Error as CQHttpError
 
 
 @nonebot.scheduler.scheduled_job('cron', hour='*')
-async def _():
+async def chime():
     bot = nonebot.get_bot()
-    now = datetime.now(pytz.timezone('Asia/Shanghai'))
+    now = datetime.now(ZoneInfo('Asia/Shanghai'))
     try:
-        await bot.send_group_msg(group_id=672076603,
-                                 message=f'现在{now.hour}点整啦！')
+        await bot.send_group_msg(group_id=672076603, message=f'现在{now.hour}点整啦！')
     except CQHttpError:
         pass
 ```
 
-这里最主要的就是第 8 行，`nonebot.scheduler.scheduled_job()` 是一个装饰器，第一个参数是触发器类型（这里是 `cron`，表示使用 [Cron](https://apscheduler.readthedocs.io/en/latest/modules/triggers/cron.html#module-apscheduler.triggers.cron) 类型的触发参数）。这里 `hour='*'` 表示每小时都执行，`minute` 和 `second` 不填时默认为 `0`，也就是说装饰器所装饰的这个函数会在每小时的第一秒被执行。
+这里最主要的就是第 7 行，`nonebot.scheduler.scheduled_job()` 是一个装饰器，第一个参数是触发器类型（这里是 `cron`，表示使用 [Cron](https://apscheduler.readthedocs.io/en/latest/modules/triggers/cron.html#module-apscheduler.triggers.cron) 类型的触发参数）。这里 `hour='*'` 表示每小时都执行，`minute` 和 `second` 不填时默认为 `0`，也就是说装饰器所装饰的这个函数会在每小时的第一秒被执行。
 
 除了 `cron`，还有两种触发器类型 `interval` 和 `date`。例如，你可以使用 `nonebot.scheduler.scheduled_job('interval', minutes=10)` 来每十分钟执行一次任务。
 
