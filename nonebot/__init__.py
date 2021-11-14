@@ -126,6 +126,14 @@ def on_startup(func: Callable[[], Awaitable[None]]) \
     return get_bot().server_app.before_serving(func)
 
 
+def on_shutdown(func: Callable[[], Awaitable[None]]) \
+        -> Callable[[], Awaitable[None]]:
+    """
+    Decorator to register a function as shutdown callback.
+    """
+    return get_bot().server_app.after_serving(func)
+
+
 def on_websocket_connect(func: Callable[[aiocqhttp.Event], Awaitable[None]]) \
         -> Callable[[], Awaitable[None]]:
     """
@@ -154,6 +162,7 @@ __all__ = [
     'get_bot',
     'run',
     'on_startup',
+    'on_shutdown',
     'on_websocket_connect',
     'CQHttpError',
     'load_plugin',

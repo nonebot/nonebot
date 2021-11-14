@@ -803,6 +803,22 @@ sidebar: auto
 
   注册启动时回调，初始化数据库。
 
+### _decorator_ `on_shutdown`
+
+- **说明:**
+
+  将函数装饰为 NoneBot 关闭时的回调函数。
+
+- **用法:**
+
+  ```python
+  @on_shutdown
+  async def shutdown()
+      await db.close_connections()
+  ```
+
+  注册退出时的回调，关闭数据库连接。
+
 ### _decorator_ `on_websocket_connect` <Badge text="1.5.0+"/>
 
 - **说明:**

@@ -4,6 +4,10 @@ sidebar: auto
 
 # 更新日志
 
+## master
+
+- 新增 `nonebot.on_shutdown` 装饰器，用于注册 NoneBot 停止时回调函数
+
 ## v1.9.1
 
 - 修复上版本更新带来的 `on_command` 定义命令别名有时不生效的 bug
