@@ -45,7 +45,7 @@ services:
   gocqhttp:
     image: pcrbot/gocqhttp:latest
     volumes:
-      - ./gocqhttp:/usr/src/app:delegated # 用于保存 gocqhttp 相关文件，请复制 config.yml 等文件到此
+      - ./gocqhttp:/data:delegated # 用于保存 gocqhttp 相关文件，请复制 config.yml 等文件到此
     tty: true
     stdin_open: true
     environment:
