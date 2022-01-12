@@ -47,6 +47,7 @@ class EventManager:
 
 
 class NoticeSession(BaseSession):
+    """继承自 `BaseSession` 类，表示通知类事件的 Session。"""
     __slots__ = ()
 
     def __init__(self, bot: NoneBot, event: CQEvent):
@@ -54,6 +55,7 @@ class NoticeSession(BaseSession):
 
 
 class RequestSession(BaseSession):
+    """继承自 `BaseSession` 类，表示请求类事件的 Session。"""
     __slots__ = ()
 
     def __init__(self, bot: NoneBot, event: CQEvent):
@@ -61,9 +63,18 @@ class RequestSession(BaseSession):
 
     async def approve(self, remark: str = '') -> None:
         """
-        Approve the request.
+        同意当前请求。
 
-        :param remark: remark of friend (only works in friend request)
+        参数:
+            remark: 好友备注，只在好友请求时有效
+
+        异常:
+            CQHttpError: 发送失败时抛出，实际由 [aiocqhttp] 抛出，等价于 `aiocqhttp.Error`
+
+        用法:
+            ```python
+            await session.approve()
+            ```
         """
         try:
             await self.bot.call_action(action='.handle_quick_operation_async',
@@ -78,9 +89,18 @@ class RequestSession(BaseSession):
 
     async def reject(self, reason: str = '') -> None:
         """
-        Reject the request.
+        拒绝当前请求。
 
-        :param reason: reason to reject (only works in group request)
+        参数:
+            reason: 拒绝理由，只在群请求时有效
+
+        异常:
+            CQHttpError: 发送失败时抛出，实际由 [aiocqhttp] 抛出，等价于 `aiocqhttp.Error`
+
+        用法:
+            ```python
+            await session.reject()
+            ```
         """
         try:
             await self.bot.call_action(action='.handle_quick_operation_async',
