@@ -151,28 +151,40 @@ class NLPManager:
 
 
 class NLPSession(BaseSession):
+    """
+    继承自 `BaseSession` 类，表示自然语言处理 Session。
+    """
     __slots__ = ('msg', 'msg_text', 'msg_images')
 
     def __init__(self, bot: NoneBot, event: CQEvent, msg: str):
         super().__init__(bot, event)
         self.msg = msg
+        """以字符串形式表示的消息内容，已去除开头的 @ 和机器人称呼，可能存在 CQ 码。"""
         tmp_msg = Message(msg)
         self.msg_text = tmp_msg.extract_plain_text()
+        """消息内容的纯文本部分，已去除所有 CQ 码／非 `text` 类型的消息段。各纯文本消息段之间使用空格连接。"""
         self.msg_images = [
             s.data['url']
             for s in tmp_msg
             if s.type == 'image' and 'url' in s.data
         ]
+        """消息内容中所有图片的 URL 的列表，如果消息中没有图片，则为 `[]`。"""
 
 
 class IntentCommand(NamedTuple):
     """
-    To represent a command that we think the user may be intended to call.
+    用于表示自然语言处理之后得到的意图命令，是一个 namedtuple，由自然语言处理器返回。
+
+    版本: 1.2.0+
     """
     confidence: float
+    """意图的置信度，即表示对当前推测的用户意图有多大把握。"""
     name: Union[str, CommandName_T]
+    """命令的名字。"""
     args: Optional[CommandArgs_T] = None
+    """命令的（初始）参数。"""
     current_arg: str = ''
+    """命令的当前输入参数。"""
 
 
 async def handle_natural_language(bot: NoneBot, event: CQEvent,
