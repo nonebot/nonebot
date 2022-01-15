@@ -38,6 +38,10 @@ __all__ = [
     'State_T',
     'Filter_T',
     'PermChecker_T',
+    'NLPHandler_T',
+    'NoticeHandler_T',
+    'RequestHandler_T',
+    'MessagePreprocessor_T',
     'PermissionPolicy_T',
     'PluginLifetimeHook_T',
 ]
