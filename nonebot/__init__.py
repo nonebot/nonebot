@@ -307,7 +307,3 @@ __all__ = [
     'context_id',
     'SenderRoles',
 ]
-
-__autodoc__ = {
-    "default_config": False
-}
