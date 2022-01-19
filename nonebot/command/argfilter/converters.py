@@ -1,12 +1,15 @@
+"""
+提供几种常用的转换器。
+
+版本: 1.2.0+
+"""
 from typing import Optional, List
 
 
 def simple_chinese_to_bool(text: str) -> Optional[bool]:
-    """
-    Convert a chinese text to boolean.
+    """将中文（`好`、`不行` 等）转换成布尔值。
 
-    Examples:
-
+    例如:
         是的 -> True
         好的呀 -> True
         不要 -> False
@@ -29,10 +32,12 @@ def simple_chinese_to_bool(text: str) -> Optional[bool]:
 
 
 def split_nonempty_lines(text: str) -> List[str]:
+    """按行切割文本，并忽略所有空行。"""
     return list(filter(lambda x: x, text.splitlines()))
 
 
 def split_nonempty_stripped_lines(text: str) -> List[str]:
+    """按行切割文本，并对每一行进行 `str.strip`，再忽略所有空行。"""
     return list(filter(lambda x: x, map(lambda x: x.strip(),
                                         text.splitlines())))
 

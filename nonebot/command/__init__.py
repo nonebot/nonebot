@@ -1,3 +1,8 @@
+"""
+快捷导入:
+
+- `CommandGroup` -> {ref}`nonebot.command.group.CommandGroup`
+"""
 import re
 import asyncio
 import warnings
@@ -203,7 +208,10 @@ class Command:
 
 
 class CommandManager:
-    """Global Command Manager"""
+    """全局命令管理器。
+
+    版本: 1.6.0+
+    """
     _commands = {}  # type: Dict[CommandName_T, Command]
     _aliases = {}  # type: Dict[str, Command]
     _switches = {}  # type: Dict[Command, bool]
@@ -211,17 +219,30 @@ class CommandManager:
 
     def __init__(self):
         self.commands = CommandManager._commands.copy()
+        """命令字典。"""
         self.aliases = CommandManager._aliases.copy()
+        """命令别名字典。"""
         self.switches = CommandManager._switches.copy()
+        """命令开关状态字典。"""
         self.patterns = CommandManager._patterns.copy()
+        """
+        命令正则匹配字典。
+        版本: 1.7.0+
+        """
 
     @classmethod
     def add_command(cls, cmd_name: CommandName_T, cmd: Command) -> None:
-        """Register a command
-        
-        Args:
-            cmd_name (CommandName_T): Command name
-            cmd (Command): Command object
+        """注册一个 `Command` 对象。
+
+        参数:
+            cmd_name: 命令名称
+            cmd: 命令对象
+
+        用法:
+            ```python
+            cmd = Command(name, func, permission, only_to_me, privileged)
+            CommandManager.add_command(name, cmd)
+            ```
         """
         if cmd_name in cls._commands:
             warnings.warn(f"Command {cmd_name} already exists")
@@ -231,13 +252,17 @@ class CommandManager:
 
     @classmethod
     def reload_command(cls, cmd_name: CommandName_T, cmd: Command) -> None:
-        """Reload a command
-        
-        **Warning! Dangerous function**
-        
-        Args:
-            cmd_name (CommandName_T): Command name
-            cmd (Command): Command object
+        """更新一个已存在的命令。
+
+        参数:
+            cmd_name: 命令名词
+            cmd: 命令对象
+
+        用法:
+            ```python
+            cmd = Command(name, func, permission, only_to_me, privileged)
+            CommandManager.reload_command(name, cmd)
+            ```
         """
         if cmd_name not in cls._commands:
             warnings.warn(
@@ -254,15 +279,18 @@ class CommandManager:
 
     @classmethod
     def remove_command(cls, cmd_name: CommandName_T) -> bool:
-        """Remove a command
-        
-        **Warning! Dangerous function**
-        
-        Args:
-            cmd_name (CommandName_T): Command name to remove
-        
-        Returns:
-            bool: Success or not
+        """移除一个已存在的命令。
+
+        参数:
+            cmd_name: 命令名称
+
+        返回:
+            bool: 是否成功移除命令
+
+        用法:
+            ```python
+            CommandManager.remove_command(("test", ))
+            ```
         """
         if cmd_name in cls._commands:
             cmd = cls._commands[cmd_name]
@@ -279,24 +307,43 @@ class CommandManager:
     @classmethod
     def switch_command_global(cls,
                               cmd_name: CommandName_T,
-                              state: Optional[bool] = None):
-        """Change command state globally or simply switch it if `state` is None
-        
-        Args:
-            cmd_name (CommandName_T): Command name
-            state (Optional[bool]): State to change to. Defaults to None.
+                              state: Optional[bool] = None) -> None:
+        """根据 `state` 更改 command 的全局状态。
+
+        参数:
+            cmd_name: 命令名称
+            state:
+                - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
+                - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
+
+        用法:
+            ```python
+            from nonebot import message_preprocessor
+
+            # 全局关闭命令test, 对所有消息生效
+            CommandManager.switch_command_global(("test", ), state=False)
+
+            @message_preprocessor
+            async def processor(bot: NoneBot, event: CQEvent, plugin_manager: PluginManager):
+                plugin_manager.cmd_manager.switch_command_global(("test", ), state=False)
+            ```
         """
         cmd = cls._commands[cmd_name]
         cls._switches[cmd] = not cls._switches[cmd] if state is None else bool(
             state)
 
     @classmethod
-    def add_aliases(cls, aliases: Union[Iterable[str], str], cmd: Command):
-        """Register command alias(es)
-        
-        Args:
-            aliases (Union[Iterable[str], str]): Command aliases
-            cmd (Command): Command
+    def add_aliases(cls, aliases: Union[Iterable[str], str], cmd: Command) -> None:
+        """为 `Command` 添加命令别名。
+
+        参数:
+            aliases: 命令别名列表
+
+        用法:
+            ```python
+            cmd = Command(name, func, permission, only_to_me, privileged)
+            CommandManager.add_aliases({"别名", "test"}, cmd)
+            ```
         """
         if isinstance(aliases, str):
             aliases = (aliases,)
@@ -310,7 +357,7 @@ class CommandManager:
             cls._aliases[alias] = cmd
 
     @classmethod
-    def add_patterns(cls, patterns: Patterns_T, cmd: Command):
+    def add_patterns(cls, patterns: Patterns_T, cmd: Command) -> None:
         """Register command alias(es)
 
         Args:
@@ -433,12 +480,24 @@ class CommandManager:
 
     def switch_command(self,
                        cmd_name: CommandName_T,
-                       state: Optional[bool] = None):
-        """Change command state or simply switch it if `state` is None
-        
-        Args:
-            cmd_name (CommandName_T): Command name
-            state (Optional[bool]): State to change to. Defaults to None.
+                       state: Optional[bool] = None) -> None:
+        """根据 `state` 更改 command 的状态。仅对当前消息有效。
+
+        参数:
+            cmd_name: 命令名称
+            state:
+                - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
+                - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
+
+        用法:
+            ```python
+            from nonebot import message_preprocessor
+
+            # 关闭命令test, 仅对当前消息生效
+            @message_preprocessor
+            async def processor(bot: NoneBot, event: CQEvent, plugin_manager: PluginManager):
+                plugin_manager.cmd_manager.switch_command(("test", ), state=False)
+            ```
         """
         cmd = self.commands[cmd_name]
         self.switches[cmd] = not self.switches[cmd] if state is None else bool(
@@ -446,6 +505,8 @@ class CommandManager:
 
 
 class CommandSession(BaseSession):
+    """继承自 `BaseSession` 类，表示命令 Session。"""
+
     __slots__ = ('cmd', 'current_key', 'current_arg_filters',
                  '_current_send_kwargs', 'current_arg', '_current_arg_text',
                  '_current_arg_images', '_state', '_last_interaction',
@@ -463,6 +524,7 @@ class CommandSession(BaseSession):
 
         # unique key of the argument that is currently requesting (asking)
         self.current_key: Optional[str] = None
+        """命令会话当前正在询问用户的参数的键（或称参数的名字）。第一次运行会话时，该属性为 `None`。"""
 
         # initialize current argument filters
         self.current_arg_filters: Optional[List[Filter_T]] = None
@@ -471,6 +533,7 @@ class CommandSession(BaseSession):
 
         # initialize current argument
         self.current_arg: Optional[str] = ''  # with potential CQ codes
+        """命令会话当前参数。实际上是 酷 Q 收到的消息去掉命令名的剩下部分，因此可能存在 CQ 码。"""
         self._current_arg_text = None
         self._current_arg_images = None
         self.refresh(event, current_arg=current_arg)  # fill the above
@@ -489,10 +552,20 @@ class CommandSession(BaseSession):
     @property
     def state(self) -> State_T:
         """
-        State of the session.
+        命令会话的状态数据（包括已获得的所有参数）。
 
-        This contains all named arguments and
-        other session scope temporary values.
+        属性本身只读，但属性中的内容可读写。
+
+        版本: 1.2.0+
+
+        用法:
+            ```python
+            if not session.state.get('initialized'):
+                # ... 初始化工作
+                session.state['initialized'] = True
+            ```
+
+            在命令处理函数的开头进行**每次命令调用只应该执行一次的初始化操作**。
         """
         return self._state
 
@@ -543,13 +616,12 @@ class CommandSession(BaseSession):
 
     @property
     def is_first_run(self) -> bool:
+        """命令会话是否第一次运行。"""
         return self._last_interaction is None
 
     @property
     def current_arg_text(self) -> str:
-        """
-        Plain text part in the current argument, without any CQ codes.
-        """
+        """`current_arg` 属性的纯文本部分（不包含 CQ 码），各部分使用空格连接。"""
         if self._current_arg_text is None:
             self._current_arg_text = Message(
                 self.current_arg).extract_plain_text()
@@ -557,9 +629,7 @@ class CommandSession(BaseSession):
 
     @property
     def current_arg_images(self) -> List[str]:
-        """
-        Images (as list of urls) in the current argument.
-        """
+        """`current_arg` 属性中所有图片的 URL 的列表，如果参数中没有图片，则为 `[]`。"""
         if self._current_arg_images is None:
             self._current_arg_images = [
                 s.data['url']
@@ -571,8 +641,14 @@ class CommandSession(BaseSession):
     @property
     def argv(self) -> List[str]:
         """
-        Shell-like argument list, similar to sys.argv.
-        Only available while shell_like is True in on_command decorator.
+        命令参数列表，类似于 `sys.argv`，本质上是 `session.state.get('argv', [])`，**需要搭配 `on_command(..., shell_like=True)` 使用**。
+
+        用法:
+            ```python
+            @on_command('some_cmd', shell_like=True)
+            async def _(session: CommandSession):
+                argv = session.argv
+            ```
         """
         return self.state.get('argv', [])
 
@@ -599,19 +675,49 @@ class CommandSession(BaseSession):
             prompt: Optional[Message_T] = None,
             arg_filters: Optional[List[Filter_T]] = None,
             **kwargs) -> Any:
-        """
-        Get an argument with a given key.
+        r"""
+        从 `state` 属性获取参数，如果参数不存在，则暂停当前会话，向用户发送提示，并等待用户的新一轮交互。
 
-        If the argument does not exist in the current session,
-        a pause exception will be raised, and the caller of
-        the command will know it should keep the session for
-        further interaction with the user.
+        如果需要暂停当前会话，则命令处理器中，此函数调用之后的语句将不会被执行（除非捕获了此函数抛出的特殊异常）。
 
-        :param key: argument key
-        :param prompt: prompt to ask the user
-        :param arg_filters: argument filters for the next user input
-        :param kwargs: other keyword arguments used in BeseSession.send()
-        :return: the argument value
+        注意，一旦传入 `arg_filters` 参数（参数过滤器），则等用户再次输入时，_command_func._`args_parser` 所注册的参数解析函数将不会被运行，而会在对 `current_arg` 依次运行过滤器之后直接将其放入 `state` 属性中。
+
+        :::tip
+        推荐使用下面的 `aget` 方法。
+        :::
+
+        参数:
+            key: 参数的键
+            prompt: 提示的消息内容
+            arg_filters {version}`1.2.0+`: 用于处理和验证用户输入的参数的过滤器
+            kwargs: 其它传入 `BaseSession.send()` 的命名参数
+
+        返回:
+            Any: 参数的值
+
+        用法:
+            ```python
+            location = session.get('location', prompt='请输入要查询的地区')
+            ```
+
+            获取位置信息，如果当前还不知道，则询问用户。
+
+            ```python
+            from nonebot.command.argfilter import extractors, validators
+
+            time = session.get(
+                'time', prompt='你需要我在什么时间提醒你呢？',
+                arg_filters=[
+                    extractors.extract_text,  # 取纯文本部分
+                    controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+                    str.strip,  # 去掉两边空白字符
+                    # 正则匹配输入格式
+                    validators.match_regex(r'^\d{4}-\d{2}-\d{2}$', '格式不对啦，请重新输入')
+                ]
+            )
+            ```
+
+            获取时间信息，如果当前还不知道，则询问用户，等待用户输入之后，会依次运行 `arg_filters` 参数中的过滤器，以确保参数内容和格式符合要求。
         """
         if key in self.state:
             return self.state[key]
@@ -628,20 +734,51 @@ class CommandSession(BaseSession):
                    arg_filters: Optional[List[Filter_T]] = None,
                    force_update: bool = ...,
                    **kwargs) -> Any:
-        """
-        Get an argument with a given key.
+        r"""
+        从 `state` 属性获取参数，如果参数不存在，则异步地暂停当前会话，向用户发送提示，并等待用户的进一步交互。
 
-        If the argument does not exist in the current session,
-        the current coroutine yields, and the caller of
-        the command will know it should keep the session for
-        further interaction with the user.
+        当用户再次输入时，不会重新运行命令处理器，而是回到此函数调用之处继续执行。
 
-        :param key: argument key
-        :param prompt: prompt to ask the user
-        :param arg_filters: argument filters for the next user input
-        :param force_update: true to ignore the current argument
-        :param kwargs: other keyword arguments used in BeseSession.send()
-        :return: the argument value
+        注意，一旦传入 `arg_filters` 参数（参数过滤器），则等用户再次输入时，_command_func._`args_parser` 所注册的参数解析函数将不会被运行，而会在对 `current_arg` 依次运行过滤器之后直接将其放入 `state` 属性中。
+
+        版本: 1.8.0+
+
+        参数:
+            key: 参数的键，若不传入则使用默认键值
+            prompt: 提示的消息内容
+            arg_filters: 用于处理和验证用户输入的参数的过滤器
+            force_update: 是否强制获取用户新的输入，若是，则会忽略已有的当前参数，若 `key` 不传入则为真，否则默认为假
+            kwargs: 其它传入 `BaseSession.send()` 的命名参数
+
+        返回:
+            Any: 参数的值
+
+        用法:
+            ```python
+            from nonebot.command.argfilter import extractors, validators
+
+            note = await session.aget(
+                'note', prompt='你需要我提醒你什么呢',
+                arg_filters=[
+                    extractors.extract_text,  # 取纯文本部分
+                    controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+                    str.strip  # 去掉两边空白字符
+                ]
+            )
+
+            time = await session.aget(
+                'time', prompt='你需要我在什么时间提醒你呢？',
+                arg_filters=[
+                    extractors.extract_text,  # 取纯文本部分
+                    controllers.handle_cancellation(session),  # 处理用户可能的取消指令
+                    str.strip,  # 去掉两边空白字符
+                    # 正则匹配输入格式
+                    validators.match_regex(r'^\d{4}-\d{2}-\d{2}$', '格式不对啦，请重新输入')
+                ]
+            )
+            ```
+
+            连续获取多个参数，如果当前还不知道，则询问用户，等待用户输入之后，会依次运行 `arg_filters` 参数中的过滤器，以确保参数内容和格式符合要求。
         """
         if key is ...:
             key = '__default_argument'
@@ -661,10 +798,27 @@ class CommandSession(BaseSession):
 
     def pause(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
         """
-        Pause the session for further interaction. This function never returns.
+        暂停当前命令会话，并发送消息。此函数调用之后的语句将不会被执行（除非捕获了此函数抛出的特殊异常）。
 
-        :param message: message to send to the user
-        :param kwargs: other keyword arguments used in BeseSession.send()
+        :::tip
+        推荐使用下面的 `apause` 方法。
+        :::
+
+        参数:
+            message: 要发送的消息，若不传入则不发送
+            kwargs: 其它传入 `BaseSession.send()` 的命名参数
+
+        用法:
+            ```python
+            if session.is_first_run:
+                session.pause('请发送要处理的图片，发送 done 结束')
+            if session.current_arg_text.strip() == 'done':
+                session.finish('处理完成')
+            process_images(session.current_arg_images)
+            session.pause('请继续发送要处理的图片，发送 done 结束')
+            ```
+
+            需要连续接收用户输入，并且过程中不需要改变 `current_key` 时，使用此函数暂停会话。
         """
         if message:
             self._run_future(self.send(message, **kwargs))
@@ -672,11 +826,27 @@ class CommandSession(BaseSession):
 
     async def apause(self, message: Optional[Message_T] = None, **kwargs) -> None:
         """
-        Pause the session for further interaction. The control flow will pick
-        up where it is left over when this command session is recalled.
+        异步地暂停当前命令会话，并发送消息。
 
-        :param message: message to send to the user
-        :param kwargs: other keyword arguments used in BeseSession.send()
+        当用户再次输入时，不会重新运行命令处理器，而是回到此函数调用之处继续执行。
+
+        版本: 1.8.0+
+
+        参数:
+            message: 要发送的消息，若不传入则不发送
+            kwargs: 其它传入 `BaseSession.send()` 的命名参数
+
+        用法:
+            ```python
+            await session.apause('请发送要处理的图片，发送 done 结束')
+            while True:
+                if session.current_arg_text.strip() == 'done':
+                    session.finish('处理完成')
+                process_images(session.current_arg_images)
+                await session.apause('请继续发送要处理的图片，发送 done 结束')
+            ```
+
+            需要连续接收用户输入，并且过程中不需要改变 `current_key` 时，使用此函数暂停会话。
         """
         if message:
             self._run_future(self.send(message, **kwargs))
@@ -697,10 +867,18 @@ class CommandSession(BaseSession):
 
     def finish(self, message: Optional[Message_T] = None, **kwargs) -> NoReturn:
         """
-        Finish the session. This function never returns.
+        结束当前命令会话，并发送消息。此函数调用之后的语句将不会被执行（除非捕获了此函数抛出的特殊异常）。
 
-        :param message: message to send to the user when this command exits
-        :param kwargs: other keyword arguments used in BeseSession.send()
+        调用此函数后，命令将被视为已经完成，当前命令会话将被移除。
+
+        参数:
+            message: 要发送的消息，若不传入则不发送
+            kwargs: 其它传入 `BaseSession.send()` 的命名参数
+
+        用法:
+            ```python
+            session.finish('感谢您的使用～')
+            ```
         """
         if message:
             self._run_future(self.send(message, **kwargs))
@@ -708,13 +886,31 @@ class CommandSession(BaseSession):
 
     def switch(self, new_message: Message_T) -> NoReturn:
         """
-        Finish the session and switch to a new (fake) message event.
+        结束当前会话，改变当前消息事件中的消息内容，然后重新处理消息事件。
 
-        The user may send another command (or another intention as natural
-        language) when interacting with the current session. In this case,
-        the session may not understand what the user is saying, so it
-        should call this method and pass in that message, then NoneBot will
-        handle the situation properly.
+        此函数可用于从一个命令中跳出，将用户输入的剩余部分作为新的消息来处理，例如可实现以下对话:
+
+        ```
+        用户: 帮我查下天气
+        Bot: 你要查询哪里的天气呢？
+        用户: 算了，帮我查下今天下午南京到上海的火车票吧
+        Bot: 今天下午南京到上海的火车票有如下班次: blahblahblah
+        ```
+
+        这里进行到第三行时，命令期待的是一个地点，但实际发现消息的开头是「算了」，于是调用 `switch('帮我查下今天下午南京到上海的火车票吧')`，结束天气命令，将剩下来的内容作为新的消息来处理（触发火车票插件的自然语言处理器，进而调用火车票查询命令）。
+
+        参数:
+            new_message: 要覆盖消息事件的新消息内容
+
+        用法:
+            ```python
+            @my_cmd.args_parser
+            async def _(session: CommandSession)
+                if not session.is_first_run and session.current_arg.startswith('算了，'):
+                    session.switch(session.current_arg[len('算了，'):])
+            ```
+
+            使用「算了」来取消当前命令，转而进入新的消息处理流程。这个例子比较简单，实际应用中可以使用更复杂的 NLP 技术来判断。
         """
         if self.is_first_run:
             # if calling this method during first run,
@@ -820,25 +1016,26 @@ async def call_command(bot: NoneBot,
                        args: Optional[CommandArgs_T] = None,
                        check_perm: bool = True,
                        disable_interaction: bool = False) -> Optional[bool]:
-    """
-    Call a command internally.
+    """从内部直接调用命令。可用于在一个插件中直接调用另一个插件的命令。
 
-    This function is typically called by some other commands
-    or "handle_natural_language" when handling IntentCommand object.
+    参数:
+        bot: NoneBot 对象
+        event: 事件对象
+        name: 要调用的命令名
+        current_arg: 命令会话的当前输入参数
+        args: 命令会话的（初始）参数（将会被并入命令会话的 `state` 属性）
+        check_perm: 是否检查命令的权限，若否，则即使当前事件上下文并没有权限调用这里指定的命令，也仍然会调用成功
+        disable_interaction: 是否禁用交互功能，若是，则该命令的会话不会覆盖任何当前已存在的命令会话，新创建的会话也不会保留
 
-    Note: If disable_interaction is not True, after calling this function,
-    any previous command session will be overridden, even if the command
-    being called here does not need further interaction (a.k.a asking
-    the user for more info).
+    返回:
+        bool: 命令是否调用成功
 
-    :param bot: NoneBot instance
-    :param event: message event
-    :param name: command name
-    :param current_arg: command current argument string
-    :param args: command args
-    :param check_perm: should check permission before running command
-    :param disable_interaction: disable the command's further interaction
-    :return: the command is successfully called
+    用法:
+        ```python
+        await call_command(bot, event, 'say', current_arg='[CQ:face,id=14]', check_perm=False)
+        ```
+
+        从内部调用 `say` 命令，且不检查权限。
     """
     cmd = CommandManager()._find_command(name)
     if not cmd:
@@ -914,11 +1111,19 @@ async def _real_run_command(session: CommandSession,
 
 
 def kill_current_session(event: CQEvent) -> None:
-    """
-    Force kill current session of the given event context,
-    despite whether it is running or not.
+    """强行移除当前已存在的任何命令会话，即使它正在运行。该函数可用于强制移除执行时间超过预期的命令，以保证新的消息不会被拒绝服务。
 
-    :param event: message event
+    参数:
+        event: 事件对象
+
+    用法:
+        ```python
+        @on_command('kill', privileged=True)
+        async def _(session: CommandSession):
+            kill_current_session(session.event)
+        ```
+
+        在特权命令 `kill` 中强行移除当前正在运行的会话。
     """
     ctx_id = context_id(event)
     if ctx_id in _sessions:
@@ -937,3 +1142,18 @@ __all__ = [
     'kill_current_session',
     'CommandGroup',
 ]
+
+__autodoc__ = {
+    "CommandInterrupt": False,
+    "SwitchException": False,
+    "Command": False,
+    "CommandManager.add_patterns": False,
+    "CommandManager.parse_command": False,
+    "CommandSession.running": False,
+    "CommandSession.waiting": False,
+    "CommandSession.expire_timeout": False,
+    "CommandSession.run_timeout": False,
+    "CommandSession.is_valid": False,
+    "CommandSession.refresh": False,
+    "handle_command": False
+}

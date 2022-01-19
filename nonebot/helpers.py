@@ -197,3 +197,7 @@ __all__ = [
     'send_to_superusers',
     'render_expression',
 ]
+
+__autodoc__ = {
+    "separate_async_funcs": False
+}

@@ -1,3 +1,8 @@
+"""
+提供几种常用的提取器。
+
+版本: 1.2.0+
+"""
 import re
 from typing import List
 
@@ -7,13 +12,13 @@ from nonebot.typing import Message_T
 
 
 def extract_text(arg: Message_T) -> str:
-    """Extract all plain text segments from a message-like object."""
+    """提取消息中的纯文本部分（使用空格合并纯文本消息段）。"""
     arg_as_msg = Message(arg)
     return arg_as_msg.extract_plain_text()
 
 
 def extract_image_urls(arg: Message_T) -> List[str]:
-    """Extract all image urls from a message-like object."""
+    """提取消息中的图片 URL 列表。"""
     arg_as_msg = Message(arg)
     return [
         s.data['url']
@@ -23,7 +28,7 @@ def extract_image_urls(arg: Message_T) -> List[str]:
 
 
 def extract_numbers(arg: Message_T) -> List[float]:
-    """Extract all numbers (integers and floats) from a message-like object."""
+    """提取消息中的所有数字（浮点数）。"""
     s = str(arg)
     return list(map(float, re.findall(r'[+-]?(\d*\.?\d+|\d+\.?\d*)', s)))
 

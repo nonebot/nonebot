@@ -62,8 +62,7 @@ class RequestSession(BaseSession):
         super().__init__(bot, event)
 
     async def approve(self, remark: str = '') -> None:
-        """
-        同意当前请求。
+        """同意当前请求。
 
         参数:
             remark: 好友备注，只在好友请求时有效
@@ -88,8 +87,7 @@ class RequestSession(BaseSession):
             pass
 
     async def reject(self, reason: str = '') -> None:
-        """
-        拒绝当前请求。
+        """拒绝当前请求。
 
         参数:
             reason: 拒绝理由，只在群请求时有效
@@ -144,3 +142,9 @@ __all__ = [
     'NoticeSession',
     'RequestSession',
 ]
+
+__autodoc__ = {
+    "EventHandler": False,
+    "EventManager": False,
+    "handle_notice_or_request": False
+}

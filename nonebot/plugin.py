@@ -1089,8 +1089,7 @@ def on_natural_language(
     only_short_message: bool = True,
     allow_empty_message: bool = False
 ):
-    """
-    将函数装饰为自然语言处理器。
+    """将函数装饰为自然语言处理器。
 
     版本: 1.6.0+
 
@@ -1187,8 +1186,7 @@ def on_notice(*events: str) -> Callable[[NoticeHandler_T], NoticeHandler_T]:
 
 
 on_notice = _make_event_deco('notice')  # type: ignore[override]
-on_notice.__doc__ = """
-将函数装饰为通知处理器。
+"""将函数装饰为通知处理器。
 
 版本: 1.6.0+
 
@@ -1228,8 +1226,7 @@ def on_request(*events: str) -> Callable[[RequestHandler_T], RequestHandler_T]:
 
 
 on_request = _make_event_deco('request')  # type: ignore[override]
-on_request.__doc__ = """
-将函数装饰为请求处理器。
+"""将函数装饰为请求处理器。
 
 版本: 1.6.0+
 
@@ -1273,5 +1270,6 @@ __all__ = [
 ]
 
 __autodoc__ = {
+    "LifetimeHook": False,
     "Plugin.__await__": True
 }

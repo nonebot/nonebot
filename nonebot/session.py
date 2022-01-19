@@ -15,8 +15,7 @@ class BaseSession:
 
     def __init__(self, bot: NoneBot, event: CQEvent):
         self.bot = bot
-        """
-        Session 对应的 NoneBot 对象。
+        """Session 对应的 NoneBot 对象。
 
         用法:
             ```python
@@ -42,8 +41,7 @@ class BaseSession:
 
     @property
     def ctx(self) -> CQEvent:
-        """
-        CQHTTP 上报的事件数据对象，或称事件上下文，具体请参考 [事件上报](https://cqhttp.cc/docs/#/Post)。
+        """CQHTTP 上报的事件数据对象，或称事件上下文，具体请参考 [事件上报](https://cqhttp.cc/docs/#/Post)。
 
         版本: 1.5.0-
 
@@ -83,8 +81,7 @@ class BaseSession:
                    ensure_private: bool = False,
                    ignore_failure: bool = True,
                    **kwargs) -> Any:
-        """
-        发送消息到 Session 对应的上下文中。
+        """发送消息到 Session 对应的上下文中。
 
         参数:
             message: 要发送的消息内容

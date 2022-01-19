@@ -256,3 +256,9 @@ __all__ = [
     'NLPSession',
     'IntentCommand',
 ]
+
+__autodoc__ = {
+    "NLProcessor": False,
+    "NLPManager": False,
+    "handle_natural_language": False
+}
