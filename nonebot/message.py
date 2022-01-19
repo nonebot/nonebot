@@ -235,6 +235,9 @@ __all__ = [
 ]
 
 __autodoc__ = {
+    "MessagePreprocessor": False,
+    "MessagePreprocessorManager": False,
+    "handle_message": False,
     "Message":
         """
         从 `aiocqhttp.message` 模块导入，继承自 `list`，用于表示一个消息。该类型是合法的 `Message_T`。
@@ -251,9 +254,7 @@ __autodoc__ = {
         """,
     "escape":
         """
-        - **说明:**
-
-            从 `aiocqhttp.message` 模块导入，对字符串进行转义。
+        - **说明:** 从 `aiocqhttp.message` 模块导入，对字符串进行转义。
 
         - **参数:**
 
@@ -267,9 +268,7 @@ __autodoc__ = {
         """,
     "unescape":
         """
-        - **说明:**
-
-            从 `aiocqhttp.message` 模块导入，对字符串进行去转义。
+        - **说明:** 从 `aiocqhttp.message` 模块导入，对字符串进行去转义。
 
         - **参数:**
 

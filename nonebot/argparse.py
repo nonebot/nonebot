@@ -87,5 +87,6 @@ __all__ = [
 ]
 
 __autodoc__ = {
+    "ParserExit": False,
     "ArgumentParser.exit": False
 }

@@ -1,25 +1,25 @@
 """
 为方便使用，`nonebot` 模块从子模块导入了部分内容:
 
-- `CQHttpError` -> `nonebot.exceptions.CQHttpError`
-- `load_plugin` -> `nonebot.plugin.load_plugin`
-- `load_plugins` -> `nonebot.plugin.load_plugins`
-- `load_builtin_plugins` -> `nonebot.plugin.load_builtin_plugins`
-- `get_loaded_plugins` <Badge text="1.1.0+"/> -> `nonebot.plugin.get_loaded_plugins`
-- `on_command` -> `nonebot.plugin.on_command`
-- `on_natural_language` -> `nonebot.plugin.on_natural_language`
-- `on_notice` -> `nonebot.plugin.on_notice`
-- `on_request` -> `nonebot.plugin.on_request`
-- `message_preprocessor` -> `nonebot.message.message_preprocessor`
-- `Message` -> `nonebot.message.Message`
-- `MessageSegment` -> `nonebot.message.MessageSegment`
-- `CommandSession` -> `nonebot.command.CommandSession`
-- `CommandGroup` -> `nonebot.command.CommandGroup`
-- `NLPSession` -> `nonebot.natural_language.NLPSession`
-- `NoticeSession` -> `nonebot.notice_request.NoticeSession`
-- `RequestSession` -> `nonebot.notice_request.RequestSession`
-- `context_id` <Badge text="1.2.0+"/> -> `nonebot.helpers.context_id`
-- `SenderRoles` <Badge text="1.9.0+"/> -> `nonebot.permission.SenderRoles`
+- `CQHttpError` -> {ref}`nonebot.exceptions.CQHttpError`
+- `load_plugin` -> {ref}`nonebot.plugin.load_plugin`
+- `load_plugins` -> {ref}`nonebot.plugin.load_plugins`
+- `load_builtin_plugins` -> {ref}`nonebot.plugin.load_builtin_plugins`
+- `get_loaded_plugins` {version}`1.1.0+` -> {ref}`nonebot.plugin.get_loaded_plugins`
+- `on_command` -> {ref}`nonebot.plugin.on_command`
+- `on_natural_language` -> {ref}`nonebot.plugin.on_natural_language`
+- `on_notice` -> {ref}`nonebot.plugin.on_notice`
+- `on_request` -> {ref}`nonebot.plugin.on_request`
+- `message_preprocessor` -> {ref}`nonebot.message.message_preprocessor`
+- `Message` -> {ref}`nonebot.message.Message`
+- `MessageSegment` -> {ref}`nonebot.message.MessageSegment`
+- `CommandSession` -> {ref}`nonebot.command.CommandSession`
+- `CommandGroup` -> {ref}`nonebot.command.group.CommandGroup`
+- `NLPSession` -> {ref}`nonebot.natural_language.NLPSession`
+- `NoticeSession` -> {ref}`nonebot.notice_request.NoticeSession`
+- `RequestSession` -> {ref}`nonebot.notice_request.RequestSession`
+- `context_id` {version}`1.2.0+` -> {ref}`nonebot.helpers.context_id`
+- `SenderRoles` {version}`1.9.0+` -> {ref}`nonebot.permission.SenderRoles`
 """
 __version__ = (1, 9, 1)
 
@@ -307,3 +307,7 @@ __all__ = [
     'context_id',
     'SenderRoles',
 ]
+
+__autodoc__ = {
+    "nonebot.plugins": False
+}
