@@ -92,7 +92,7 @@ module.exports = {
                 {
                     title: 'API Reference',
                     collapsable: false,
-                    sidebarDepth: 0,
+                    sidebarDepth: 1,
                     children: [
                         {
                             title: 'nonebot 模块',
