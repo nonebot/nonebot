@@ -4,9 +4,6 @@ module.exports = {
     markdown: {
         lineNumbers: true
     },
-    extendMarkdown(md) {
-        md.use(require('markdown-it-attrs'))
-    },
     plugins: [
         ['@vuepress/google-analytics', {
             ga: 'UA-115509121-2'
