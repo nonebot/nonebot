@@ -40,7 +40,7 @@ async def weather_switch(session: CommandSession):
     ...
 ```
 
-对于更多的权限检查方式，请参考 [API 文档](../api.md#readonly-property-is-superuser)。
+对于更多的权限检查方式，请参考 [API 文档](../api/permission.md#class-senderroles-bot-event-sender)。
 
 ## 操作 `SenderRoles` 中的属性
 
@@ -114,4 +114,4 @@ async def _(session: NLPSession):
 这样就不会泄露我们的命令权限了。
 
 ## 默认的权限
-上面例子中我们提到了命令和 NLP 的默认权限为所有人。这个行为可以被更改，即配置项中的 [`DEFAULT_COMMAND_PERMISSION` 和 ` DEFAULT_NLP_PERMISSION`](../api.md#default-command-permission)。
+上面例子中我们提到了命令和 NLP 的默认权限为所有人。这个行为可以被更改，即配置项中的 [`DEFAULT_COMMAND_PERMISSION` 和 ` DEFAULT_NLP_PERMISSION`](../api/default_config.md#def-default-command-permission)。
