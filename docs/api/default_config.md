@@ -7,11 +7,12 @@
 例如:
 
 ```python
->>> from nonebot.default_config import *
->>> PORT = 9090
->>> DEBUG = False
->>> SUPERUSERS.add(123456)
->>> NICKNAME = '小明'
+from nonebot.default_config import *
+
+HOST = '0.0.0.0'
+PORT = 8080
+SUPERUSERS = {12345678}
+COMMAND_START = {'', '/', '!', '／', '！'}
 ```
 
 ## _var_ `API_ROOT`
@@ -178,6 +179,34 @@
 
   将 `note.add` 这样的命令解析为 `('note', 'add')`。
 
+## _var_ `DEFAULT_COMMAND_PERMISSION` <Badge text="1.9.0+"/>
+
+- **类型:** (SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]
+
+- **说明**
+
+  命令处理器的缺省权限。默认为允许所有用户触发。
+
+  **默认值:** `lambda _: True`
+
+- **用法**
+
+  ```python
+  DEFAULT_COMMAND_PERMISSION = lambda s: s.is_superuser
+  ```
+
+  调用 `on_command` 而不提供 `permission` 参数时，命令仅能被超级用户触发。
+
+## _var_ `DEFAULT_NLP_PERMISSION` <Badge text="1.9.0+"/>
+
+- **类型:** (SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]
+
+- **说明**
+
+  自然语言处理器的缺省权限。默认为允许所有用户触发。
+
+  **默认值:** `lambda _: True`
+
 ## _var_ `SESSION_EXPIRE_TIMEOUT`
 
 - **类型:** datetime.timedelta | None
@@ -331,43 +360,3 @@
   APScheduler 的配置对象，见 [Configuring the scheduler](https://apscheduler.readthedocs.io/en/latest/userguide.html#configuring-the-scheduler)。
 
   **默认值:** `{'apscheduler.timezone': 'Asia/Shanghai'}`
-
-## _def_ `DEFAULT_COMMAND_PERMISSION(_)` <Badge text="1.9.0+"/>
-
-- **说明**
-
-  命令处理器的缺省权限。默认为允许所有用户触发。
-
-  **默认值:** `lambda _: True`
-
-- **参数**
-
-  - `_`
-
-- **返回**
-
-  - Unknown
-
-- **用法**
-
-  ```python
-  DEFAULT_COMMAND_PERMISSION = lambda s: s.is_superuser
-  ```
-
-  调用 `on_command` 而不提供 `permission` 参数时，命令仅能被超级用户触发。
-
-## _def_ `DEFAULT_NLP_PERMISSION(_)` <Badge text="1.9.0+"/>
-
-- **说明**
-
-  自然语言处理器的缺省权限。默认为允许所有用户触发。
-
-  **默认值:** `lambda _: True`
-
-- **参数**
-
-  - `_`
-
-- **返回**
-
-  - Unknown

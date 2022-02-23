@@ -218,13 +218,15 @@ class CommandManager:
     _patterns = {}  # type: Dict[Pattern[str], Command]
 
     def __init__(self):
-        self.commands = CommandManager._commands.copy()
+        # TODO: don't copy
+        # https://github.com/nonebot/nonebot/projects/2#card-69531150
+        self.commands: Dict[CommandName_T, Command] = CommandManager._commands.copy()
         """命令字典。"""
-        self.aliases = CommandManager._aliases.copy()
+        self.aliases: Dict[str, Command] = CommandManager._aliases.copy()
         """命令别名字典。"""
-        self.switches = CommandManager._switches.copy()
+        self.switches: Dict[Command, bool] = CommandManager._switches.copy()
         """命令开关状态字典。"""
-        self.patterns = CommandManager._patterns.copy()
+        self.patterns: Dict[Pattern[str], Command] = CommandManager._patterns.copy()
         """
         命令正则匹配字典。
         版本: 1.7.0+

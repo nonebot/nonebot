@@ -6,11 +6,12 @@
 例如:
 
 ```python
->>> from nonebot.default_config import *
->>> PORT = 9090
->>> DEBUG = False
->>> SUPERUSERS.add(123456)
->>> NICKNAME = '小明'
+from nonebot.default_config import *
+
+HOST = '0.0.0.0'
+PORT = 8080
+SUPERUSERS = {12345678}
+COMMAND_START = {'', '/', '!', '／', '！'}
 ```
 """
 
@@ -18,6 +19,7 @@ from datetime import timedelta
 from typing import Collection, Union, Iterable, Pattern, Optional, Dict, Any
 
 from .typing import Expression_T, PermissionPolicy_T
+from .permission import EVERYBODY as _EVERYBODY
 
 API_ROOT: str = ''
 """CQHTTP 插件的 HTTP 接口地址，如果不使用 HTTP 通信，则无需设置。
@@ -31,16 +33,19 @@ API_ROOT: str = ''
 
     告诉 NoneBot CQHTTP 插件的 HTTP 服务运行在 `http://127.0.0.1:5700`。
 """
+
 ACCESS_TOKEN: str = ''
 """需要和 CQHTTP 插件的配置中的 `access_token` 相同。
 
 **默认值:** `''`
 """
+
 SECRET: str = ''
 """需要和 CQHTTP 插件的配置中的 `secret` 相同。
 
 **默认值:** `''`
 """
+
 HOST: str = '127.0.0.1'
 """NoneBot 的 HTTP 和 WebSocket 服务端监听的 IP／主机名。
 
@@ -53,6 +58,7 @@ HOST: str = '127.0.0.1'
 
     监听服务器的所有 IP。
 """
+
 PORT: int = 8080
 """NoneBot 的 HTTP 和 WebSocket 服务端监听的端口。
 
@@ -65,6 +71,7 @@ PORT: int = 8080
 
     监听 9876 端口。
 """
+
 DEBUG: bool = True
 """是否以调试模式运行，生产环境需要设置为 `False` 以提高性能。
 
@@ -92,6 +99,7 @@ SUPERUSERS: Collection[int] = set()
 
     设置 `12345678` 和 `87654321` 为超级用户。
 """
+
 NICKNAME: Union[str, Iterable[str]] = ''
 """机器人的昵称，用于辨别用户是否在和机器人说话。
 
@@ -117,6 +125,7 @@ COMMAND_START: Iterable[Union[str, Pattern]] = {'/', '!', '／', '！'}
 
     允许使用 `/`、`!` 作为命令起始符，或不用发送起始符。
 """
+
 COMMAND_SEP: Iterable[Union[str, Pattern]] = {'/', '.'}
 """命令的分隔标记，用于将文本形式的命令切分为元组（实际的命令名）。
 
@@ -130,7 +139,7 @@ COMMAND_SEP: Iterable[Union[str, Pattern]] = {'/', '.'}
     将 `note.add` 这样的命令解析为 `('note', 'add')`。
 """
 
-DEFAULT_COMMAND_PERMISSION: PermissionPolicy_T = lambda _: True  # EVERYBODY
+DEFAULT_COMMAND_PERMISSION: PermissionPolicy_T = _EVERYBODY
 """命令处理器的缺省权限。默认为允许所有用户触发。
 
 **默认值:** `lambda _: True`
@@ -144,7 +153,8 @@ DEFAULT_COMMAND_PERMISSION: PermissionPolicy_T = lambda _: True  # EVERYBODY
 
     调用 `on_command` 而不提供 `permission` 参数时，命令仅能被超级用户触发。
 """
-DEFAULT_NLP_PERMISSION: PermissionPolicy_T = lambda _: True  # EVERYBODY
+
+DEFAULT_NLP_PERMISSION: PermissionPolicy_T = _EVERYBODY
 """自然语言处理器的缺省权限。默认为允许所有用户触发。
 
 **默认值:** `lambda _: True`
@@ -165,6 +175,7 @@ SESSION_EXPIRE_TIMEOUT: Optional[timedelta] = timedelta(minutes=5)
 
     设置过期超时为 2 分钟，即用户 2 分钟不发消息后，会话将被关闭。
 """
+
 SESSION_RUN_TIMEOUT: Optional[timedelta] = None
 """命令会话的运行超时时长，超时后会话将被移除，命令处理函数会被异常所中断。此时用户可以调用新的命令，开启新的会话。`None` 表示不超时。
 
@@ -178,6 +189,7 @@ SESSION_RUN_TIMEOUT: Optional[timedelta] = None
 
     设置运行超时为 10 秒，即命令会话运行达到 10 秒，NoneBot 将认为它已经结束。
 """
+
 SESSION_RUNNING_EXPRESSION: Expression_T = '您有命令正在执行，请稍后再试'
 """当有命令会话正在运行时，给用户新消息的回复。
 
@@ -218,6 +230,7 @@ DEFAULT_VALIDATION_FAILURE_EXPRESSION: Expression_T = '您的输入不符合要�
 
     设置更亲切的默认错误提示。
 """
+
 MAX_VALIDATION_FAILURES: int = 3
 """
 命令参数验证允许的最大失败次数，用户输入错误达到这个次数之后，将会提示用户输入错误太多次，并结束命令会话。
@@ -228,6 +241,7 @@ MAX_VALIDATION_FAILURES: int = 3
 
 版本: 1.3.0+
 """
+
 TOO_MANY_VALIDATION_FAILURES_EXPRESSION: Expression_T = \
     '您输入错误太多次啦，如需重试，请重新触发本功能'
 """命令参数验证失败达到 `MAX_VALIDATION_FAILURES` 次之后，向用户发送的提示。

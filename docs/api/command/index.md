@@ -12,25 +12,25 @@
 
 ### _instance-var_ `commands`
 
-- **类型:** 
+- **类型:** Dict[CommandName_T, Command]
 
 - **说明:** 命令字典。
 
 ### _instance-var_ `aliases`
 
-- **类型:** 
+- **类型:** Dict[str, Command]
 
 - **说明:** 命令别名字典。
 
 ### _instance-var_ `switches`
 
-- **类型:** 
+- **类型:** Dict[Command, bool]
 
 - **说明:** 命令开关状态字典。
 
 ### _instance-var_ `patterns` <Badge text="1.7.0+"/>
 
-- **类型:** 
+- **类型:** Dict[Pattern[str], Command]
 
 - **说明:** 命令正则匹配字典。
 
@@ -219,7 +219,7 @@
 
 ### _instance-var_ `current_arg`
 
-- **类型:** 
+- **类型:** Optional[str]
 
 - **说明:** 命令会话当前参数。实际上是 酷 Q 收到的消息去掉命令名的剩下部分，因此可能存在 CQ 码。
 
@@ -237,7 +237,7 @@
 
 ### _instance-var_ `current_key`
 
-- **类型:** 
+- **类型:** Optional[str]
 
 - **说明:** 命令会话当前正在询问用户的参数的键（或称参数的名字）。第一次运行会话时，该属性为 `None`。
 

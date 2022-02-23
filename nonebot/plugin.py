@@ -11,7 +11,7 @@ import importlib
 import contextlib
 from datetime import timedelta
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Awaitable, Generator, List, Set, Dict, Tuple, TypeVar, Union, Optional, Iterable, Callable, Type, overload
+from typing import TYPE_CHECKING, Any, Coroutine, Generator, List, Set, Dict, Tuple, TypeVar, Union, Optional, Iterable, Callable, Type, overload
 
 from .log import logger
 from nonebot import permission as perm
@@ -54,13 +54,13 @@ class Plugin:
                  lifetime_hooks: List[LifetimeHook] = ...):
         """Creates a plugin with no name, no usage, and no handlers."""
 
-        self.module = module
+        self.module: ModuleType = module
         """已加载的插件模块（importlib 导入的 Python 模块）。"""
-        self.name = name
+        self.name: Optional[str] = name
         """插件名称，从插件模块的 `__plugin_name__` 特殊变量获得，如果没有此变量，则为 `None`。"""
-        self.usage = usage
+        self.usage: Optional[Any] = usage
         """插件使用方法，从插件模块的 `__plugin_usage__` 特殊变量获得，如果没有此变量，则为 `None`。"""
-        self.userdata = userdata
+        self.userdata: Optional[Any] = userdata
         """
         插件作者可由此变量向外部暴露其他信息，从插件模块的 `__plugin_userdata__` 特殊变量获得，如果没有此变量，则为 `None`。
         版本: 1.9.0+
@@ -519,7 +519,7 @@ def _add_handlers_to_managers(plugin: Plugin) -> None:
         MessagePreprocessorManager.add_message_preprocessor(mp)
 
 
-def _run_async_func_by_environ(func: Callable[..., Awaitable[Any]]) -> None:
+def _run_async_func_by_environ(func: Callable[..., Coroutine[Any, Any, Any]]) -> None:
     """
     run an async func depending on whether we are currently in a running
     event loop (inside a another async function)
@@ -1088,7 +1088,7 @@ def on_natural_language(
     only_to_me: bool = True,
     only_short_message: bool = True,
     allow_empty_message: bool = False
-):
+) -> Union[NLPHandler_T, Callable[[NLPHandler_T], NLPHandler_T]]:
     """将函数装饰为自然语言处理器。
 
     版本: 1.6.0+

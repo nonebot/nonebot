@@ -16,21 +16,21 @@
 
 ### _instance-var_ `msg`
 
-- **类型:** 
+- **类型:** str
 
 - **说明:** 以字符串形式表示的消息内容，已去除开头的 @ 和机器人称呼，可能存在 CQ 码。
 
 ### _instance-var_ `msg_images`
 
-- **类型:** 
+- **类型:** List[str]
 
 - **说明:** 消息内容中所有图片的 URL 的列表，如果消息中没有图片，则为 `[]`。
 
 ### _instance-var_ `msg_text`
 
-- **类型:** 
+- **类型:** str
 
-- **说明:** 消息内容的纯文本部分，已去除所有 CQ 码／非 `text` 类型的消息段。各纯文本消息段之间使用空格连接。
+- **说明:** 消息内容的纯文本部分，已去除所有 CQ 码/非 `text` 类型的消息段。各纯文本消息段之间使用空格连接。
 
 ## _class_ `IntentCommand(confidence, name, args=None, current_arg='')` <Badge text="1.2.0+"/>
 

@@ -28,55 +28,55 @@
 
 ### _instance-var_ `commands` <Badge text="1.6.0+"/>
 
-- **类型:** 
+- **类型:** Set[Command]
 
 - **说明:** 插件包含的命令，通过 `on_command` 装饰器注册。
 
 ### _instance-var_ `event_handlers` <Badge text="1.6.0+"/>
 
-- **类型:** 
+- **类型:** Set[EventHandler]
 
 - **说明:** 插件包含的事件处理器（包含通知、请求），通过 `on_notice` 以及 `on_request` 装饰器注册。
 
 ### _instance-var_ `lifetime_hooks` <Badge text="1.9.0+"/>
 
-- **类型:** 
+- **类型:** List[LifetimeHook]
 
 - **说明:** 插件包含的生命周期事件回调，通过 `on_plugin` 装饰器注册。
 
 ### _instance-var_ `module`
 
-- **类型:** 
+- **类型:** ModuleType
 
 - **说明:** 已加载的插件模块（importlib 导入的 Python 模块）。
 
 ### _instance-var_ `msg_preprocessors` <Badge text="1.9.0+"/>
 
-- **类型:** 
+- **类型:** Set['MessagePreprocessor']
 
 - **说明:** 插件包含的消息预处理器，通过 `message_preprocessor` 装饰器注册。
 
 ### _instance-var_ `name`
 
-- **类型:** 
+- **类型:** Optional[str]
 
 - **说明:** 插件名称，从插件模块的 `__plugin_name__` 特殊变量获得，如果没有此变量，则为 `None`。
 
 ### _instance-var_ `nl_processors` <Badge text="1.6.0+"/>
 
-- **类型:** 
+- **类型:** Set[NLProcessor]
 
 - **说明:** 插件包含的自然语言处理器，通过 `on_natural_language` 装饰器注册。
 
 ### _instance-var_ `usage`
 
-- **类型:** 
+- **类型:** Optional[Any]
 
 - **说明:** 插件使用方法，从插件模块的 `__plugin_usage__` 特殊变量获得，如果没有此变量，则为 `None`。
 
 ### _instance-var_ `userdata` <Badge text="1.9.0+"/>
 
-- **类型:** 
+- **类型:** Optional[Any]
 
 - **说明:** 插件作者可由此变量向外部暴露其他信息，从插件模块的 `__plugin_userdata__` 特殊变量获得，如果没有此变量，则为 `None`。
 

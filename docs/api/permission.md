@@ -31,6 +31,42 @@ async def _(session: NLPSession):
     return IntentCommand('weather', 100.0)
 ```
 
+## 权限声明常量
+<br />
+<details>
+<summary>适用于 1.9.0 之前的版本。点此展开</summary>
+
+NoneBot 在 1.9.0 后改变了声明权限的风格。为了保持向前兼容，尽管不建议使用，如果你的代码仍包含以下常量，则无需改动它们仍将工作：
+
+- `PRIVATE_FRIEND`: 好友私聊
+- `PRIVATE_GROUP`: 群临时私聊
+- `PRIVATE_DISCUSS`: 讨论组临时私聊
+- `PRIVATE_OTHER`: 其它私聊
+- `PRIVATE`: 任何私聊
+- `DISCUSS`: 讨论组
+- `GROUP_MEMBER`: 群成员
+- `GROUP_ADMIN`: 群管理员
+- `GROUP_OWNER`: 群主
+- `GROUP`: 任何群成员
+- `SUPERUSER`: 超级用户
+- `EVERYBODY`: 任何人
+
+用于权限声明的常量可通过 `|` 合并，在命令或自然语言处理器装饰器的 `permission` 参数中传入，表示允许触发相应命令或自然语言处理器的用户类型。
+
+例如下面的代码中，只有私聊和群管理员可以访问 `hello` 命令：
+
+```python
+@nonebot.on_command('hello', permission=PRIVATE | GROUP_ADMIN)
+async def _(session):
+    pass
+```
+
+需要注意的是，当一个用户是「群管理员」时，ta 同时也是「群成员」；当 ta 是「群主」时，ta 同时也是「群管理员」和「群成员」。
+
+在 1.9.0 后，这些常量的类型从 `int` 改变为了 [PermissionPolicy_T](./typing.md#var-permissionpolicy-t)，所以如果你之前包含了它们的 type hints，或用了不寻常的方法来获取它们的值，则可能会导致错误。
+
+</details>
+
 ## _class_ `SenderRoles(bot, event, sender)` <Badge text="1.9.0+"/>
 
 - **说明**
@@ -49,9 +85,13 @@ async def _(session: NLPSession):
 
 - **类型:** nonebot.NoneBot
 
+- **说明:** 机器人对象。
+
 ### _class-var_ `event`
 
 - **类型:** aiocqhttp.event.Event
+
+- **说明:** 事件。
 
 ### _property_ `is_admin`
 
@@ -233,5 +273,5 @@ async def _(session: NLPSession):
   policy1 = lambda sender: sender.is_groupchat and sender.from_group(123456789)
 
   policy2 = aggregate_policy(lambda sender: sender.is_groupchat,
-                              lambda sender: sender.from_group(123456789))
+                             lambda sender: sender.from_group(123456789))
   ```

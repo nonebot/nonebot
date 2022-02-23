@@ -158,12 +158,12 @@ class NLPSession(BaseSession):
 
     def __init__(self, bot: NoneBot, event: CQEvent, msg: str):
         super().__init__(bot, event)
-        self.msg = msg
+        self.msg: str = msg
         """以字符串形式表示的消息内容，已去除开头的 @ 和机器人称呼，可能存在 CQ 码。"""
         tmp_msg = Message(msg)
-        self.msg_text = tmp_msg.extract_plain_text()
-        """消息内容的纯文本部分，已去除所有 CQ 码／非 `text` 类型的消息段。各纯文本消息段之间使用空格连接。"""
-        self.msg_images = [
+        self.msg_text: str = tmp_msg.extract_plain_text()
+        """消息内容的纯文本部分，已去除所有 CQ 码/非 `text` 类型的消息段。各纯文本消息段之间使用空格连接。"""
+        self.msg_images: List[str] = [
             s.data['url']
             for s in tmp_msg
             if s.type == 'image' and 'url' in s.data
