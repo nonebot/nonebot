@@ -11,8 +11,8 @@ class CommandGroup:
     **注:** 在 1.8.1 之前，此类文档与实际表现不一致 ([issue 242](https://github.com/nonebot/nonebot/issues/242))。
 
     参数:
-        name: 命令名前缀，若传入字符串，则会自动转换成元组
-        permission {version}`1.9.0+`: 对应 `permission` 属性
+        name (Union[str, nonebot.typing.CommandName_T]): 命令名前缀，若传入字符串，则会自动转换成元组
+        permission (Union[nonebot.typing.PermissionPolicy_T, Iterable[nonebot.typing.PermissionPolicy_T]]) {version}`1.9.0+`: 对应 `permission` 属性
         only_to_me: 对应 `only_to_me` 属性
         privileged: 对应 `privileged` 属性
         shell_like: 对应 `shell_like` 属性
@@ -49,16 +49,19 @@ class CommandGroup:
         """将函数装饰为命令组中的命令处理器。使用方法和 `on_command` 装饰器完全相同。
 
         参数:
-            name: 命令名，注册命令处理器时会加上命令组的前缀
+            name (Union[str, nonebot.typing.CommandName_T]): 命令名，注册命令处理器时会加上命令组的前缀
             aliases: 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值时，则使用 `on_command` 装饰器的默认值
-            patterns {version}`1.8.1+`: 同上
-            permission {version}`1.9.0+`: 同上
+            patterns (nonebot.typing.Patterns_T) {version}`1.8.1+`: 同上
+            permission (Union[nonebot.typing.PermissionPolicy_T, Iterable[nonebot.typing.PermissionPolicy_T]]) {version}`1.9.0+`: 同上
             only_to_me: 同上
             privileged: 同上
             shell_like: 同上
             expire_timeout {version}`1.8.2+`: 同上
             run_timeout {version}`1.8.2+`: 同上
             session_class {version}`1.8.1+`: 同上
+
+        返回:
+            Callable[[nonebot.typing.CommandHandler_T], nonebot.typing.CommandHandler_T]: 装饰器闭包
 
         用法:
             ```python

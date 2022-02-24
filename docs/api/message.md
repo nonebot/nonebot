@@ -8,7 +8,7 @@
 
 - **要求** <Badge text="1.6.0+"/>
 
-  被装饰函数必须是一个 async 函数，且必须接收且仅接收三个位置参数，类型分别为 `NoneBot` 、 `aiocqhttp.Event` 和 `nonebot.plugin.PluginManager`，即形如:
+  被装饰函数必须是一个 async 函数，且必须接收且仅接收三个位置参数，类型分别为 [NoneBot](./index.md#class-nonebot-config-object-none) 、 `aiocqhttp.Event` 和 [PluginManager](./plugin.md#class-pluginmanager)，即形如:
 
   ```python
   async def func(bot: NoneBot, event: aiocqhttp.Event, plugin_manager: PluginManager):
@@ -17,11 +17,11 @@
 
 - **参数**
 
-  - `func` ((NoneBot, CQEvent, PluginManager) -> Awaitable[Any])
+  - `func` ([MessagePreprocessor_T](./typing.md#var-messagepreprocessor-t))
 
 - **返回**
 
-  - (NoneBot, CQEvent, PluginManager) -> Awaitable[Any]
+  - [MessagePreprocessor_T](./typing.md#var-messagepreprocessor-t): 装饰器闭包
 
 - **用法**
 

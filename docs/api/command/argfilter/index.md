@@ -18,10 +18,10 @@
 
 - **参数**
 
-  - `message` (str | dict[str, Any] | list[dict[str, Any]] | NoneType)
+  - `message` ([Message_T](../../typing.md#var-message-t) | None)
 
 ### _instance-var_ `message`
 
-- **类型:** 
+- **类型:** [Message_T](../../typing.md#var-message-t) | None
 
 - **说明:** 验证失败时要发送的错误提示消息。如果为 `None`，则使用配置中的 `DEFAULT_VALIDATION_FAILURE_EXPRESSION`。

@@ -79,7 +79,7 @@
 
 - **参数**
 
-  - `message` (str | dict[str, Any] | list[dict[str, Any]]): 要发送的消息内容
+  - `message` ([Message_T](./typing.md#var-message-t)): 要发送的消息内容
 
   - `at_sender` (bool): 是否 @ 发送者，对私聊不起作用
 

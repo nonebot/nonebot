@@ -12,13 +12,23 @@ from nonebot.typing import Message_T
 
 
 def extract_text(arg: Message_T) -> str:
-    """提取消息中的纯文本部分（使用空格合并纯文本消息段）。"""
+    """
+    提取消息中的纯文本部分（使用空格合并纯文本消息段）。
+
+    参数:
+        arg (nonebot.typing.Message_T):
+    """
     arg_as_msg = Message(arg)
     return arg_as_msg.extract_plain_text()
 
 
 def extract_image_urls(arg: Message_T) -> List[str]:
-    """提取消息中的图片 URL 列表。"""
+    """
+    提取消息中的图片 URL 列表。
+
+    参数:
+        arg (nonebot.typing.Message_T):
+    """
     arg_as_msg = Message(arg)
     return [
         s.data['url']
@@ -28,7 +38,12 @@ def extract_image_urls(arg: Message_T) -> List[str]:
 
 
 def extract_numbers(arg: Message_T) -> List[float]:
-    """提取消息中的所有数字（浮点数）。"""
+    """
+    提取消息中的所有数字（浮点数）。
+
+    参数:
+        arg (nonebot.typing.Message_T):
+    """
     s = str(arg)
     return list(map(float, re.findall(r'[+-]?(\d*\.?\d+|\d+\.?\d*)', s)))
 

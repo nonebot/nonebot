@@ -81,13 +81,13 @@ async def _(session):
 
   - `sender` (dict[str, Any] | None)
 
-### _class-var_ `bot`
+### _instance-var_ `bot`
 
-- **类型:** nonebot.NoneBot
+- **类型:** [NoneBot](./index.md#class-nonebot-config-object-none)
 
 - **说明:** 机器人对象。
 
-### _class-var_ `event`
+### _instance-var_ `event`
 
 - **类型:** aiocqhttp.event.Event
 
@@ -153,7 +153,7 @@ async def _(session):
 
 - **说明:** 发送者是配置文件中设置的超级用户。
 
-### _class-var_ `sender`
+### _instance-var_ `sender`
 
 - **类型:** dict[str, Any] | None
 
@@ -232,7 +232,7 @@ async def _(session):
 
   - `event` (aiocqhttp.event.Event): 消息事件对象
 
-  - `policy` ((SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]) <Badge text="1.9.0+"/>: 返回布尔值的权限检查策略
+  - `policy` ([PermissionPolicy_T](./typing.md#var-permissionpolicy-t)) <Badge text="1.9.0+"/>: 返回布尔值的权限检查策略
 
 - **返回**
 

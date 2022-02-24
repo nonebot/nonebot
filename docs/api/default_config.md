@@ -181,7 +181,7 @@ COMMAND_START = {'', '/', '!', '／', '！'}
 
 ## _var_ `DEFAULT_COMMAND_PERMISSION` <Badge text="1.9.0+"/>
 
-- **类型:** (SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]
+- **类型:** [PermissionPolicy_T](./typing.md#var-permissionpolicy-t)
 
 - **说明**
 
@@ -199,7 +199,7 @@ COMMAND_START = {'', '/', '!', '／', '！'}
 
 ## _var_ `DEFAULT_NLP_PERMISSION` <Badge text="1.9.0+"/>
 
-- **类型:** (SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]
+- **类型:** [PermissionPolicy_T](./typing.md#var-permissionpolicy-t)
 
 - **说明**
 
@@ -247,7 +247,7 @@ COMMAND_START = {'', '/', '!', '／', '！'}
 
 ## _var_ `SESSION_RUNNING_EXPRESSION`
 
-- **类型:** str | Sequence[str] | (*Any, **Any) -> str
+- **类型:** [Expression_T](./typing.md#var-expression-t)
 
 - **说明**
 
@@ -283,7 +283,7 @@ COMMAND_START = {'', '/', '!', '／', '！'}
 
 ## _var_ `DEFAULT_VALIDATION_FAILURE_EXPRESSION` <Badge text="1.2.0+"/>
 
-- **类型:** str | Sequence[str] | (*Any, **Any) -> str
+- **类型:** [Expression_T](./typing.md#var-expression-t)
 
 - **说明**
 
@@ -313,7 +313,7 @@ COMMAND_START = {'', '/', '!', '／', '！'}
 
 ## _var_ `TOO_MANY_VALIDATION_FAILURES_EXPRESSION` <Badge text="1.3.0+"/>
 
-- **类型:** str | Sequence[str] | (*Any, **Any) -> str
+- **类型:** [Expression_T](./typing.md#var-expression-t)
 
 - **说明**
 
@@ -332,7 +332,7 @@ COMMAND_START = {'', '/', '!', '／', '！'}
 
 ## _var_ `SESSION_CANCEL_EXPRESSION` <Badge text="1.3.0+"/>
 
-- **类型:** str | Sequence[str] | (*Any, **Any) -> str
+- **类型:** [Expression_T](./typing.md#var-expression-t)
 
 - **说明**
 

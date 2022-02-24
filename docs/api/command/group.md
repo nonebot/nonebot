@@ -10,9 +10,9 @@
 
 - **参数**
 
-  - `name` (str | tuple[str, ...]): 命令名前缀，若传入字符串，则会自动转换成元组
+  - `name` (str | [CommandName_T](../typing.md#var-commandname-t)): 命令名前缀，若传入字符串，则会自动转换成元组
 
-  - `permission` ((SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool] | Iterable[(SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]]) <Badge text="1.9.0+"/>: 对应 `permission` 属性
+  - `permission` ([PermissionPolicy_T](../typing.md#var-permissionpolicy-t) | Iterable[[PermissionPolicy_T](../typing.md#var-permissionpolicy-t)]) <Badge text="1.9.0+"/>: 对应 `permission` 属性
 
   - `only_to_me` (bool): 对应 `only_to_me` 属性
 
@@ -46,13 +46,13 @@
 
 - **参数**
 
-  - `name` (str | tuple[str, ...]): 命令名，注册命令处理器时会加上命令组的前缀
+  - `name` (str | [CommandName_T](../typing.md#var-commandname-t)): 命令名，注册命令处理器时会加上命令组的前缀
 
   - `aliases` (Iterable[str] | str): 和 `on_command` 装饰器含义相同，若不传入则使用命令组默认值，若命令组没有默认值时，则使用 `on_command` 装饰器的默认值
 
-  - `patterns` (Iterable[str] | str | Iterable[Pattern[str]] | Pattern[str]) <Badge text="1.8.1+"/>: 同上
+  - `patterns` ([Patterns_T](../typing.md#var-patterns-t)) <Badge text="1.8.1+"/>: 同上
 
-  - `permission` ((SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool] | Iterable[(SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]]) <Badge text="1.9.0+"/>: 同上
+  - `permission` ([PermissionPolicy_T](../typing.md#var-permissionpolicy-t) | Iterable[[PermissionPolicy_T](../typing.md#var-permissionpolicy-t)]) <Badge text="1.9.0+"/>: 同上
 
   - `only_to_me` (bool): 同上
 
@@ -68,7 +68,7 @@
 
 - **返回**
 
-  - ((CommandSession) -> Awaitable[Any]) -> (CommandSession) -> Awaitable[Any]
+  - ([CommandHandler_T](../typing.md#var-commandhandler-t)) -> [CommandHandler_T](../typing.md#var-commandhandler-t): 装饰器闭包
 
 - **用法**
 

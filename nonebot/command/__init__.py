@@ -2,6 +2,8 @@
 快捷导入:
 
 - `CommandGroup` -> {ref}`nonebot.command.group.CommandGroup`
+
+此模块定义了一个内部细节可能会频繁变更而不在文档公开的 `Command` 类型，用户如果需要使用应该自行考虑不兼容更新产生的风险。
 """
 import re
 import asyncio
@@ -221,7 +223,7 @@ class CommandManager:
         # TODO: don't copy
         # https://github.com/nonebot/nonebot/projects/2#card-69531150
         self.commands: Dict[CommandName_T, Command] = CommandManager._commands.copy()
-        """命令字典。"""
+        """{anno}`Dict[nonebot.typing.CommandName_T, Command]` 命令字典。"""
         self.aliases: Dict[str, Command] = CommandManager._aliases.copy()
         """命令别名字典。"""
         self.switches: Dict[Command, bool] = CommandManager._switches.copy()
@@ -237,12 +239,12 @@ class CommandManager:
         """注册一个 `Command` 对象。
 
         参数:
-            cmd_name: 命令名称
+            cmd_name (nonebot.typing.CommandName_T): 命令名称
             cmd: 命令对象
 
         用法:
             ```python
-            cmd = Command(name, func, permission, only_to_me, privileged)
+            cmd = Command(...)
             CommandManager.add_command(name, cmd)
             ```
         """
@@ -257,12 +259,12 @@ class CommandManager:
         """更新一个已存在的命令。
 
         参数:
-            cmd_name: 命令名词
+            cmd_name (nonebot.typing.CommandName_T): 命令名称
             cmd: 命令对象
 
         用法:
             ```python
-            cmd = Command(name, func, permission, only_to_me, privileged)
+            cmd = Command(...)
             CommandManager.reload_command(name, cmd)
             ```
         """
@@ -284,7 +286,7 @@ class CommandManager:
         """移除一个已存在的命令。
 
         参数:
-            cmd_name: 命令名称
+            cmd_name (nonebot.typing.CommandName_T): 命令名称
 
         返回:
             bool: 是否成功移除命令
@@ -313,7 +315,7 @@ class CommandManager:
         """根据 `state` 更改 command 的全局状态。
 
         参数:
-            cmd_name: 命令名称
+            cmd_name (nonebot.typing.CommandName_T): 命令名称
             state:
                 - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
                 - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
@@ -343,7 +345,7 @@ class CommandManager:
 
         用法:
             ```python
-            cmd = Command(name, func, permission, only_to_me, privileged)
+            cmd = Command(...)
             CommandManager.add_aliases({"别名", "test"}, cmd)
             ```
         """
@@ -486,7 +488,7 @@ class CommandManager:
         """根据 `state` 更改 command 的状态。仅对当前消息有效。
 
         参数:
-            cmd_name: 命令名称
+            cmd_name (nonebot.typing.CommandName_T): 命令名称
             state:
                 - `None(default)`: 切换状态，即 开 -> 关、关 -> 开
                 - `bool`: 切换至指定状态，`True` -> 开、`False` -> 关
@@ -507,7 +509,16 @@ class CommandManager:
 
 
 class CommandSession(BaseSession):
-    """继承自 `BaseSession` 类，表示命令 Session。"""
+    """
+    继承自 `BaseSession` 类，表示命令 Session。
+
+    参数:
+        bot:
+        event:
+        cmd:
+        current_arg:
+        args (Optional[nonebot.typing.CommandArgs_T]):
+    """
 
     __slots__ = ('cmd', 'current_key', 'current_arg_filters',
                  '_current_send_kwargs', 'current_arg', '_current_arg_text',
@@ -554,6 +565,7 @@ class CommandSession(BaseSession):
     @property
     def state(self) -> State_T:
         """
+        {anno}`nonebot.typing.State_T`
         命令会话的状态数据（包括已获得的所有参数）。
 
         属性本身只读，但属性中的内容可读写。
@@ -685,13 +697,13 @@ class CommandSession(BaseSession):
         注意，一旦传入 `arg_filters` 参数（参数过滤器），则等用户再次输入时，_command_func._`args_parser` 所注册的参数解析函数将不会被运行，而会在对 `current_arg` 依次运行过滤器之后直接将其放入 `state` 属性中。
 
         :::tip
-        推荐使用下面的 `aget` 方法。
+        推荐使用 `aget` 方法。
         :::
 
         参数:
             key: 参数的键
-            prompt: 提示的消息内容
-            arg_filters {version}`1.2.0+`: 用于处理和验证用户输入的参数的过滤器
+            prompt (Optional[nonebot.typing.Message_T]): 提示的消息内容
+            arg_filters (Optional[List[nonebot.typing.Filter_T]]) {version}`1.2.0+`: 用于处理和验证用户输入的参数的过滤器
             kwargs: 其它传入 `BaseSession.send()` 的命名参数
 
         返回:
@@ -747,8 +759,8 @@ class CommandSession(BaseSession):
 
         参数:
             key: 参数的键，若不传入则使用默认键值
-            prompt: 提示的消息内容
-            arg_filters: 用于处理和验证用户输入的参数的过滤器
+            prompt (Optional[nonebot.typing.Message_T]): 提示的消息内容
+            arg_filters (Optional[List[nonebot.typing.Filter_T]]): 用于处理和验证用户输入的参数的过滤器
             force_update: 是否强制获取用户新的输入，若是，则会忽略已有的当前参数，若 `key` 不传入则为真，否则默认为假
             kwargs: 其它传入 `BaseSession.send()` 的命名参数
 
@@ -803,11 +815,11 @@ class CommandSession(BaseSession):
         暂停当前命令会话，并发送消息。此函数调用之后的语句将不会被执行（除非捕获了此函数抛出的特殊异常）。
 
         :::tip
-        推荐使用下面的 `apause` 方法。
+        推荐使用 `apause` 方法。
         :::
 
         参数:
-            message: 要发送的消息，若不传入则不发送
+            message (Optional[nonebot.typing.Message_T]): 要发送的消息，若不传入则不发送
             kwargs: 其它传入 `BaseSession.send()` 的命名参数
 
         用法:
@@ -835,7 +847,7 @@ class CommandSession(BaseSession):
         版本: 1.8.0+
 
         参数:
-            message: 要发送的消息，若不传入则不发送
+            message (Optional[nonebot.typing.Message_T]): 要发送的消息，若不传入则不发送
             kwargs: 其它传入 `BaseSession.send()` 的命名参数
 
         用法:
@@ -874,7 +886,7 @@ class CommandSession(BaseSession):
         调用此函数后，命令将被视为已经完成，当前命令会话将被移除。
 
         参数:
-            message: 要发送的消息，若不传入则不发送
+            message (Optional[nonebot.typing.Message_T]): 要发送的消息，若不传入则不发送
             kwargs: 其它传入 `BaseSession.send()` 的命名参数
 
         用法:
@@ -902,7 +914,7 @@ class CommandSession(BaseSession):
         这里进行到第三行时，命令期待的是一个地点，但实际发现消息的开头是「算了」，于是调用 `switch('帮我查下今天下午南京到上海的火车票吧')`，结束天气命令，将剩下来的内容作为新的消息来处理（触发火车票插件的自然语言处理器，进而调用火车票查询命令）。
 
         参数:
-            new_message: 要覆盖消息事件的新消息内容
+            new_message (nonebot.typing.Message_T): 要覆盖消息事件的新消息内容
 
         用法:
             ```python
@@ -1023,9 +1035,9 @@ async def call_command(bot: NoneBot,
     参数:
         bot: NoneBot 对象
         event: 事件对象
-        name: 要调用的命令名
+        name (Union[str, nonebot.typing.CommandName_T]): 要调用的命令名
         current_arg: 命令会话的当前输入参数
-        args: 命令会话的（初始）参数（将会被并入命令会话的 `state` 属性）
+        args (Optional[nonebot.typing.CommandArgs_T]): 命令会话的（初始）参数（将会被并入命令会话的 `state` 属性）
         check_perm: 是否检查命令的权限，若否，则即使当前事件上下文并没有权限调用这里指定的命令，也仍然会调用成功
         disable_interaction: 是否禁用交互功能，若是，则该命令的会话不会覆盖任何当前已存在的命令会话，新创建的会话也不会保留
 

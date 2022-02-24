@@ -28,19 +28,19 @@
 
 ### _instance-var_ `commands` <Badge text="1.6.0+"/>
 
-- **类型:** Set[Command]
+- **类型:** set[Command]
 
 - **说明:** 插件包含的命令，通过 `on_command` 装饰器注册。
 
 ### _instance-var_ `event_handlers` <Badge text="1.6.0+"/>
 
-- **类型:** Set[EventHandler]
+- **类型:** set[EventHandler]
 
 - **说明:** 插件包含的事件处理器（包含通知、请求），通过 `on_notice` 以及 `on_request` 装饰器注册。
 
 ### _instance-var_ `lifetime_hooks` <Badge text="1.9.0+"/>
 
-- **类型:** List[LifetimeHook]
+- **类型:** list[LifetimeHook]
 
 - **说明:** 插件包含的生命周期事件回调，通过 `on_plugin` 装饰器注册。
 
@@ -52,31 +52,31 @@
 
 ### _instance-var_ `msg_preprocessors` <Badge text="1.9.0+"/>
 
-- **类型:** Set['MessagePreprocessor']
+- **类型:** set[MessagePreprocessor]
 
 - **说明:** 插件包含的消息预处理器，通过 `message_preprocessor` 装饰器注册。
 
 ### _instance-var_ `name`
 
-- **类型:** Optional[str]
+- **类型:** str | None
 
 - **说明:** 插件名称，从插件模块的 `__plugin_name__` 特殊变量获得，如果没有此变量，则为 `None`。
 
 ### _instance-var_ `nl_processors` <Badge text="1.6.0+"/>
 
-- **类型:** Set[NLProcessor]
+- **类型:** set[NLProcessor]
 
 - **说明:** 插件包含的自然语言处理器，通过 `on_natural_language` 装饰器注册。
 
 ### _instance-var_ `usage`
 
-- **类型:** Optional[Any]
+- **类型:** Any | None
 
 - **说明:** 插件使用方法，从插件模块的 `__plugin_usage__` 特殊变量获得，如果没有此变量，则为 `None`。
 
 ### _instance-var_ `userdata` <Badge text="1.9.0+"/>
 
-- **类型:** Optional[Any]
+- **类型:** Any | None
 
 - **说明:** 插件作者可由此变量向外部暴露其他信息，从插件模块的 `__plugin_userdata__` 特殊变量获得，如果没有此变量，则为 `None`。
 
@@ -98,13 +98,13 @@
 
 ### _instance-var_ `cmd_manager`
 
-- **类型:** 
+- **类型:** CommandManager
 
 - **说明:** 命令管理器实例。
 
 ### _instance-var_ `nlp_manager`
 
-- **类型:** 
+- **类型:** NLPManager
 
 - **说明:** 自然语言管理器实例。
 
@@ -616,7 +616,7 @@
 
 - **返回**
 
-  - (() -> Any | () -> Awaitable[Any]) -> () -> Any | () -> Awaitable[Any]
+  - ([PluginLifetimeHook_T](./typing.md#var-pluginlifetimehook-t)) -> [PluginLifetimeHook_T](./typing.md#var-pluginlifetimehook-t): 装饰器闭包
 
 - **用法**
 
@@ -652,17 +652,17 @@
 
 - **参数**
 
-  - `name` (str | tuple[str, ...]): 命令名，如果传入的是字符串则会自动转为元组
+  - `name` (str | [CommandName_T](./typing.md#var-commandname-t)): 命令名，如果传入的是字符串则会自动转为元组
 
   - `aliases` (Iterable[str] | str): 命令别名
 
-  - `patterns` (Iterable[str] | str | Iterable[Pattern[str]] | Pattern[str]) <Badge text="1.7.0+"/>: 正则匹配，可以传入正则表达式或正则表达式组，来对整条命令进行匹配
+  - `patterns` ([Patterns_T](./typing.md#var-patterns-t)) <Badge text="1.7.0+"/>: 正则匹配，可以传入正则表达式或正则表达式组，来对整条命令进行匹配
 
     :::warning 注意
     滥用正则表达式可能会引发性能问题，请优先使用普通命令。另外一点需要注意的是，由正则表达式匹配到的匹配到的命令，`session` 中的 `current_arg` 会是整个命令，而不会删除匹配到的内容，以满足一些特殊需求。
     :::
 
-  - `permission` ((SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool] | Iterable[(SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]]) <Badge text="1.9.0+"/>: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_COMMAND_PERMISSION`
+  - `permission` ([PermissionPolicy_T](./typing.md#var-permissionpolicy-t) | Iterable[[PermissionPolicy_T](./typing.md#var-permissionpolicy-t)]) <Badge text="1.9.0+"/>: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_COMMAND_PERMISSION`
 
   - `only_to_me` (bool): 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
 
@@ -678,7 +678,7 @@
 
 - **返回**
 
-  - ((CommandSession) -> Awaitable[Any]) -> (CommandSession) -> Awaitable[Any]
+  - ([CommandHandler_T](./typing.md#var-commandhandler-t)) -> [CommandHandler_T](./typing.md#var-commandhandler-t): 装饰器闭包
 
 - **用法**
 
@@ -740,11 +740,11 @@
 
   - **参数**
 
-    - `__func` ((NLPSession) -> Awaitable[IntentCommand | None]): 待装饰函数
+    - `__func` ([NLPHandler_T](./typing.md#var-nlphandler-t)): 待装饰函数
 
   - **返回**
 
-    - NLPHandler_T: 被装饰函数
+    - [NLPHandler_T](./typing.md#var-nlphandler-t): 被装饰函数
 
   **2.** `(keywords=..., *, permission=..., only_to_me=..., only_short_message=..., allow_empty_message=...)`
 
@@ -752,7 +752,7 @@
 
     - `keywords` (Iterable[str] | str | NoneType): 要响应的关键词，若传入 `None`，则响应所有消息
 
-    - `permission` ((SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool] | Iterable[(SenderRoles) -> bool | (SenderRoles) -> Awaitable[bool]]) <Badge text="1.9.0+"/>: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_NLP_PERMISSION`
+    - `permission` ([PermissionPolicy_T](./typing.md#var-permissionpolicy-t) | Iterable[[PermissionPolicy_T](./typing.md#var-permissionpolicy-t)]) <Badge text="1.9.0+"/>: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_NLP_PERMISSION`
 
     - `only_to_me` (bool): 是否只响应确定是在和「我」（机器人）说话的消息（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
 
@@ -762,7 +762,7 @@
 
   - **返回**
 
-    - ((NLPSession) -> Awaitable[IntentCommand | None]) -> (NLPSession) -> Awaitable[IntentCommand | None]
+    - ([NLPHandler_T](./typing.md#var-nlphandler-t)) -> [NLPHandler_T](./typing.md#var-nlphandler-t): 装饰器闭包
 
 - **用法**
 
@@ -797,11 +797,11 @@
 
   - **参数**
 
-    - `__func` ((NoticeSession) -> Awaitable[Any])
+    - `__func` ([NoticeHandler_T](./typing.md#var-noticehandler-t))
 
   - **返回**
 
-    - (NoticeSession) -> Awaitable[Any]
+    - [NoticeHandler_T](./typing.md#var-noticehandler-t)
 
   **2.** `(*events)`
 
@@ -811,7 +811,7 @@
 
   - **返回**
 
-    - ((NoticeSession) -> Awaitable[Any]) -> (NoticeSession) -> Awaitable[Any]
+    - ([NoticeHandler_T](./typing.md#var-noticehandler-t)) -> [NoticeHandler_T](./typing.md#var-noticehandler-t): 装饰器闭包
 
 - **用法**
 
@@ -848,11 +848,11 @@
 
   - **参数**
 
-    - `__func` ((RequestSession) -> Awaitable[Any])
+    - `__func` ([RequestHandler_T](./typing.md#var-requesthandler-t))
 
   - **返回**
 
-    - (RequestSession) -> Awaitable[Any]
+    - [RequestHandler_T](./typing.md#var-requesthandler-t)
 
   **2.** `(*events)`
 
@@ -862,7 +862,7 @@
 
   - **返回**
 
-    - ((RequestSession) -> Awaitable[Any]) -> (RequestSession) -> Awaitable[Any]
+    - ([RequestHandler_T](./typing.md#var-requesthandler-t)) -> [RequestHandler_T](./typing.md#var-requesthandler-t): 装饰器闭包
 
 - **用法**
 

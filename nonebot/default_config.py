@@ -22,7 +22,8 @@ from .typing import Expression_T, PermissionPolicy_T
 from .permission import EVERYBODY as _EVERYBODY
 
 API_ROOT: str = ''
-"""CQHTTP 插件的 HTTP 接口地址，如果不使用 HTTP 通信，则无需设置。
+"""
+CQHTTP 插件的 HTTP 接口地址，如果不使用 HTTP 通信，则无需设置。
 
 **默认值:** `''`
 
@@ -35,19 +36,22 @@ API_ROOT: str = ''
 """
 
 ACCESS_TOKEN: str = ''
-"""需要和 CQHTTP 插件的配置中的 `access_token` 相同。
+"""
+需要和 CQHTTP 插件的配置中的 `access_token` 相同。
 
 **默认值:** `''`
 """
 
 SECRET: str = ''
-"""需要和 CQHTTP 插件的配置中的 `secret` 相同。
+"""
+需要和 CQHTTP 插件的配置中的 `secret` 相同。
 
 **默认值:** `''`
 """
 
 HOST: str = '127.0.0.1'
-"""NoneBot 的 HTTP 和 WebSocket 服务端监听的 IP／主机名。
+"""
+NoneBot 的 HTTP 和 WebSocket 服务端监听的 IP／主机名。
 
 **默认值:** `'127.0.0.1'`
 
@@ -60,7 +64,8 @@ HOST: str = '127.0.0.1'
 """
 
 PORT: int = 8080
-"""NoneBot 的 HTTP 和 WebSocket 服务端监听的端口。
+"""
+NoneBot 的 HTTP 和 WebSocket 服务端监听的端口。
 
 **默认值:** `8080`
 
@@ -73,7 +78,8 @@ PORT: int = 8080
 """
 
 DEBUG: bool = True
-"""是否以调试模式运行，生产环境需要设置为 `False` 以提高性能。
+"""
+是否以调试模式运行，生产环境需要设置为 `False` 以提高性能。
 
 **默认值:** `True`
 
@@ -86,7 +92,8 @@ DEBUG: bool = True
 """
 
 SUPERUSERS: Collection[int] = set()
-"""超级用户的 QQ 号，用于命令的权限检查。
+"""
+超级用户的 QQ 号，用于命令的权限检查。
 
 **默认值:** `set()`
 
@@ -101,7 +108,8 @@ SUPERUSERS: Collection[int] = set()
 """
 
 NICKNAME: Union[str, Iterable[str]] = ''
-"""机器人的昵称，用于辨别用户是否在和机器人说话。
+"""
+机器人的昵称，用于辨别用户是否在和机器人说话。
 
 **默认值:** `''`
 
@@ -114,7 +122,8 @@ NICKNAME: Union[str, Iterable[str]] = ''
 """
 
 COMMAND_START: Iterable[Union[str, Pattern]] = {'/', '!', '／', '！'}
-"""命令的起始标记，用于判断一条消息是不是命令。
+"""
+命令的起始标记，用于判断一条消息是不是命令。
 
 **默认值:** `{'/', '!', '／', '！'}`
 
@@ -127,7 +136,8 @@ COMMAND_START: Iterable[Union[str, Pattern]] = {'/', '!', '／', '！'}
 """
 
 COMMAND_SEP: Iterable[Union[str, Pattern]] = {'/', '.'}
-"""命令的分隔标记，用于将文本形式的命令切分为元组（实际的命令名）。
+"""
+命令的分隔标记，用于将文本形式的命令切分为元组（实际的命令名）。
 
 **默认值:** `{'/', '.'}`
 
@@ -140,7 +150,9 @@ COMMAND_SEP: Iterable[Union[str, Pattern]] = {'/', '.'}
 """
 
 DEFAULT_COMMAND_PERMISSION: PermissionPolicy_T = _EVERYBODY
-"""命令处理器的缺省权限。默认为允许所有用户触发。
+"""
+{anno}`nonebot.typing.PermissionPolicy_T`
+命令处理器的缺省权限。默认为允许所有用户触发。
 
 **默认值:** `lambda _: True`
 
@@ -155,7 +167,9 @@ DEFAULT_COMMAND_PERMISSION: PermissionPolicy_T = _EVERYBODY
 """
 
 DEFAULT_NLP_PERMISSION: PermissionPolicy_T = _EVERYBODY
-"""自然语言处理器的缺省权限。默认为允许所有用户触发。
+"""
+{anno}`nonebot.typing.PermissionPolicy_T`
+自然语言处理器的缺省权限。默认为允许所有用户触发。
 
 **默认值:** `lambda _: True`
 
@@ -163,7 +177,8 @@ DEFAULT_NLP_PERMISSION: PermissionPolicy_T = _EVERYBODY
 """
 
 SESSION_EXPIRE_TIMEOUT: Optional[timedelta] = timedelta(minutes=5)
-"""命令会话的过期超时时长，超时后会话将被移除。`None` 表示不超时。
+"""
+命令会话的过期超时时长，超时后会话将被移除。`None` 表示不超时。
 
 **默认值:** `datetime.timedelta(minutes=5)`
 
@@ -177,7 +192,8 @@ SESSION_EXPIRE_TIMEOUT: Optional[timedelta] = timedelta(minutes=5)
 """
 
 SESSION_RUN_TIMEOUT: Optional[timedelta] = None
-"""命令会话的运行超时时长，超时后会话将被移除，命令处理函数会被异常所中断。此时用户可以调用新的命令，开启新的会话。`None` 表示不超时。
+"""
+命令会话的运行超时时长，超时后会话将被移除，命令处理函数会被异常所中断。此时用户可以调用新的命令，开启新的会话。`None` 表示不超时。
 
 **默认值:** `None`
 
@@ -191,7 +207,9 @@ SESSION_RUN_TIMEOUT: Optional[timedelta] = None
 """
 
 SESSION_RUNNING_EXPRESSION: Expression_T = '您有命令正在执行，请稍后再试'
-"""当有命令会话正在运行时，给用户新消息的回复。
+"""
+{anno}`nonebot.typing.Expression_T`
+当有命令会话正在运行时，给用户新消息的回复。
 
 **默认值:** `'您有命令正在执行，请稍后再试'`
 
@@ -204,7 +222,8 @@ SESSION_RUNNING_EXPRESSION: Expression_T = '您有命令正在执行，请稍后
 """
 
 SHORT_MESSAGE_MAX_LENGTH: int = 50
-"""短消息的最大长度。默认情况下（`only_short_message` 为 `True`），自然语言处理器只会响应消息中纯文本部分的长度总和小于等于此值的消息。
+"""
+短消息的最大长度。默认情况下（`only_short_message` 为 `True`），自然语言处理器只会响应消息中纯文本部分的长度总和小于等于此值的消息。
 
 **默认值:** `50`
 
@@ -217,7 +236,9 @@ SHORT_MESSAGE_MAX_LENGTH: int = 50
 """
 
 DEFAULT_VALIDATION_FAILURE_EXPRESSION: Expression_T = '您的输入不符合要求，请重新输入'
-"""命令参数验证失败（验证器抛出 `ValidateError` 异常）、且验证器没有指定错误信息时，默认向用户发送的错误提示。
+"""
+{anno}`nonebot.typing.Expression_T`
+命令参数验证失败（验证器抛出 `ValidateError` 异常）、且验证器没有指定错误信息时，默认向用户发送的错误提示。
 
 **默认值:** `'您的输入不符合要求，请重新输入'`
 
@@ -244,7 +265,9 @@ MAX_VALIDATION_FAILURES: int = 3
 
 TOO_MANY_VALIDATION_FAILURES_EXPRESSION: Expression_T = \
     '您输入错误太多次啦，如需重试，请重新触发本功能'
-"""命令参数验证失败达到 `MAX_VALIDATION_FAILURES` 次之后，向用户发送的提示。
+"""
+{anno}`nonebot.typing.Expression_T`
+命令参数验证失败达到 `MAX_VALIDATION_FAILURES` 次之后，向用户发送的提示。
 
 **默认值:** `'您输入错误太多次啦，如需重试，请重新触发本功能'`
 
@@ -260,7 +283,9 @@ TOO_MANY_VALIDATION_FAILURES_EXPRESSION: Expression_T = \
 """
 
 SESSION_CANCEL_EXPRESSION: Expression_T = '好的'
-"""`nonebot.command.argfilter.controllers.handle_cancellation()` 控制器在用户发送了 `算了`、`取消` 等取消指令后，结束当前命令会话时，向用户发送的提示。
+"""
+{anno}`nonebot.typing.Expression_T`
+`nonebot.command.argfilter.controllers.handle_cancellation()` 控制器在用户发送了 `算了`、`取消` 等取消指令后，结束当前命令会话时，向用户发送的提示。
 
 **默认值:** `'好的'`
 
@@ -278,7 +303,8 @@ SESSION_CANCEL_EXPRESSION: Expression_T = '好的'
 """
 
 APSCHEDULER_CONFIG: Dict[str, Any] = {'apscheduler.timezone': 'Asia/Shanghai'}
-"""APScheduler 的配置对象，见 [Configuring the scheduler](https://apscheduler.readthedocs.io/en/latest/userguide.html#configuring-the-scheduler)。
+"""
+APScheduler 的配置对象，见 [Configuring the scheduler](https://apscheduler.readthedocs.io/en/latest/userguide.html#configuring-the-scheduler)。
 
 **默认值:** `{'apscheduler.timezone': 'Asia/Shanghai'}`
 """

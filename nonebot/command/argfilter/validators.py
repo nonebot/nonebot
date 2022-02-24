@@ -34,7 +34,12 @@ def _raise_failure(message):
 
 
 def not_empty(message=None) -> Filter_T:
-    """验证输入不为空。"""
+    """
+    验证输入不为空。
+    
+    返回:
+        nonebot.typing.Filter_T:
+    """
 
     def validate(value):
         if value is None:
@@ -48,11 +53,18 @@ def not_empty(message=None) -> Filter_T:
 
 def fit_size(min_length: int = 0, max_length: int = None,
              message=None) -> Filter_T:
-    """验证输入的长度（大小）在 `min_length` 到 `max_length` 之间（包括两者）。
+    """
+    验证输入的长度（大小）在 `min_length` 到 `max_length` 之间（包括两者）。
+
+    输入和输出应符合 `Sized` 类型。
 
     参数:
         min_length: 最小长度
         max_length: 最大长度
+        message: 验证失败时的提示
+
+    返回:
+        nonebot.typing.Filter_T:
     """
 
     def validate(value):
@@ -67,12 +79,19 @@ def fit_size(min_length: int = 0, max_length: int = None,
 
 def match_regex(pattern: str, message=None, *, flags=0,
                 fullmatch: bool = False) -> Filter_T:
-    """验证输入是否匹配正则表达式。
+    """
+    验证输入是否匹配正则表达式。
+
+    输入和输出应符合 `str` 类型。
 
     参数:
         pattern: 正则表达式
+        message: 验证失败时的提示
         flags: 传入 `re.compile()` 的标志
         fullmatch: 是否使用完全匹配（`re.fullmatch()`）
+
+    返回:
+        nonebot.typing.Filter_T:
     """
 
     pattern_ = re.compile(pattern, flags)
@@ -90,10 +109,15 @@ def match_regex(pattern: str, message=None, *, flags=0,
 
 
 def ensure_true(bool_func: Callable[[Any], bool], message=None) -> Filter_T:
-    """验证输入是否能使给定布尔函数返回 `True`。
+    """
+    验证输入是否能使给定布尔函数返回 `True`。
 
     参数:
         bool_func: 接受输入、返回布尔值的函数
+        message: 验证失败时的提示
+
+    返回:
+        nonebot.typing.Filter_T:
     """
 
     def validate(value):
@@ -105,11 +129,18 @@ def ensure_true(bool_func: Callable[[Any], bool], message=None) -> Filter_T:
 
 
 def between_inclusive(start=None, end=None, message=None) -> Filter_T:
-    """验证输入是否在 `start` 到 `end` 之间（包括两者）。
+    """
+    验证输入是否在 `start` 到 `end` 之间（包括两者）。
+
+    输入和输出应符合 `Comparable` 类型。
 
     参数:
         start: 范围开始
         end: 范围结束
+        message: 验证失败时的提示
+
+    返回:
+        nonebot.typing.Filter_T:
     """
 
     def validate(value):

@@ -4,6 +4,8 @@
 
 - `CommandGroup` -> [CommandGroup](./group.md#class-commandgroup-name-permission-only-to-me-privileged-shell-like-expire-timeout-run-timeout-session-class)
 
+此模块定义了一个内部细节可能会频繁变更而不在文档公开的 `Command` 类型，用户如果需要使用应该自行考虑不兼容更新产生的风险。
+
 ## _class_ `CommandManager()` <Badge text="1.6.0+"/>
 
 - **说明**
@@ -12,25 +14,25 @@
 
 ### _instance-var_ `commands`
 
-- **类型:** Dict[CommandName_T, Command]
+- **类型:** dict[[CommandName_T](../typing.md#var-commandname-t), Command]
 
 - **说明:** 命令字典。
 
 ### _instance-var_ `aliases`
 
-- **类型:** Dict[str, Command]
+- **类型:** dict[str, Command]
 
 - **说明:** 命令别名字典。
 
 ### _instance-var_ `switches`
 
-- **类型:** Dict[Command, bool]
+- **类型:** dict[Command, bool]
 
 - **说明:** 命令开关状态字典。
 
 ### _instance-var_ `patterns` <Badge text="1.7.0+"/>
 
-- **类型:** Dict[Pattern[str], Command]
+- **类型:** dict[Pattern[str], Command]
 
 - **说明:** 命令正则匹配字典。
 
@@ -53,7 +55,7 @@
 - **用法**
 
   ```python
-  cmd = Command(name, func, permission, only_to_me, privileged)
+  cmd = Command(...)
   CommandManager.add_aliases({"别名", "test"}, cmd)
   ```
 
@@ -65,7 +67,7 @@
 
 - **参数**
 
-  - `cmd_name` (tuple[str, ...]): 命令名称
+  - `cmd_name` ([CommandName_T](../typing.md#var-commandname-t)): 命令名称
 
   - `cmd` (nonebot.command.Command): 命令对象
 
@@ -76,7 +78,7 @@
 - **用法**
 
   ```python
-  cmd = Command(name, func, permission, only_to_me, privileged)
+  cmd = Command(...)
   CommandManager.add_command(name, cmd)
   ```
 
@@ -88,7 +90,7 @@
 
 - **参数**
 
-  - `cmd_name` (tuple[str, ...]): 命令名词
+  - `cmd_name` ([CommandName_T](../typing.md#var-commandname-t)): 命令名称
 
   - `cmd` (nonebot.command.Command): 命令对象
 
@@ -99,7 +101,7 @@
 - **用法**
 
   ```python
-  cmd = Command(name, func, permission, only_to_me, privileged)
+  cmd = Command(...)
   CommandManager.reload_command(name, cmd)
   ```
 
@@ -111,7 +113,7 @@
 
 - **参数**
 
-  - `cmd_name` (tuple[str, ...]): 命令名称
+  - `cmd_name` ([CommandName_T](../typing.md#var-commandname-t)): 命令名称
 
 - **返回**
 
@@ -131,7 +133,7 @@
 
 - **参数**
 
-  - `cmd_name` (tuple[str, ...]): 命令名称
+  - `cmd_name` ([CommandName_T](../typing.md#var-commandname-t)): 命令名称
 
   - `state` (bool | None)
 
@@ -161,7 +163,7 @@
 
 - **参数**
 
-  - `cmd_name` (tuple[str, ...]): 命令名称
+  - `cmd_name` ([CommandName_T](../typing.md#var-commandname-t)): 命令名称
 
   - `state` (bool | None)
 
@@ -201,7 +203,7 @@
 
   - `current_arg` (str | None)
 
-  - `args` (dict[str, Any] | None)
+  - `args` ([CommandArgs_T](../typing.md#var-commandargs-t) | None)
 
 ### _property_ `argv`
 
@@ -219,7 +221,7 @@
 
 ### _instance-var_ `current_arg`
 
-- **类型:** Optional[str]
+- **类型:** str | None
 
 - **说明:** 命令会话当前参数。实际上是 酷 Q 收到的消息去掉命令名的剩下部分，因此可能存在 CQ 码。
 
@@ -237,7 +239,7 @@
 
 ### _instance-var_ `current_key`
 
-- **类型:** Optional[str]
+- **类型:** str | None
 
 - **说明:** 命令会话当前正在询问用户的参数的键（或称参数的名字）。第一次运行会话时，该属性为 `None`。
 
@@ -249,7 +251,7 @@
 
 ### _property_ `state` <Badge text="1.2.0+"/>
 
-- **类型:** dict[str, Any]
+- **类型:** [State_T](../typing.md#var-state-t)
 
 - **说明**
 
@@ -281,9 +283,9 @@
 
   - `key` (str): 参数的键，若不传入则使用默认键值
 
-  - `prompt` (str | dict[str, Any] | list[dict[str, Any]] | NoneType): 提示的消息内容
+  - `prompt` ([Message_T](../typing.md#var-message-t) | None): 提示的消息内容
 
-  - `arg_filters` (list[(Any) -> Any | Awaitable[Any]] | None): 用于处理和验证用户输入的参数的过滤器
+  - `arg_filters` (list[[Filter_T](../typing.md#var-filter-t)] | None): 用于处理和验证用户输入的参数的过滤器
 
   - `force_update` (bool): 是否强制获取用户新的输入，若是，则会忽略已有的当前参数，若 `key` 不传入则为真，否则默认为假
 
@@ -331,7 +333,7 @@
 
 - **参数**
 
-  - `message` (str | dict[str, Any] | list[dict[str, Any]] | NoneType): 要发送的消息，若不传入则不发送
+  - `message` ([Message_T](../typing.md#var-message-t) | None): 要发送的消息，若不传入则不发送
 
   - `**kwargs`: 其它传入 `BaseSession.send()` 的命名参数
 
@@ -362,7 +364,7 @@
 
 - **参数**
 
-  - `message` (str | dict[str, Any] | list[dict[str, Any]] | NoneType): 要发送的消息，若不传入则不发送
+  - `message` ([Message_T](../typing.md#var-message-t) | None): 要发送的消息，若不传入则不发送
 
   - `**kwargs`: 其它传入 `BaseSession.send()` 的命名参数
 
@@ -387,16 +389,16 @@
   注意，一旦传入 `arg_filters` 参数（参数过滤器），则等用户再次输入时，_command_func._`args_parser` 所注册的参数解析函数将不会被运行，而会在对 `current_arg` 依次运行过滤器之后直接将其放入 `state` 属性中。
 
   :::tip
-  推荐使用下面的 `aget` 方法。
+  推荐使用 `aget` 方法。
   :::
 
 - **参数**
 
   - `key` (str): 参数的键
 
-  - `prompt` (str | dict[str, Any] | list[dict[str, Any]] | NoneType): 提示的消息内容
+  - `prompt` ([Message_T](../typing.md#var-message-t) | None): 提示的消息内容
 
-  - `arg_filters` (list[(Any) -> Any | Awaitable[Any]] | None) <Badge text="1.2.0+"/>: 用于处理和验证用户输入的参数的过滤器
+  - `arg_filters` (list[[Filter_T](../typing.md#var-filter-t)] | None) <Badge text="1.2.0+"/>: 用于处理和验证用户输入的参数的过滤器
 
   - `**kwargs`: 其它传入 `BaseSession.send()` 的命名参数
 
@@ -436,12 +438,12 @@
   暂停当前命令会话，并发送消息。此函数调用之后的语句将不会被执行（除非捕获了此函数抛出的特殊异常）。
 
   :::tip
-  推荐使用下面的 `apause` 方法。
+  推荐使用 `apause` 方法。
   :::
 
 - **参数**
 
-  - `message` (str | dict[str, Any] | list[dict[str, Any]] | NoneType): 要发送的消息，若不传入则不发送
+  - `message` ([Message_T](../typing.md#var-message-t) | None): 要发送的消息，若不传入则不发送
 
   - `**kwargs`: 其它传入 `BaseSession.send()` 的命名参数
 
@@ -481,7 +483,7 @@
 
 - **参数**
 
-  - `new_message` (str | dict[str, Any] | list[dict[str, Any]]): 要覆盖消息事件的新消息内容
+  - `new_message` ([Message_T](../typing.md#var-message-t)): 要覆盖消息事件的新消息内容
 
 - **返回**
 
@@ -510,11 +512,11 @@
 
   - `event` (aiocqhttp.event.Event): 事件对象
 
-  - `name` (str | tuple[str, ...]): 要调用的命令名
+  - `name` (str | [CommandName_T](../typing.md#var-commandname-t)): 要调用的命令名
 
   - `current_arg` (str): 命令会话的当前输入参数
 
-  - `args` (dict[str, Any] | None): 命令会话的（初始）参数（将会被并入命令会话的 `state` 属性）
+  - `args` ([CommandArgs_T](../typing.md#var-commandargs-t) | None): 命令会话的（初始）参数（将会被并入命令会话的 `state` 属性）
 
   - `check_perm` (bool): 是否检查命令的权限，若否，则即使当前事件上下文并没有权限调用这里指定的命令，也仍然会调用成功
 

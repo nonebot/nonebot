@@ -87,11 +87,11 @@ class SenderRoles(NamedTuple):
     """
 
     bot: NoneBot
-    """机器人对象。"""
+    """{kind}`instance-var` 机器人对象。"""
     event: CQEvent
-    """事件。"""
+    """{kind}`instance-var` 事件。"""
     sender: Optional[Dict[str, Any]]
-    """只有消息是群消息的时候才会有这个属性，其内容是 `/get_group_member_info` API 调用的返回值。"""
+    """{kind}`instance-var` 只有消息是群消息的时候才会有这个属性，其内容是 `/get_group_member_info` API 调用的返回值。"""
 
     @staticmethod
     async def create(bot: NoneBot, event: CQEvent) -> 'SenderRoles':
@@ -222,7 +222,7 @@ async def check_permission(bot: NoneBot, event: CQEvent,
     参数:
         bot: NoneBot 对象
         event: 消息事件对象
-        policy {version}`1.9.0+`: 返回布尔值的权限检查策略
+        policy (nonebot.typing.PermissionPolicy_T) {version}`1.9.0+`: 返回布尔值的权限检查策略
 
     返回:
         bool: 消息事件所对应的上下文是否具有所要求的权限

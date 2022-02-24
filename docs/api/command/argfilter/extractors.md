@@ -10,7 +10,7 @@
 
 - **参数**
 
-  - `arg` (str | dict[str, Any] | list[dict[str, Any]])
+  - `arg` ([Message_T](../../typing.md#var-message-t))
 
 - **返回**
 
@@ -24,7 +24,7 @@
 
 - **参数**
 
-  - `arg` (str | dict[str, Any] | list[dict[str, Any]])
+  - `arg` ([Message_T](../../typing.md#var-message-t))
 
 - **返回**
 
@@ -38,7 +38,7 @@
 
 - **参数**
 
-  - `arg` (str | dict[str, Any] | list[dict[str, Any]])
+  - `arg` ([Message_T](../../typing.md#var-message-t))
 
 - **返回**
 

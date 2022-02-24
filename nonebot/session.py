@@ -84,7 +84,7 @@ class BaseSession:
         """发送消息到 Session 对应的上下文中。
 
         参数:
-            message: 要发送的消息内容
+            message (nonebot.typing.Message_T): 要发送的消息内容
             at_sender: 是否 @ 发送者，对私聊不起作用
             ensure_private: 确保消息发送到私聊，对于群组和讨论组消息上下文，会私聊发送者
             ignore_failure: 发送失败时忽略 `CQHttpError` 异常

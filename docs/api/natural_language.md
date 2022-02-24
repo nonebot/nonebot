@@ -22,7 +22,7 @@
 
 ### _instance-var_ `msg_images`
 
-- **类型:** List[str]
+- **类型:** list[str]
 
 - **说明:** 消息内容中所有图片的 URL 的列表，如果消息中没有图片，则为 `[]`。
 
@@ -36,38 +36,38 @@
 
 - **说明**
 
-  用于表示自然语言处理之后得到的意图命令，是一个 namedtuple，由自然语言处理器返回。
+  用于表示自然语言处理之后得到的意图命令，是一个 `NamedTuple`，由自然语言处理器返回。
 
 - **参数**
 
   - `confidence` (float)
 
-  - `name` (str | tuple[str, ...])
+  - `name` (str | [CommandName_T](./typing.md#var-commandname-t))
 
-  - `args` (dict[str, Any] | None)
+  - `args` ([CommandArgs_T](./typing.md#var-commandargs-t))
 
   - `current_arg` (str)
 
-### _class-var_ `args`
+### _instance-var_ `args`
 
-- **类型:** dict[str, Any] | None
+- **类型:** [CommandArgs_T](./typing.md#var-commandargs-t)
 
 - **说明:** 命令的（初始）参数。
 
-### _class-var_ `confidence`
+### _instance-var_ `confidence`
 
 - **类型:** float
 
 - **说明:** 意图的置信度，即表示对当前推测的用户意图有多大把握。
 
-### _class-var_ `current_arg`
+### _instance-var_ `current_arg`
 
 - **类型:** str
 
 - **说明:** 命令的当前输入参数。
 
-### _class-var_ `name`
+### _instance-var_ `name`
 
-- **类型:** str | tuple[str, ...]
+- **类型:** str | [CommandName_T](./typing.md#var-commandname-t)
 
 - **说明:** 命令的名字。

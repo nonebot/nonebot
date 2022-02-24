@@ -72,7 +72,7 @@ async def send(bot: NoneBot,
     参数:
         bot: NoneBot 对象
         event: 事件对象
-        message: 要发送的消息内容
+        message (nonebot.typing.Message_T): 要发送的消息内容
         ensure_private: 确保消息发送到私聊，对于群组和讨论组消息上下文，会私聊发送者
         ignore_failure: 发送失败时忽略 `CQHttpError` 异常
         kwargs: 其它传入 `CQHttp.send()` 的命名参数
@@ -109,7 +109,7 @@ async def send_to_superusers(bot: NoneBot,
 
     参数:
         bot: NoneBot 对象
-        message: 要发送的消息内容
+        message (nonebot.typing.Message_T): 要发送的消息内容
         kwargs: 其它传入 `bot.send_private_msg()` 的命名参数
 
     异常:
@@ -135,7 +135,7 @@ def render_expression(expr: Expression_T,
     渲染 Expression。
 
     参数:
-        expr: 要渲染的 Expression，对于 Expression 的三种类型: `str`、`Sequence[str]`、`(*Any, **Any) -> str`，行为分别是
+        expr (nonebot.typing.Expression_T): 要渲染的 Expression，对于 Expression 的三种类型: `str`、`Sequence[str]`、`(*Any, **Any) -> str`，行为分别是
             - `str`: 以 `*args`、`**kwargs` 为参数，使用 `str.format()` 进行格式化
             - `Sequence[str]`: 随机选择其中之一，进行上面 `str` 的操作
             - `(*Any, **Any) -> str`: 以 `*args`、`**kwargs` 为参数，调用该可调用对象/函数，对返回的字符串进行上面 `str` 的操作

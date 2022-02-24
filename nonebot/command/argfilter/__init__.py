@@ -17,11 +17,16 @@ from nonebot.typing import Message_T
 
 
 class ValidateError(ValueError):
-    """用于表示验证失败的异常类。"""
+    """
+    用于表示验证失败的异常类。
+
+    参数:
+        message (Optional[nonebot.typing.Message_T]):
+    """
 
     def __init__(self, message: Optional[Message_T] = None):
         self.message = message
-        """验证失败时要发送的错误提示消息。如果为 `None`，则使用配置中的 `DEFAULT_VALIDATION_FAILURE_EXPRESSION`。"""
+        """{anno}`Optional[nonebot.typing.Message_T]` 验证失败时要发送的错误提示消息。如果为 `None`，则使用配置中的 `DEFAULT_VALIDATION_FAILURE_EXPRESSION`。"""
 
 
 __all__ = [

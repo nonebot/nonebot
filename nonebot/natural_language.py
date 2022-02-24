@@ -82,6 +82,7 @@ class NLPManager:
     _nl_processors: Set[NLProcessor] = set()
 
     def __init__(self):
+        # TODO: don't copy
         self.nl_processors = NLPManager._nl_processors.copy()
 
     @classmethod
@@ -173,18 +174,24 @@ class NLPSession(BaseSession):
 
 class IntentCommand(NamedTuple):
     """
-    用于表示自然语言处理之后得到的意图命令，是一个 namedtuple，由自然语言处理器返回。
+    用于表示自然语言处理之后得到的意图命令，是一个 `NamedTuple`，由自然语言处理器返回。
 
     版本: 1.2.0+
+
+    参数:
+        confidence:
+        name (Union[str, nonebot.typing.CommandName_T]):
+        args (nonebot.typing.CommandArgs_T):
+        current_arg:
     """
     confidence: float
-    """意图的置信度，即表示对当前推测的用户意图有多大把握。"""
+    """{kind}`instance-var` 意图的置信度，即表示对当前推测的用户意图有多大把握。"""
     name: Union[str, CommandName_T]
-    """命令的名字。"""
+    """{kind}`instance-var` {anno}`Union[str, nonebot.typing.CommandName_T]` 命令的名字。"""
     args: Optional[CommandArgs_T] = None
-    """命令的（初始）参数。"""
+    """{kind}`instance-var` {anno}`nonebot.typing.CommandArgs_T` 命令的（初始）参数。"""
     current_arg: str = ''
-    """命令的当前输入参数。"""
+    """{kind}`instance-var` 命令的当前输入参数。"""
 
 
 async def handle_natural_language(bot: NoneBot, event: CQEvent,

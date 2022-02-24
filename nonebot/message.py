@@ -54,8 +54,14 @@ def message_preprocessor(func: MessagePreprocessor_T) -> MessagePreprocessor_T:
     """
     将函数装饰为消息预处理器。
 
+    参数:
+        func (nonebot.typing.MessagePreprocessor_T):
+
+    返回:
+        nonebot.typing.MessagePreprocessor_T: 装饰器闭包
+
     要求(1.6.0+):
-        被装饰函数必须是一个 async 函数，且必须接收且仅接收三个位置参数，类型分别为 `NoneBot` 、 `aiocqhttp.Event` 和 `nonebot.plugin.PluginManager`，即形如:
+        被装饰函数必须是一个 async 函数，且必须接收且仅接收三个位置参数，类型分别为 {ref}`nonebot.NoneBot` 、 `aiocqhttp.Event` 和 {ref}`nonebot.plugin.PluginManager`，即形如:
 
         ```python
         async def func(bot: NoneBot, event: aiocqhttp.Event, plugin_manager: PluginManager):

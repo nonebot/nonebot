@@ -42,7 +42,7 @@
 
   - `event` (aiocqhttp.event.Event): 事件对象
 
-  - `message` (str | dict[str, Any] | list[dict[str, Any]]): 要发送的消息内容
+  - `message` ([Message_T](./typing.md#var-message-t)): 要发送的消息内容
 
   - `ensure_private` (bool): 确保消息发送到私聊，对于群组和讨论组消息上下文，会私聊发送者
 
@@ -74,7 +74,7 @@
 
   - `bot` ([NoneBot](./index.md#class-nonebot-config-object-none)): NoneBot 对象
 
-  - `message` (str | dict[str, Any] | list[dict[str, Any]]): 要发送的消息内容
+  - `message` ([Message_T](./typing.md#var-message-t)): 要发送的消息内容
 
   - `**kwargs`: 其它传入 `bot.send_private_msg()` 的命名参数
 
@@ -100,7 +100,7 @@
 
 - **参数**
 
-  - `expr` (str | Sequence[str] | (*Any, **Any) -> str): 要渲染的 Expression，对于 Expression 的三种类型: `str`、`Sequence[str]`、`(*Any, **Any) -> str`，行为分别是
+  - `expr` ([Expression_T](./typing.md#var-expression-t)): 要渲染的 Expression，对于 Expression 的三种类型: `str`、`Sequence[str]`、`(*Any, **Any) -> str`，行为分别是
 
     - `str`: 以 `*args`、`**kwargs` 为参数，使用 `str.format()` 进行格式化
     - `Sequence[str]`: 随机选择其中之一，进行上面 `str` 的操作

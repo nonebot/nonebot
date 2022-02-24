@@ -190,9 +190,9 @@ class PluginManager:
     _unloaded_plugins_fast: Dict[str, Plugin] = {}
 
     def __init__(self):
-        self.cmd_manager = CommandManager()
+        self.cmd_manager: CommandManager = CommandManager()
         """命令管理器实例。"""
-        self.nlp_manager = NLPManager()
+        self.nlp_manager: NLPManager = NLPManager()
         """自然语言管理器实例。"""
 
     @classmethod
@@ -899,6 +899,9 @@ def on_plugin(timing: str) -> Callable[[PluginLifetimeHook_T], PluginLifetimeHoo
     参数:
         timing: `"loading"` 表示注册加载回调，`"unloaded"` 表示注册卸载回调
 
+    返回:
+        Callable[[nonebot.typing.PluginLifetimeHook_T], nonebot.typing.PluginLifetimeHook_T]: 装饰器闭包
+
     用法:
         ```python
         necessary_info = []
@@ -953,19 +956,22 @@ def on_command(
         ```
 
     参数:
-        name: 命令名，如果传入的是字符串则会自动转为元组
+        name (Union[str, nonebot.typing.CommandName_T]): 命令名，如果传入的是字符串则会自动转为元组
         aliases: 命令别名
-        patterns {version}`1.7.0+`: 正则匹配，可以传入正则表达式或正则表达式组，来对整条命令进行匹配
+        patterns (nonebot.typing.Patterns_T) {version}`1.7.0+`: 正则匹配，可以传入正则表达式或正则表达式组，来对整条命令进行匹配
             :::warning 注意
             滥用正则表达式可能会引发性能问题，请优先使用普通命令。另外一点需要注意的是，由正则表达式匹配到的匹配到的命令，`session` 中的 `current_arg` 会是整个命令，而不会删除匹配到的内容，以满足一些特殊需求。
             :::
-        permission {version}`1.9.0+`: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_COMMAND_PERMISSION`
+        permission (Union[nonebot.typing.PermissionPolicy_T, Iterable[nonebot.typing.PermissionPolicy_T]]) {version}`1.9.0+`: 命令所需要的权限，不满足权限的用户将无法触发该命令。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_COMMAND_PERMISSION`
         only_to_me: 是否只响应确定是在和「我」（机器人）说话的命令（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
         privileged: 是否特权命令，若是，则无论当前是否有命令会话正在运行，都会运行该命令，但运行不会覆盖已有会话，也不会保留新创建的会话
         shell_like: 是否使用类 shell 语法，若是，则会自动使用 `shlex` 模块进行分割（无需手动编写参数解析器），分割后的参数列表放入 `session.args['argv']`
         expire_timeout {version}`1.8.2+`: 命令过期时间。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_EXPIRE_TIMEOUT`，如果提供则使用提供的值。
         run_timeout {version}`1.8.2+`: 命令会话的运行超时时长。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `SESSION_RUN_TIMEOUT`，如果提供则使用提供的值。
         session_class {version}`1.7.0+`: 自定义 `CommandSession` 子类，若传入此参数，则命令处理函数的参数 `session` 类型为 `session_class`
+
+    返回:
+        Callable[[nonebot.typing.CommandHandler_T], nonebot.typing.CommandHandler_T]: 装饰器闭包
 
     用法:
         ```python
@@ -1055,10 +1061,10 @@ def on_command(
 def on_natural_language(__func: NLPHandler_T) -> NLPHandler_T:
     """
     参数:
-        __func: 待装饰函数
+        __func (nonebot.typing.NLPHandler_T): 待装饰函数
 
     返回:
-        NLPHandler_T: 被装饰函数
+        nonebot.typing.NLPHandler_T: 被装饰函数
     """
 
 
@@ -1074,10 +1080,13 @@ def on_natural_language(
     """
     参数:
         keywords: 要响应的关键词，若传入 `None`，则响应所有消息
-        permission {version}`1.9.0+`: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_NLP_PERMISSION`
+        permission (Union[nonebot.typing.PermissionPolicy_T, Iterable[nonebot.typing.PermissionPolicy_T]]) {version}`1.9.0+`: 自然语言处理器所需要的权限，不满足权限的用户将无法触发该处理器。若提供了多个，则默认使用 `aggregate_policy` 和其默认参数组合。如果不传入该参数（即为默认的 `...`），则使用配置项中的 `DEFAULT_NLP_PERMISSION`
         only_to_me: 是否只响应确定是在和「我」（机器人）说话的消息（在开头或结尾 @ 了机器人，或在开头称呼了机器人昵称）
         only_short_message: 是否只响应短消息
         allow_empty_message: 是否响应内容为空的消息（只有 @ 或机器人昵称）
+    
+    返回:
+        Callable[[nonebot.typing.NLPHandler_T], nonebot.typing.NLPHandler_T]: 装饰器闭包
     """
 
 
@@ -1174,7 +1183,14 @@ def _make_event_deco(post_type: str):
 
 
 @overload
-def on_notice(__func: NoticeHandler_T) -> NoticeHandler_T: ...  # type: ignore
+def on_notice(__func: NoticeHandler_T) -> NoticeHandler_T:  # type: ignore
+    """
+    参数:
+        __func (nonebot.typing.NoticeHandler_T):
+
+    返回:
+        nonebot.typing.NoticeHandler_T:
+    """
 
 
 @overload
@@ -1182,6 +1198,9 @@ def on_notice(*events: str) -> Callable[[NoticeHandler_T], NoticeHandler_T]:
     """
     参数:
         events: 要处理的通知类型（`notice_type`），若不传入，则处理所有通知
+
+    返回:
+        Callable[[nonebot.typing.NoticeHandler_T], nonebot.typing.NoticeHandler_T]: 装饰器闭包
     """
 
 
@@ -1214,7 +1233,14 @@ on_notice = _make_event_deco('notice')  # type: ignore[override]
 
 
 @overload
-def on_request(__func: RequestHandler_T) -> RequestHandler_T: ...  # type: ignore
+def on_request(__func: RequestHandler_T) -> RequestHandler_T:  # type: ignore
+    """
+    参数:
+        __func (nonebot.typing.RequestHandler_T):
+
+    返回:
+        nonebot.typing.RequestHandler_T:
+    """
 
 
 @overload
@@ -1222,6 +1248,9 @@ def on_request(*events: str) -> Callable[[RequestHandler_T], RequestHandler_T]:
     """
     参数:
         events: 要处理的请求类型（`request_type`），若不传入，则处理所有请求
+
+    返回:
+        Callable[[nonebot.typing.RequestHandler_T], nonebot.typing.RequestHandler_T]: 装饰器闭包
     """
 
 

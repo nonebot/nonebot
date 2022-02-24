@@ -23,7 +23,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **返回**
 
-  - (Any) -> Any | Awaitable[Any]
+  - [Filter_T](../../typing.md#var-filter-t)
 
 ## _def_ `fit_size(min_length=0, max_length=None, message=None)`
 
@@ -31,17 +31,19 @@ session.get('arg1', prompt='请输入 arg1：',
 
   验证输入的长度（大小）在 `min_length` 到 `max_length` 之间（包括两者）。
 
+  输入和输出应符合 `Sized` 类型。
+
 - **参数**
 
   - `min_length` (int): 最小长度
 
   - `max_length` (int): 最大长度
 
-  - `message`
+  - `message`: 验证失败时的提示
 
 - **返回**
 
-  - (Any) -> Any | Awaitable[Any]
+  - [Filter_T](../../typing.md#var-filter-t)
 
 ## _def_ `match_regex(pattern, message=None, *, flags=0, fullmatch=False)`
 
@@ -49,11 +51,13 @@ session.get('arg1', prompt='请输入 arg1：',
 
   验证输入是否匹配正则表达式。
 
+  输入和输出应符合 `str` 类型。
+
 - **参数**
 
   - `pattern` (str): 正则表达式
 
-  - `message`
+  - `message`: 验证失败时的提示
 
   - `flags`: 传入 `re.compile()` 的标志
 
@@ -61,7 +65,7 @@ session.get('arg1', prompt='请输入 arg1：',
 
 - **返回**
 
-  - (Any) -> Any | Awaitable[Any]
+  - [Filter_T](../../typing.md#var-filter-t)
 
 ## _def_ `ensure_true(bool_func, message=None)`
 
@@ -73,11 +77,11 @@ session.get('arg1', prompt='请输入 arg1：',
 
   - `bool_func` ((Any) -> bool): 接受输入、返回布尔值的函数
 
-  - `message`
+  - `message`: 验证失败时的提示
 
 - **返回**
 
-  - (Any) -> Any | Awaitable[Any]
+  - [Filter_T](../../typing.md#var-filter-t)
 
 ## _def_ `between_inclusive(start=None, end=None, message=None)`
 
@@ -85,14 +89,16 @@ session.get('arg1', prompt='请输入 arg1：',
 
   验证输入是否在 `start` 到 `end` 之间（包括两者）。
 
+  输入和输出应符合 `Comparable` 类型。
+
 - **参数**
 
   - `start`: 范围开始
 
   - `end`: 范围结束
 
-  - `message`
+  - `message`: 验证失败时的提示
 
 - **返回**
 
-  - (Any) -> Any | Awaitable[Any]
+  - [Filter_T](../../typing.md#var-filter-t)
