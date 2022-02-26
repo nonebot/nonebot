@@ -1,3 +1,17 @@
+"""
+提供几种常用的验证器。
+
+这些验证器的工厂函数全都接受可选参数 `message: Message_T | None`，用于在验证失败时向用户发送错误提示。使用这些的验证器时，必须先调用验证器的工厂函数，其返回结果才是真正的验证器，例如:
+
+```python
+session.get('arg1', prompt='请输入 arg1：',
+            arg_filters=[extract_text， not_empty('输入不能为空')])
+```
+
+注意 `extract_text` 和 `not_empty` 使用上的区别。
+
+版本: 1.2.0+
+"""
 import re
 from typing import Callable, Any
 
@@ -21,7 +35,10 @@ def _raise_failure(message):
 
 def not_empty(message=None) -> Filter_T:
     """
-    Validate any object to ensure it's not empty (is None or has no elements).
+    验证输入不为空。
+    
+    返回:
+        nonebot.typing.Filter_T:
     """
 
     def validate(value):
@@ -37,8 +54,17 @@ def not_empty(message=None) -> Filter_T:
 def fit_size(min_length: int = 0, max_length: int = None,
              message=None) -> Filter_T:
     """
-    Validate any sized object to ensure the size/length
-    is in a given range [min_length, max_length].
+    验证输入的长度（大小）在 `min_length` 到 `max_length` 之间（包括两者）。
+
+    输入和输出应符合 `Sized` 类型。
+
+    参数:
+        min_length: 最小长度
+        max_length: 最大长度
+        message: 验证失败时的提示
+
+    返回:
+        nonebot.typing.Filter_T:
     """
 
     def validate(value):
@@ -54,7 +80,18 @@ def fit_size(min_length: int = 0, max_length: int = None,
 def match_regex(pattern: str, message=None, *, flags=0,
                 fullmatch: bool = False) -> Filter_T:
     """
-    Validate any string object to ensure it matches a given pattern.
+    验证输入是否匹配正则表达式。
+
+    输入和输出应符合 `str` 类型。
+
+    参数:
+        pattern: 正则表达式
+        message: 验证失败时的提示
+        flags: 传入 `re.compile()` 的标志
+        fullmatch: 是否使用完全匹配（`re.fullmatch()`）
+
+    返回:
+        nonebot.typing.Filter_T:
     """
 
     pattern_ = re.compile(pattern, flags)
@@ -73,8 +110,14 @@ def match_regex(pattern: str, message=None, *, flags=0,
 
 def ensure_true(bool_func: Callable[[Any], bool], message=None) -> Filter_T:
     """
-    Validate any object to ensure the result of applying
-    a boolean function to it is True.
+    验证输入是否能使给定布尔函数返回 `True`。
+
+    参数:
+        bool_func: 接受输入、返回布尔值的函数
+        message: 验证失败时的提示
+
+    返回:
+        nonebot.typing.Filter_T:
     """
 
     def validate(value):
@@ -87,8 +130,17 @@ def ensure_true(bool_func: Callable[[Any], bool], message=None) -> Filter_T:
 
 def between_inclusive(start=None, end=None, message=None) -> Filter_T:
     """
-    Validate any comparable object to ensure it's between
-    `start` and `end` inclusively.
+    验证输入是否在 `start` 到 `end` 之间（包括两者）。
+
+    输入和输出应符合 `Comparable` 类型。
+
+    参数:
+        start: 范围开始
+        end: 范围结束
+        message: 验证失败时的提示
+
+    返回:
+        nonebot.typing.Filter_T:
     """
 
     def validate(value):
@@ -108,3 +160,7 @@ __all__ = [
     'ensure_true',
     'between_inclusive',
 ]
+
+__autodoc__ = {
+    "BaseValidator": False
+}

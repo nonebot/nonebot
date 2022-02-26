@@ -4,6 +4,10 @@ sidebar: auto
 
 # 更新日志
 
+## master
+
+- 改进源码文档注释
+
 ## v1.9.1
 
 - 修复上版本更新带来的 `on_command` 定义命令别名有时不生效的 bug
