@@ -29,7 +29,7 @@ module.exports = {
         lastUpdated: '上次更新',
         activeHeaderLinks: false,
         nav: [
-            { text: 'v2', link: 'https://v2.nonebot.dev' },
+            { text: 'v2', link: 'https://nonebot.dev' },
             { text: '主页', link: '/' },
             { text: '指南', link: '/guide/' },
             { text: '进阶', link: '/advanced/' },

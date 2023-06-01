@@ -22,7 +22,7 @@ NoneBot 在其底层与 OneBot 实现交互的部分使用 [aiocqhttp](https://g
 
 ## 文档
 
-文档目前「指南」和「API」部分已经完成，「进阶」部分尚未完成，你可以在 [这里](https://docs.nonebot.dev/) 查看。
+文档目前「指南」和「API」部分已经完成，「进阶」部分尚未完成，你可以在 [这里](https://v1.nonebot.dev/) 查看。
 
 ## 贡献
 
@@ -46,7 +46,7 @@ NoneBot only supports Python 3.7+.
 
 ## Documentation
 
-For Guide and API manuals, check out [this page](https://docs.nonebot.dev/).
+For Guide and API manuals, check out [this page](https://v1.nonebot.dev/).
 
 ## Contributing
 
